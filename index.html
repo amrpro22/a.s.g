@@ -552,10 +552,37 @@
     let currentEmployeeShopId = null;
     let currentEmployeeIndex = null;
 
-    const availableIcons = ["fas fa-store", "fas fa-shopping-cart", "fas fa-mobile-alt", "fas fa-laptop", "fas fa-tshirt", "fas fa-shoe-prints", "fas fa-gift", "fas fa-ring", "fas fa-car", "fas fa-plane", "fas fa-hotel", "fas fa-coffee", "fas fa-pizza-slice", "fas fa-ice-cream", "fas fa-apple-alt", "fas fa-book"];
+    // قائمة بالأيقونات المتاحة للفروع مع أسماء واضحة لها بالتصنيفات (تم تحديثها وإضافة محل تدخين ومطاعم والمزيد)
+    const availableIconsList = [
+        { iconClass: "fas fa-store", label: "متجر عام" },
+        { iconClass: "fas fa-shopping-cart", label: "سوبرماركت / عربة تسوق" },
+        { iconClass: "fas fa-smoking", label: "محل تدخين / فيب / شيشة" },
+        { iconClass: "fas fa-utensils", label: "مطعم مأكولات (شرقية وغربية)" },
+        { iconClass: "fas fa-pizza-slice", label: "مطعم وجبات سريعة / بيتزا" },
+        { iconClass: "fas fa-mobile-alt", label: "مبيعات جوالات" },
+        { iconClass: "fas fa-laptop", label: "إلكترونيات وحواسيب" },
+        { iconClass: "fas fa-tshirt", label: "ملابس وأزياء" },
+        { iconClass: "fas fa-shoe-prints", label: "أحذية ومستلزمات" },
+        { iconClass: "fas fa-gift", label: "هدايا وكماليات" },
+        { iconClass: "fas fa-ring", label: "مجوهرات وإكسسوارات" },
+        { iconClass: "fas fa-car", label: "سيارات وقطع غيار" },
+        { iconClass: "fas fa-plane", label: "سياحة وسفر" },
+        { iconClass: "fas fa-hotel", label: "شقق وفنادق" },
+        { iconClass: "fas fa-coffee", label: "مقهى / كوفي شوب" },
+        { iconClass: "fas fa-ice-cream", label: "حلويات ومثلجات" },
+        { iconClass: "fas fa-apple-alt", label: "خضار وفواكه" },
+        { iconClass: "fas fa-book", label: "مكتبة ومستندات" },
+        { iconClass: "fas fa-scissors", label: "صالون حلاقة / تجميل" },
+        { iconClass: "fas fa-heartbeat", label: "صيدلية / رعاية صحية" },
+        { iconClass: "fas fa-dumbbell", label: "نادي رياضي / جيم" },
+        { iconClass: "fas fa-tools", label: "ورشة صيانة وتصليح" },
+        { iconClass: "fas fa-warehouse", label: "مستودع / مخازن" },
+        { iconClass: "fas fa-couch", label: "أثاث ومفروشات" }
+    ];
 
     function generateAccessCode() { return Math.floor(100000 + Math.random() * 900000).toString(); }
-    function getRandomIcon() { return availableIcons[Math.floor(Math.random() * availableIcons.length)]; }
+    // اختيار أيقونة عشوائية كقيمة افتراضية إذا لم يتم اختيار أيقونة محددة
+    function getRandomIcon() { return availableIconsList[Math.floor(Math.random() * availableIconsList.length)].iconClass; }
     function getArabicDayName(date) { const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]; return days[date.getDay()]; }
     function formatDate(date) { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}/${month}/${day}`; }
     function calculateTimeDifferenceInMinutes(checkinTime, checkoutTime) { const diffMinutes = (new Date(checkoutTime) - new Date(checkinTime)) / (1000 * 60); return Math.round(diffMinutes); }
@@ -619,9 +646,11 @@
         let shopOptions=''; shopsData.forEach(shop=>{shopOptions+=`<option value="${shop.id}">${shop.name}</option>`;});
         let shopsHtml=''; shopsData.forEach(shop=>{ 
             const totalEmployees=shop.employees?.length||0; 
+            // التحقق من وجود أيقونة مخصصة وإلا استخدام أيقونة افتراضية
+            const currentIcon = shop.icon || "fas fa-store";
             shopsHtml+=`
             <div class="shop-card" data-shop-id="${shop.id}">
-                <div class="shop-icon"><i class="${shop.icon}"></i></div>
+                <div class="shop-icon"><i class="${currentIcon}"></i></div>
                 <div class="shop-info">
                     <div class="shop-name">${shop.name}</div>
                     <div class="shop-desc"><i class="fas fa-users"></i> ${totalEmployees} موظف | ${shop.desc}</div>
@@ -826,11 +855,31 @@
         document.getElementById('globalBackBtn').addEventListener('click',()=>renderShopPage(returnShopId));
     }
 
+    // تعديل نافذة تعديل الفرع لتشمل خيار تخصيص/تغيير الأيقونة
     function showEditShopModal(shop,callback){
         const modal=document.createElement('div'); modal.className='modal-overlay';
+        
+        let iconOptionsHtml = '';
+        availableIconsList.forEach(item => {
+            const isSelected = shop.icon === item.iconClass ? 'selected' : '';
+            iconOptionsHtml += `<option value="${item.iconClass}" ${isSelected}>${item.label}</option>`;
+        });
+
         modal.innerHTML=`<div class="modal-content">
-            <h3 style="margin-bottom:15px">تعديل اسم الفرع</h3>
-            <input id="editShopName" class="form-input" value="${shop.name}">
+            <h3 style="margin-bottom:15px">تعديل بيانات الفرع</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">اسم الفرع</label>
+                <input id="editShopName" class="form-input" value="${shop.name}">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">أيقونة / نوع الفرع</label>
+                <select id="editShopIcon" class="form-select">
+                    ${iconOptionsHtml}
+                </select>
+            </div>
+
             <div class="modal-buttons">
                 <button class="btn-add modal-save">حفظ</button>
                 <button class="btn-header-action modal-cancel">إلغاء</button>
@@ -838,8 +887,11 @@
         </div>`;
         document.body.appendChild(modal);
         modal.querySelector('.modal-save').onclick = async() => {
-            if(modal.querySelector('#editShopName').value) {
-                shop.name = modal.querySelector('#editShopName').value;
+            const newName = modal.querySelector('#editShopName').value.trim();
+            const newIcon = modal.querySelector('#editShopIcon').value;
+            if(newName) {
+                shop.name = newName;
+                shop.icon = newIcon;
                 await saveDataToFirebase();
                 callback();
                 modal.remove();
@@ -848,12 +900,35 @@
         modal.querySelector('.modal-cancel').onclick = () => modal.remove();
     }
 
+    // تعديل نافذة إضافة الفرع لتشمل تحديد الأيقونة / نوع النشاط
     function showAddBranchModal(callback){
         const modal=document.createElement('div'); modal.className='modal-overlay';
+        
+        let iconOptionsHtml = '';
+        availableIconsList.forEach(item => {
+            iconOptionsHtml += `<option value="${item.iconClass}">${item.label}</option>`;
+        });
+
         modal.innerHTML=`<div class="modal-content">
             <h3 style="margin-bottom:15px">إضافة فرع جديد</h3>
-            <input id="newBranchName" class="form-input" placeholder="اسم الفرع" style="margin-bottom:10px">
-            <input id="newBranchDesc" class="form-input" placeholder="وصف الفرع">
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">اسم الفرع الجديد</label>
+                <input id="newBranchName" class="form-input" placeholder="مثال: فرع الملز">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">وصف الفرع</label>
+                <input id="newBranchDesc" class="form-input" placeholder="مثال: مبيعات التجزئة">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">نوع النشاط (الأيقونة)</label>
+                <select id="newBranchIcon" class="form-select">
+                    ${iconOptionsHtml}
+                </select>
+            </div>
+
             <div class="modal-buttons">
                 <button class="btn-add modal-save">إضافة</button>
                 <button class="btn-header-action modal-cancel">إلغاء</button>
@@ -861,13 +936,17 @@
         </div>`;
         document.body.appendChild(modal);
         modal.querySelector('.modal-save').onclick = async() => {
-            const name = modal.querySelector('#newBranchName').value;
+            const name = modal.querySelector('#newBranchName').value.trim();
+            const desc = modal.querySelector('#newBranchDesc').value.trim() || "فرع جديد";
+            const icon = modal.querySelector('#newBranchIcon').value;
             if(name) {
                 const newId=Math.max(...shopsData.map(s=>s.id),0)+1; 
-                shopsData.push({id:newId,name:name,icon:getRandomIcon(),desc:modal.querySelector('#newBranchDesc').value||"فرع جديد",employees:[]}); 
+                shopsData.push({id:newId,name:name,icon:icon,desc:desc,employees:[]}); 
                 await saveDataToFirebase(); 
                 callback();
                 modal.remove();
+            } else {
+                alert('الرجاء إدخال اسم الفرع');
             }
         };
         modal.querySelector('.modal-cancel').onclick = () => modal.remove();
