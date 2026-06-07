@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>الشجاع جروب | نظام إدارة الموظفين المتكامل - Firebase</title>
     
-    <!-- Google Fonts: Cairo for premium Arabic typography -->
+    <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child, push, remove } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+        import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
         
-        // Firebase configuration (UNTOUCHED)
         const firebaseConfig = {
             apiKey: "AIzaSyDrdXTVxCS5H_W22viYPijFyTuUb1M1uiY",
             authDomain: "alialshugaa-6aff4.firebaseapp.com",
@@ -29,11 +27,9 @@
             databaseURL: "https://alialshugaa-6aff4-default-rtdb.firebaseio.com/"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         
-        // جعل الكائنات متاحة للاستخدام في النطاق العام
         window.firebaseDB = database;
         window.firebaseRef = ref;
         window.firebaseSet = set;
@@ -41,9 +37,9 @@
         window.firebaseChild = child;
         window.firebasePush = push;
         window.firebaseRemove = remove;
-        window.firebaseInitialized = true;
+        window.firebaseOnValue = onValue;
         
-        console.log("Firebase initialized successfully");
+        console.log("Firebase initialized");
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
 
@@ -79,27 +75,27 @@
             background-color: var(--bg-color);
             font-family: 'Cairo', sans-serif;
             color: var(--text-main);
-            padding: 24px 16px 40px 16px;
             min-height: 100vh;
             line-height: 1.6;
         }
 
-        .app-container {
-            max-width: 760px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* --- Modern Header --- */
         .main-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
             text-align: center;
-            margin-bottom: 32px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             padding: 32px 20px;
-            border-radius: var(--radius-lg);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
             box-shadow: 0 16px 32px -8px rgba(58, 12, 163, 0.4);
-            position: relative;
             overflow: hidden;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .main-header.scrolled {
+            box-shadow: 0 4px 20px rgba(58, 12, 163, 0.3);
+            padding: 20px 20px;
         }
         
         .main-header::before {
@@ -108,6 +104,13 @@
             top: -50%; left: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
             pointer-events: none;
+        }
+
+        .app-container {
+            max-width: 760px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 24px 16px 40px 16px;
         }
 
         .brand-name {
@@ -176,7 +179,6 @@
             display: none;
         }
 
-        /* --- Forms & Inputs --- */
         .add-employee-form {
             background: var(--card-bg);
             border-radius: var(--radius-md);
@@ -252,7 +254,6 @@
             transform: scale(0.97);
         }
 
-        /* --- Cards (Shops & Employees) --- */
         .shop-card, .employee-card {
             background: var(--card-bg);
             border-radius: var(--radius-md);
@@ -359,7 +360,7 @@
             color: var(--primary-dark);
         }
 
-        .employee-schedule {
+        .employee-hours {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
@@ -368,7 +369,7 @@
             font-weight: 600;
         }
         
-        .employee-schedule span {
+        .employee-hours span {
             display: flex;
             align-items: center;
             gap: 5px;
@@ -403,7 +404,6 @@
             transform: translateX(-5px);
         }
 
-        /* --- Modal for editing --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -473,7 +473,6 @@
             color: var(--text-main);
         }
 
-        /* --- Section Headers --- */
         .shop-header {
             display: flex;
             justify-content: space-between;
@@ -505,7 +504,6 @@
             gap: 8px;
         }
 
-        /* --- Employee Profile & Tables --- */
         .employee-profile {
             background: var(--card-bg);
             border-radius: var(--radius-lg);
@@ -539,138 +537,61 @@
             margin-bottom: 16px;
         }
 
-        .work-hours-card {
+        .total-hours-card {
             background: var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--primary);
+        }
+
+        .total-hours-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .total-hours-label {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .hours-list {
+            background: #f8fafc;
             border-radius: var(--radius-md);
             padding: 16px;
-            margin: 20px 0;
-            border: 1px dashed rgba(67, 97, 238, 0.3);
-            display: inline-block;
+            margin-top: 20px;
+            text-align: right;
         }
 
-        .daily-hours {
-            font-size: 1.1rem;
-            font-weight: 700;
+        .hours-list h4 {
+            margin-bottom: 12px;
             color: var(--primary-dark);
         }
 
-        .delete-record-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: var(--radius-md);
-            padding: 14px 24px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
+        .hours-day-item {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .delete-record-btn:hover {
-            background: #dc2626;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-        
-        .delete-record-btn:active {
-            transform: scale(0.98);
-        }
-
-        .weekly-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            margin: 24px 0 16px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-color);
-        }
-
-        .weekly-header {
-            background: #f8fafc;
-            padding: 20px 24px;
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--text-main);
-        }
-
-        .table-header-row {
-            display: flex;
-            background: var(--primary-light);
-            padding: 16px 24px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: var(--primary-dark);
-        }
-
-        .col-day { flex: 1.2; min-width: 90px; }
-        .col-date { flex: 1.5; min-width: 100px; }
-        .col-entry, .col-exit { flex: 1; text-align: center; }
-
-        .week-row {
-            display: flex;
-            align-items: center;
-            padding: 16px 24px;
+            justify-content: space-between;
+            padding: 8px 0;
             border-bottom: 1px solid var(--border-color);
-            transition: background 0.2s;
-            flex-wrap: wrap;
+            font-size: 0.95rem;
         }
 
-        .week-row:hover {
-            background: #fbfcfd;
+        .hours-day-item:last-child {
+            border-bottom: none;
         }
 
-        .week-row:last-child { border-bottom: none; }
-
-        .day-cell {
-            flex: 1.2; min-width: 90px;
-            display: flex; align-items: center; gap: 10px;
-            font-weight: 700; font-size: 1rem;
+        .hours-day-name {
+            font-weight: 700;
             color: var(--text-main);
         }
-        
-        .day-cell i {
+
+        .hours-value {
             color: var(--primary);
-            font-size: 1.1rem;
+            font-weight: 600;
         }
 
-        .date-cell {
-            flex: 1.5; min-width: 100px;
-            font-size: 0.9rem; font-weight: 600;
-            color: var(--text-muted); direction: ltr;
-        }
-
-        .entry-cell, .exit-cell {
-            flex: 1; text-align: center;
-            font-weight: 700; font-size: 0.95rem;
-            padding: 6px 0; border-radius: 8px;
-        }
-
-        .entry-cell { color: var(--success); background: rgba(16, 185, 129, 0.08); margin-left: 5px; }
-        .exit-cell { color: var(--danger); background: rgba(239, 68, 68, 0.08); margin-right: 5px; }
-
-        .total-week-row {
-            background: var(--primary-dark);
-            color: white;
-            padding: 18px 24px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-
-        /* --- Footer & Loading --- */
         footer {
             margin-top: 40px;
             text-align: center;
@@ -698,134 +619,106 @@
             filter: drop-shadow(0 4px 6px rgba(67, 97, 238, 0.3));
         }
 
-        /* --- Responsive Design --- */
+        .attendance-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .attendance-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            border-right: 4px solid var(--primary);
+        }
+        
+        .attendance-type.checkin { color: var(--success); }
+        .attendance-type.checkout { color: var(--danger); }
+        
+        .attendance-time {
+            color: var(--text-muted);
+            direction: ltr;
+            font-size: 0.75rem;
+        }
+
         @media (max-width: 600px) {
-            .main-header { padding: 24px 16px; border-radius: 24px; }
+            .main-header { 
+                padding: 24px 16px;
+                border-radius: 0 0 24px 24px;
+            }
             .brand-name { font-size: 1.8rem; }
             .back-button { right: 16px; width: 38px; height: 38px; }
             .form-input, .form-select, .btn-add { flex: 100%; }
-            .table-header-row { display: none; }
             
-            .week-row {
+            .hours-day-item {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 20px;
-                background: #ffffff;
-                margin: 10px 16px;
-                border-radius: 16px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-                border: 1px solid var(--border-color);
+                gap: 5px;
+                text-align: center;
             }
-            .weekly-card { background: transparent; box-shadow: none; border: none; margin: 10px 0; }
-            .weekly-header { border-radius: 16px; margin: 0 16px; }
-            .total-week-row { border-radius: 16px; margin: 0 16px; }
-            
-            .day-cell, .date-cell, .entry-cell, .exit-cell { 
-                width: 100%; display: flex; justify-content: space-between; align-items: center;
-            }
-            
-            .entry-cell, .exit-cell { padding: 10px 16px; margin: 0; }
-            
-            .entry-cell::before { content: "وقت الدخول"; font-weight: 700; color: #475569; }
-            .exit-cell::before { content: "وقت المغادرة"; font-weight: 700; color: #475569; }
-            .date-cell::before { content: "التاريخ"; font-weight: 700; color: #475569; }
-            .date-cell { flex-direction: row-reverse; justify-content: flex-end; gap: 10px; }
-            .date-cell::before { margin-right: auto; }
         }
     </style>
 </head>
 <body>
 <div id="appRoot" class="app-container">
-    <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> جاري تحميل البيانات وبناء الواجهة...</div>
+    <div class="loading"><i class="fas fa-circle-notch fa-spin"></i> جاري تحميل البيانات...</div>
 </div>
 
 <script>
-    // بيانات المحلات الأساسية
     let shopsData = [];
-    
-    // دوال مساعدة
-    function timeToMinutes(timeStr) {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    }
-    
-    function getMinutesDifference(start, end) {
-        let startMin = timeToMinutes(start);
-        let endMin = timeToMinutes(end);
-        let diff = endMin - startMin;
-        if (diff < 0) diff += 24 * 60;
-        return diff;
-    }
-    
-    function minutesToHoursMinutes(minutes) {
-        const hrs = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        if (mins === 0) return `${hrs} ساعات`;
-        if (hrs === 0) return `${mins} دقيقة`;
-        return `${hrs} ساعة و ${mins} دقيقة`;
-    }
-    
-    function getDailyWorkHoursText(entryBase, exitBase) {
-        const minutes = getMinutesDifference(entryBase, exitBase);
-        return minutesToHoursMinutes(minutes);
-    }
-    
-    function addMinutesToTime(timeBase, minutesAdd) {
-        let [hours, minutes] = timeBase.split(':').map(Number);
-        let total = hours * 60 + minutes + minutesAdd;
-        let newHours = Math.floor(total / 60) % 24;
-        let newMins = total % 60;
-        let raw = `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
-        let period = newHours >= 12 ? 'مساءً' : 'صباحاً';
-        let displayHour = newHours % 12;
-        if (displayHour === 0) displayHour = 12;
-        let formatted = `${displayHour}:${String(newMins).padStart(2, '0')} ${period}`;
-        return { raw, formatted };
-    }
-    
-    function generateWeeklySchedule(entryBase, exitBase) {
-        const weekDays = [
-            { ar: "الإثنين", icon: "fas fa-sun" },
-            { ar: "الثلاثاء", icon: "fas fa-cloud-sun" },
-            { ar: "الأربعاء", icon: "fas fa-cloud" },
-            { ar: "الخميس", icon: "fas fa-star" },
-            { ar: "الجمعة", icon: "fas fa-moon" },
-            { ar: "السبت", icon: "fas fa-calendar-week" },
-            { ar: "الأحد", icon: "fas fa-calendar-day" }
-        ];
-        const today = new Date();
-        const currentDay = today.getDay();
-        let startOfWeek = new Date(today);
-        let diff = currentDay === 0 ? -6 : 1 - currentDay;
-        startOfWeek.setDate(today.getDate() + diff);
-        
-        const schedule = [];
-        for (let i = 0; i < weekDays.length; i++) {
-            let date = new Date(startOfWeek);
-            date.setDate(startOfWeek.getDate() + i);
-            let year = date.getFullYear();
-            let month = String(date.getMonth() + 1).padStart(2, '0');
-            let day = String(date.getDate()).padStart(2, '0');
-            let dateStr = `${year}/${month}/${day}`;
-            let variance = (i * 2) % 12;
-            let entryData = addMinutesToTime(entryBase, variance);
-            let exitData = addMinutesToTime(exitBase, variance + 3);
-            schedule.push({
-                dayName: weekDays[i].ar,
-                dayIcon: weekDays[i].icon,
-                date: dateStr,
-                entryTime: entryData.formatted,
-                exitTime: exitData.formatted,
-                entryRaw: entryData.raw,
-                exitRaw: exitData.raw
-            });
-        }
-        return schedule;
-    }
+    let attendanceRecords = [];
+    let currentView = 'home'; // home, shop, employee
     
     function generateAccessCode() {
         return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+    
+    function calculateHoursBetween(checkinTime, checkoutTime) {
+        const date1 = new Date(checkinTime);
+        const date2 = new Date(checkoutTime);
+        const diffHours = (date2 - date1) / (1000 * 60 * 60);
+        return Math.round(diffHours * 10) / 10;
+    }
+    
+    async function calculateWorkHoursForEmployee(employeeName, branchName) {
+        const employeeRecords = attendanceRecords.filter(r => 
+            r.employeeName === employeeName && r.branchName === branchName
+        ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        const dailyHours = {
+            "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0
+        };
+        
+        const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+        
+        for (let i = 0; i < employeeRecords.length - 1; i++) {
+            if (employeeRecords[i].type === 'دخول' && employeeRecords[i+1].type === 'خروج') {
+                const date = new Date(employeeRecords[i].timestamp);
+                const dayIndex = date.getDay();
+                const dayName = dayNames[dayIndex];
+                const hours = calculateHoursBetween(employeeRecords[i].timestamp, employeeRecords[i+1].timestamp);
+                if (hours > 0 && hours < 24) {
+                    dailyHours[dayName] = Math.round((dailyHours[dayName] + hours) * 10) / 10;
+                }
+            }
+        }
+        
+        return dailyHours;
+    }
+    
+    async function updateAllEmployeesWorkHours() {
+        for (let shop of shopsData) {
+            if (shop.employees) {
+                for (let emp of shop.employees) {
+                    emp.workHours = await calculateWorkHoursForEmployee(emp.name, shop.name);
+                }
+            }
+        }
+        await saveDataToFirebase();
     }
     
     async function saveDataToFirebase() {
@@ -834,7 +727,21 @@
             const dbRef = window.firebaseRef(window.firebaseDB, 'shopsData');
             await window.firebaseSet(dbRef, shopsData);
         } catch (error) {
-            console.warn("تعذر الحفظ في Firebase (الرجاء التأكد من صلاحيات Database Rules):", error.message);
+            console.warn("خطأ في حفظ البيانات:", error.message);
+        }
+    }
+    
+    async function saveAttendanceToFirebase() {
+        if (!window.firebaseDB || !attendanceRecords.length) return;
+        try {
+            const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
+            const recordsObj = {};
+            attendanceRecords.forEach(record => {
+                if (record.id) recordsObj[record.id] = record;
+            });
+            await window.firebaseSet(attendanceRef, recordsObj);
+        } catch (error) {
+            console.warn("خطأ في حفظ سجل الحضور:", error.message);
         }
     }
     
@@ -846,41 +753,61 @@
             if (snapshot.exists()) return snapshot.val();
             return null;
         } catch (error) {
-            console.warn("تعذر جلب البيانات من Firebase، سيتم استخدام البيانات الافتراضية:", error.message);
+            console.warn("خطأ في جلب البيانات:", error.message);
             return null;
         }
     }
     
+    async function loadAttendanceFromFirebase() {
+        if (!window.firebaseDB) return [];
+        try {
+            const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
+            const snapshot = await window.firebaseGet(attendanceRef);
+            const records = [];
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                for (const key in data) {
+                    records.push({ id: key, ...data[key] });
+                }
+            }
+            records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            return records;
+        } catch (error) {
+            console.warn("خطأ في جلب سجل الحضور:", error.message);
+            return [];
+        }
+    }
+    
     function getDefaultShopsData() {
+        const emptyHours = { "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0 };
         return [
             { id: 1, name: "متجر الأندلس", icon: "fas fa-crown", desc: "أفخر التشكيلات", employees: [
-                { name: "أحمد الشجاع", entryBase: "08:30", exitBase: "16:30", entryLabel: "08:30 صباحاً", exitLabel: "04:30 مساءً", accessCode: generateAccessCode() },
-                { name: "سارة المنصور", entryBase: "09:00", exitBase: "17:00", entryLabel: "09:00 صباحاً", exitLabel: "05:00 مساءً", accessCode: generateAccessCode() }
+                { name: "أحمد الشجاع", accessCode: "111111", workHours: {...emptyHours} },
+                { name: "سارة المنصور", accessCode: "222222", workHours: {...emptyHours} }
             ]},
             { id: 2, name: "رواد الخليج", icon: "fas fa-ship", desc: "ريادة في البحر", employees: [
-                { name: "خالد النقبي", entryBase: "07:30", exitBase: "15:30", entryLabel: "07:30 صباحاً", exitLabel: "03:30 مساءً", accessCode: generateAccessCode() },
-                { name: "لينا العتيبي", entryBase: "08:00", exitBase: "16:00", entryLabel: "08:00 صباحاً", exitLabel: "04:00 مساءً", accessCode: generateAccessCode() }
+                { name: "خالد النقبي", accessCode: "333333", workHours: {...emptyHours} },
+                { name: "لينا العتيبي", accessCode: "444444", workHours: {...emptyHours} }
             ]},
             { id: 3, name: "زهور الشجاع", icon: "fas fa-leaf", desc: "طبيعة ورفاهية", employees: [
-                { name: "ريم الهاجري", entryBase: "08:00", exitBase: "16:00", entryLabel: "08:00 صباحاً", exitLabel: "04:00 مساءً", accessCode: generateAccessCode() },
-                { name: "ناصر العتيق", entryBase: "09:00", exitBase: "17:00", entryLabel: "09:00 صباحاً", exitLabel: "05:00 مساءً", accessCode: generateAccessCode() }
+                { name: "ريم الهاجري", accessCode: "555555", workHours: {...emptyHours} },
+                { name: "ناصر العتيق", accessCode: "666666", workHours: {...emptyHours} }
             ]},
             { id: 4, name: "الدرة بلازا", icon: "fas fa-gem", desc: "فخامة وتميز", employees: [
-                { name: "جمال السالم", entryBase: "08:15", exitBase: "16:15", entryLabel: "08:15 صباحاً", exitLabel: "04:15 مساءً", accessCode: generateAccessCode() },
-                { name: "هبة العبيد", entryBase: "09:30", exitBase: "17:30", entryLabel: "09:30 صباحاً", exitLabel: "05:30 مساءً", accessCode: generateAccessCode() }
+                { name: "جمال السالم", accessCode: "777777", workHours: {...emptyHours} },
+                { name: "هبة العبيد", accessCode: "888888", workHours: {...emptyHours} }
             ]},
             { id: 5, name: "نخبة الشرق", icon: "fas fa-chart-line", desc: "ريادة أعمال", employees: [
-                { name: "ماجد الشهراني", entryBase: "07:00", exitBase: "15:00", entryLabel: "07:00 صباحاً", exitLabel: "03:00 مساءً", accessCode: generateAccessCode() },
-                { name: "نوال الغامدي", entryBase: "08:20", exitBase: "16:20", entryLabel: "08:20 صباحاً", exitLabel: "04:20 مساءً", accessCode: generateAccessCode() }
+                { name: "ماجد الشهراني", accessCode: "999999", workHours: {...emptyHours} },
+                { name: "نوال الغامدي", accessCode: "101010", workHours: {...emptyHours} }
             ]},
             { id: 6, name: "قمة الشجاع", icon: "fas fa-mountain", desc: "أعلى القمم", employees: [
-                { name: "تركي العتيبي", entryBase: "08:00", exitBase: "16:00", entryLabel: "08:00 صباحاً", exitLabel: "04:00 مساءً", accessCode: generateAccessCode() },
-                { name: "جواهر القاسم", entryBase: "09:15", exitBase: "17:15", entryLabel: "09:15 صباحاً", exitLabel: "05:15 مساءً", accessCode: generateAccessCode() }
+                { name: "تركي العتيبي", accessCode: "111111", workHours: {...emptyHours} },
+                { name: "جواهر القاسم", accessCode: "121212", workHours: {...emptyHours} }
             ]}
         ];
     }
     
-    // عرض نافذة تعديل اسم المحل
     function showEditShopModal(shop, callback) {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -909,23 +836,29 @@
             modal.remove();
         });
         
-        modal.querySelector('.modal-cancel').addEventListener('click', () => {
-            modal.remove();
-        });
-        
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.remove();
-        });
+        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
     }
     
-    // دوال العرض مع زر رجوع موحد
+    function addScrollEffect() {
+        const header = document.querySelector('.main-header');
+        if (header) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) header.classList.add('scrolled');
+                else header.classList.remove('scrolled');
+            });
+        }
+    }
+    
     function renderHomePage() {
+        currentView = 'home';
         if (!shopsData.length) return;
         const root = document.getElementById('appRoot');
         let shopOptions = '';
         shopsData.forEach(shop => { shopOptions += `<option value="${shop.id}">${shop.name}</option>`; });
         let shopsHtml = '';
         shopsData.forEach(shop => {
+            const totalEmployees = shop.employees?.length || 0;
             shopsHtml += `<div class="shop-card" data-shop-id="${shop.id}">
                 <div class="shop-icon"><i class="${shop.icon}"></i></div>
                 <div class="shop-info">
@@ -933,7 +866,7 @@
                         <div class="shop-name">${shop.name}</div>
                         <button class="edit-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
                     </div>
-                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.8rem; margin-left:3px;"></i> عدد الموظفين: ${shop.employees.length} | ${shop.desc}</div>
+                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.8rem; margin-left:3px;"></i> عدد الموظفين: ${totalEmployees} | ${shop.desc}</div>
                 </div>
                 <i class="fas fa-chevron-left arrow-icon"></i>
             </div>`;
@@ -941,13 +874,13 @@
         const html = `
             <div class="main-header" id="mainHeader">
                 <div class="brand-name">الشجاع جروب</div>
-                <div class="subhead">لوحة التحكم الشاملة لإدارة الفروع</div>
-                <div class="dashboard-badge"><i class="fas fa-wifi"></i> متصل بـ Firebase بشكل حي</div>
+                <div class="subhead">نظام إدارة الموظفين - ساعات العمل المحسوبة تلقائياً</div>
+                <div class="dashboard-badge"><i class="fas fa-wifi"></i> متصل بـ Firebase</div>
                 <div class="back-button hidden" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
             <div class="add-employee-form">
-                <div class="form-title"><i class="fas fa-user-plus"></i><span>إضافة موظف جديد وتوليد رمز تلقائي</span></div>
+                <div class="form-title"><i class="fas fa-user-plus"></i><span>إضافة موظف جديد</span></div>
                 <div class="form-row">
                     <input type="text" id="newEmployeeName" class="form-input" placeholder="اكتب اسم الموظف هنا...">
                     <select id="newEmployeeShop" class="form-select">${shopOptions}</select>
@@ -955,11 +888,12 @@
                 </div>
             </div>
             
-            <div class="section-title"><i class="fas fa-building text-primary"></i> المتاجر والفروع</div>
+            <div class="section-title"><i class="fas fa-building"></i> المتاجر والفروع</div>
             ${shopsHtml}
-            <footer><i class="fas fa-shield-alt"></i> جميع البيانات مشفرة ومحفوظة بأمان في قاعدة بيانات سحابية</footer>
+            <footer><i class="fas fa-chart-line"></i> يتم احتساب ساعات العمل تلقائياً من تسجيلات الدخول والخروج | جميع البيانات محفوظة في السحابة</footer>
         `;
         root.innerHTML = html;
+        addScrollEffect();
         
         const backBtn = document.getElementById('globalBackBtn');
         if (backBtn) backBtn.classList.add('hidden');
@@ -972,22 +906,18 @@
             if (!employeeName) { alert('الرجاء إدخال اسم الموظف أولاً'); return; }
             const shop = shopsData.find(s => s.id === shopId);
             if (shop) {
-                const newAccessCode = generateAccessCode();
+                const emptyHours = { "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0 };
                 shop.employees.push({ 
                     name: employeeName, 
-                    entryBase: "09:00", 
-                    exitBase: "17:00", 
-                    entryLabel: "09:00 صباحاً", 
-                    exitLabel: "05:00 مساءً",
-                    accessCode: newAccessCode
+                    accessCode: generateAccessCode(),
+                    workHours: {...emptyHours}
                 });
                 await saveDataToFirebase();
                 renderHomePage();
-                alert(`تم بنجاح إضافة الموظف: ${employeeName}\n\nرمز الدخول السري: ${newAccessCode}\n\nيرجى تسليم هذا الرمز للموظف.`);
+                alert(`تم بنجاح إضافة الموظف: ${employeeName}\n\nرمز الدخول: ${generateAccessCode()}`);
             }
         });
         
-        // إضافة مستمعي الأحداث لبطاقات المحلات وأزرار التعديل
         document.querySelectorAll('.shop-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('.edit-shop-btn')) {
@@ -1001,34 +931,27 @@
                 e.stopPropagation();
                 const shopId = parseInt(btn.getAttribute('data-shop-id'));
                 const shop = shopsData.find(s => s.id === shopId);
-                if (shop) {
-                    showEditShopModal(shop, () => {
-                        renderHomePage();
-                    });
-                }
+                if (shop) showEditShopModal(shop, () => renderHomePage());
             });
         });
     }
     
     function renderShopPage(shopId) {
+        currentView = 'shop';
         const shop = shopsData.find(s => s.id === shopId);
         if (!shop) return;
         let employeesHtml = '';
         shop.employees.forEach((emp, idx) => {
-            const codeDisplay = emp.accessCode 
-                ? `<div class="employee-pin"><i class="fas fa-key"></i> رمز الدخول: ${emp.accessCode}</div>` 
-                : `<div class="employee-pin" style="color:#ef4444; background: rgba(239, 68, 68, 0.1); border-color: #ef4444;"><i class="fas fa-exclamation-circle"></i> رمز: غير محدد</div>`;
-            
+            const totalHours = Object.values(emp.workHours || {}).reduce((a, b) => a + b, 0);
             employeesHtml += `
             <div class="employee-card" data-emp-index="${idx}" data-shop-id="${shop.id}">
                 <div class="employee-avatar"><i class="fas fa-user-tie"></i></div>
                 <div class="employee-details">
                     <div class="employee-name">${emp.name}</div>
-                    <div class="employee-schedule">
-                        <span><i class="fas fa-sign-in-alt text-success"></i> ${emp.entryLabel}</span>
-                        <span><i class="fas fa-sign-out-alt text-danger"></i> ${emp.exitLabel}</span>
+                    <div class="employee-hours">
+                        <span><i class="fas fa-clock"></i> إجمالي الساعات المسجلة: ${totalHours.toFixed(1)} ساعة</span>
                     </div>
-                    ${codeDisplay}
+                    <div class="employee-pin"><i class="fas fa-key"></i> رمز الدخول: ${emp.accessCode}</div>
                 </div>
                 <i class="fas fa-chevron-left arrow-icon"></i>
             </div>`;
@@ -1037,7 +960,7 @@
         const html = `
             <div class="main-header" id="mainHeader">
                 <div class="brand-name" style="font-size: 1.8rem;">${shop.name}</div>
-                <div class="subhead">إدارة طاقم العمل والرموز السرية</div>
+                <div class="subhead">إدارة طاقم العمل وساعات العمل</div>
                 <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
@@ -1046,12 +969,13 @@
                 <div style="color:var(--primary); font-weight:700;"><i class="fas fa-users"></i> ${shop.employees.length} موظف</div>
             </div>
             
-            <div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين المسجلين</div>
+            <div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div>
             ${employeesHtml}
             
-            <footer>تطبيق إدارة الموظفين | ${shop.name}</footer>
+            <footer><i class="fas fa-chart-line"></i> ساعات العمل محسوبة تلقائياً من تسجيلات الحضور | ${shop.name}</footer>
         `;
         document.getElementById('appRoot').innerHTML = html;
+        addScrollEffect();
         
         const backBtn = document.getElementById('globalBackBtn');
         if (backBtn) backBtn.classList.remove('hidden');
@@ -1067,102 +991,124 @@
         });
     }
     
-    // الدالة المصححة التي تحفظ البيانات في Firebase بشكل صحيح
-    async function renderEmployeePage(employee, returnShopId, employeeIndex) {
-        const weeklyData = generateWeeklySchedule(employee.entryBase, employee.exitBase);
-        const totalWeeklyMinutes = weeklyData.reduce((sum, day) => sum + getMinutesDifference(day.entryRaw, day.exitRaw), 0);
-        const totalWeeklyText = minutesToHoursMinutes(totalWeeklyMinutes);
+    function renderEmployeePage(employee, returnShopId, employeeIndex) {
+        currentView = 'employee';
+        const totalHours = Object.values(employee.workHours || {}).reduce((a, b) => a + b, 0);
+        const weekDays = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"];
         
-        let rowsHtml = '';
-        for (const day of weeklyData) {
-            rowsHtml += `
-            <div class="week-row">
-                <div class="day-cell"><i class="${day.dayIcon}"></i> ${day.dayName}</div>
-                <div class="date-cell">${day.date}</div>
-                <div class="entry-cell">${day.entryTime}</div>
-                <div class="exit-cell">${day.exitTime}</div>
-            </div>`;
-        }
+        let hoursListHtml = '';
+        weekDays.forEach(day => {
+            const hoursValue = employee.workHours?.[day] || 0;
+            hoursListHtml += `
+                <div class="hours-day-item">
+                    <span class="hours-day-name">${day}</span>
+                    <span class="hours-value">${hoursValue.toFixed(1)} ساعة</span>
+                </div>
+            `;
+        });
         
-        const accessCodeHtml = employee.accessCode 
-            ? `<div style="background: rgba(67, 97, 238, 0.08); border: 2px solid var(--primary); border-radius: 50px; padding: 12px 24px; margin-top: 15px; display:inline-block; direction:ltr; font-size:1.1rem; color:var(--primary-dark);">
-                <i class="fas fa-lock"></i> <strong>رمز الدخول:</strong> <span style="letter-spacing: 2px;">${employee.accessCode}</span>
-               </div>` 
-            : `<div style="background: rgba(239, 68, 68, 0.1); border: 2px dashed #ef4444; border-radius: 50px; padding: 12px 24px; margin-top: 15px; display:inline-block; color:#ef4444; font-weight:700;">
-                <i class="fas fa-exclamation-triangle"></i> لا يوجد رمز دخول
-               </div>`;
-               
+        const employeeAttendance = attendanceRecords.filter(r => 
+            r.employeeName === employee.name
+        ).slice(0, 10);
+        
+        let attendanceHtml = '';
+        employeeAttendance.forEach(record => {
+            attendanceHtml += `
+                <div class="attendance-item">
+                    <span class="attendance-type ${record.type === 'دخول' ? 'checkin' : 'checkout'}">
+                        <i class="fas ${record.type === 'دخول' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i> ${record.type}
+                    </span>
+                    <span class="attendance-time">${record.date || new Date(record.timestamp).toLocaleDateString('ar-EG')} | ${record.time || new Date(record.timestamp).toLocaleTimeString('ar-EG')}</span>
+                </div>
+            `;
+        });
+        
+        if (attendanceHtml === '') attendanceHtml = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد تسجيلات حضور بعد</div>';
+        
         const html = `
             <div class="main-header" id="mainHeader">
                 <div class="brand-name" style="font-size: 1.6rem;">الملف الشخصي</div>
-                <div class="subhead">سجل الحضور والرموز الخاصة</div>
+                <div class="subhead">ساعات العمل المحسوبة تلقائياً</div>
                 <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
             <div class="employee-profile">
                 <div class="profile-avatar"><i class="fas fa-user"></i></div>
                 <div class="profile-name">${employee.name}</div>
-                ${accessCodeHtml}
+                <div class="employee-pin" style="margin: 0 auto; display: inline-block;"><i class="fas fa-key"></i> رمز الدخول: ${employee.accessCode}</div>
                 <br>
-                <div class="work-hours-card">
-                    <div class="daily-hours"><i class="fas fa-stopwatch"></i> معدل ساعات العمل اليومية: ${getDailyWorkHoursText(employee.entryBase, employee.exitBase)}</div>
+                <div class="total-hours-card">
+                    <div class="total-hours-number">${totalHours.toFixed(1)}</div>
+                    <div class="total-hours-label">إجمالي ساعات العمل المسجلة</div>
                 </div>
-                <button class="delete-record-btn" id="deleteScheduleBtn">
-                    <i class="fas fa-undo-alt"></i> إعادة تعيين جدول الدوام للوضع الافتراضي
-                </button>
-            </div>
-            
-            <div class="weekly-card">
-                <div class="weekly-header"><i class="fas fa-calendar-check text-primary"></i><span>سجل الدوام الأسبوعي</span></div>
-                <div class="table-header-row">
-                    <div class="col-day">اليوم</div>
-                    <div class="col-date">التاريخ</div>
-                    <div class="col-entry">دخول</div>
-                    <div class="col-exit">مغادرة</div>
+                
+                <div class="hours-list">
+                    <h4><i class="fas fa-calendar-week"></i> ساعات العمل حسب اليوم</h4>
+                    ${hoursListHtml}
                 </div>
-                ${rowsHtml}
-                <div class="total-week-row">
-                    <i class="fas fa-calculator"></i> إجمالي ساعات العمل الأسبوعية: <span>${totalWeeklyText}</span>
+                
+                <div class="hours-list">
+                    <h4><i class="fas fa-history"></i> آخر تسجيلات الحضور</h4>
+                    <div class="attendance-list">
+                        ${attendanceHtml}
+                    </div>
                 </div>
             </div>
             
-            <footer>بيانات الموظف: ${employee.name} | النظام الآمن</footer>
+            <footer><i class="fas fa-sync-alt"></i> يتم تحديث ساعات العمل تلقائياً من كود تسجيل الدخول | بيانات الموظف: ${employee.name}</footer>
         `;
         document.getElementById('appRoot').innerHTML = html;
+        addScrollEffect();
         
         const backBtn = document.getElementById('globalBackBtn');
         if (backBtn) backBtn.classList.remove('hidden');
         backBtn.addEventListener('click', () => renderShopPage(returnShopId));
+    }
+    
+    function listenToFirebaseChanges() {
+        if (!window.firebaseDB) return;
         
-        // زر إعادة التعيين - يقوم بحفظ البيانات في Firebase ثم إعادة تحميل الصفحة
-        document.getElementById('deleteScheduleBtn').addEventListener('click', async () => {
-            if (confirm(`هل أنت متأكد من إعادة ضبط دوام الموظف "${employee.name}" إلى القيم الافتراضية (9 صباحاً - 5 مساءً)؟`)) {
-                // تحديث بيانات الموظف
-                employee.entryBase = "09:00";
-                employee.exitBase = "17:00";
-                employee.entryLabel = "09:00 صباحاً";
-                employee.exitLabel = "05:00 مساءً";
-                
-                // حفظ التغييرات في Firebase
-                await saveDataToFirebase();
-                
-                // إعادة عرض الصفحة مع البيانات الجديدة
-                renderEmployeePage(employee, returnShopId, employeeIndex);
+        const shopsRef = window.firebaseRef(window.firebaseDB, 'shopsData');
+        window.firebaseOnValue(shopsRef, async (snapshot) => {
+            if (snapshot.exists()) shopsData = snapshot.val();
+            await updateAllEmployeesWorkHours();
+            if (currentView === 'home') renderHomePage();
+            else if (currentView === 'shop' && window.currentShopId) renderShopPage(window.currentShopId);
+        });
+        
+        const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
+        window.firebaseOnValue(attendanceRef, async (snapshot) => {
+            const records = [];
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                for (const key in data) records.push({ id: key, ...data[key] });
+            }
+            records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            attendanceRecords = records;
+            await updateAllEmployeesWorkHours();
+            if (currentView === 'home') renderHomePage();
+            else if (currentView === 'shop' && window.currentShopId) renderShopPage(window.currentShopId);
+            else if (currentView === 'employee' && window.currentEmployeeData) {
+                const shop = shopsData.find(s => s.id === window.currentEmployeeShopId);
+                if (shop && shop.employees[window.currentEmployeeIndex]) {
+                    renderEmployeePage(shop.employees[window.currentEmployeeIndex], window.currentEmployeeShopId, window.currentEmployeeIndex);
+                }
             }
         });
     }
     
-    // بدء التطبيق مع Firebase وحماية ضد التعليق
     let appStarted = false;
-
     const startApplication = async () => {
         if (appStarted) return;
         appStarted = true;
-
+        
         try {
-            const savedData = await loadDataFromFirebase();
-            if (savedData && savedData.length) {
-                shopsData = savedData;
+            const savedShops = await loadDataFromFirebase();
+            const savedAttendance = await loadAttendanceFromFirebase();
+            attendanceRecords = savedAttendance;
+            
+            if (savedShops && savedShops.length) {
+                shopsData = savedShops;
                 let updated = false;
                 for (let shop of shopsData) {
                     if (shop.employees) {
@@ -1171,29 +1117,34 @@
                                 emp.accessCode = generateAccessCode();
                                 updated = true;
                             }
+                            if (!emp.workHours) {
+                                emp.workHours = { "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0 };
+                                updated = true;
+                            }
                         }
                     }
                 }
-                if(updated) await saveDataToFirebase();
+                if (updated) await saveDataToFirebase();
             } else {
                 shopsData = getDefaultShopsData();
                 await saveDataToFirebase();
             }
+            
+            await updateAllEmployeesWorkHours();
+            listenToFirebaseChanges();
+            renderHomePage();
         } catch (error) {
-            console.error("حدث خطأ غير متوقع، تم التبديل للبيانات المحلية:", error);
+            console.error("خطأ في التهيئة:", error);
             shopsData = getDefaultShopsData();
-        } finally {
-            // إجبار الواجهة على الظهور دائماً حتى لو فشل الاتصال بقاعدة البيانات
             renderHomePage();
         }
     };
-
+    
     window.addEventListener('firebaseReady', startApplication);
-
-    // مؤقت احتياطي (Fallback): إذا لم يستجب Firebase خلال 3 ثوانٍ، افتح النظام محلياً لكي لا يبقى معلقاً
+    
     setTimeout(() => {
         if (!appStarted) {
-            console.warn("تأخر استجابة Firebase، سيتم فتح الواجهة للعمل محلياً...");
+            console.warn("تأخر Firebase، بدء التشغيل محلياً");
             startApplication();
         }
     }, 3000);
