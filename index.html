@@ -71,18 +71,22 @@
             width: 100% !important;
         }
 
+        /* هيدر ثابت لا يختفي أثناء التمرير - sticky */
         .main-header {
             position: sticky;
             top: 0;
-            z-index: 100;
-            text-align: center;
+            z-index: 1000;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            padding: 32px 20px;
+            padding: 12px 16px;
             border-bottom: none;
-            transition: all 0.3s ease;
             width: 100%;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 2px 12px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         
         .main-header::before {
@@ -92,7 +96,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
             background-size: 40px 40px;
             animation: stars 20s linear infinite;
             pointer-events: none;
@@ -109,7 +113,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 2px;
             background: linear-gradient(90deg, 
                 #fff 0%, 
                 #ffd700 20%, 
@@ -126,108 +130,139 @@
             100% { background-position: 200% 0; }
         }
         
+        /* مجموعة اللوجو والنص */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px 6px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        
         .brand-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 56px;
+            width: 38px;
+            height: 38px;
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
-            border-radius: 28px;
-            margin-bottom: 12px;
+            border-radius: 20px;
             animation: float 3s ease-in-out infinite;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border: 1px solid rgba(255,255,255,0.3);
         }
         
         .brand-icon i {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-3px); }
         }
         
-        .main-header.scrolled {
-            padding: 20px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .main-header.scrolled .brand-icon {
-            width: 46px;
-            height: 46px;
-        }
-        
-        .main-header.scrolled .brand-icon i {
-            font-size: 1.4rem;
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.3;
         }
         
         .brand-name {
-            font-size: 2rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: #ffffff;
             letter-spacing: -0.02em;
-            margin-bottom: 6px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
-
+        
         .subhead {
-            font-size: 0.9rem;
+            font-size: 0.65rem;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.85);
             letter-spacing: -0.01em;
         }
 
         .dashboard-badge {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
+            gap: 5px;
+            padding: 4px 12px;
             border-radius: 30px;
             font-weight: 500;
-            margin-top: 14px;
             color: #ffffff;
             border: 1px solid rgba(255,255,255,0.2);
+            white-space: nowrap;
+        }
+        
+        /* حاوية أزرار الحذف في الهيدر */
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .delete-header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+        }
+        
+        .delete-header-btn i {
+            font-size: 0.7rem;
+        }
+        
+        .delete-header-btn:hover {
+            background: rgba(255, 60, 60, 0.7);
+            transform: scale(0.96);
+            border-color: rgba(255,255,255,0.6);
         }
 
         .back-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            right: 24px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 10;
             border: 1px solid rgba(255,255,255,0.3);
         }
 
         .back-button i {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             color: #ffffff;
         }
 
         .back-button:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-50%) scale(1.05);
+            transform: scale(1.03);
         }
         
         .back-button:active {
-            transform: translateY(-50%) scale(0.96);
+            transform: scale(0.96);
         }
 
         .back-button.hidden {
@@ -459,6 +494,44 @@
         .edit-shop-btn:hover {
             background: #e5e5ea;
             color: #667eea;
+        }
+        
+        .delete-shop-btn {
+            background: #fee2e2;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-right: 6px;
+        }
+        
+        .delete-shop-btn:hover {
+            background: #fecaca;
+            color: #b91c1c;
+        }
+        
+        .delete-employee-btn {
+            background: #fee2e2;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-right: 6px;
+        }
+        
+        .delete-employee-btn:hover {
+            background: #fecaca;
+            color: #b91c1c;
         }
 
         .shop-desc {
@@ -704,7 +777,6 @@
             margin-top: 5px;
         }
 
-        /* جدول الحضور - صفوف أفقية مع منع التمرير */
         .attendance-days-container {
             display: flex;
             flex-direction: column;
@@ -765,7 +837,6 @@
             font-weight: 500;
         }
         
-        /* الجدول - منع التمرير الأفقي */
         .attendance-table-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -879,7 +950,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 1001;
         }
 
         .edit-modal {
@@ -899,18 +970,18 @@
             font-size: 1.1rem;
         }
 
-        .edit-modal input {
+        .edit-modal input, .edit-modal select {
             width: 100%;
             padding: 12px;
             border: 0.5px solid #d2d2d6;
             border-radius: 14px;
             font-family: inherit;
             font-size: 0.9rem;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             background: #ffffff;
         }
 
-        .edit-modal input:focus {
+        .edit-modal input:focus, .edit-modal select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
@@ -919,6 +990,7 @@
         .modal-buttons {
             display: flex;
             gap: 12px;
+            margin-top: 8px;
         }
 
         .modal-buttons button {
@@ -951,25 +1023,16 @@
         }
 
         @media (max-width: 768px) {
-            .brand-name { font-size: 1.5rem; }
-            .back-button { right: 16px; width: 36px; height: 36px; }
+            .main-header { padding: 8px 12px; }
+            .brand-name { font-size: 1rem; }
+            .subhead { font-size: 0.55rem; }
+            .brand-icon { width: 30px; height: 30px; }
+            .brand-icon i { font-size: 0.9rem; }
+            .delete-header-btn { padding: 4px 10px; font-size: 0.65rem; }
+            .header-brand { gap: 8px; padding: 4px 12px; }
+            .back-button { width: 32px; height: 32px; }
             .form-input, .form-select, .btn-add { flex: 100%; }
             .actions-bar { flex-direction: column; }
-            .profile-name { font-size: 1.3rem; }
-            .shop-icon { width: 50px; height: 50px; font-size: 1.3rem; }
-            .shop-name { font-size: 1rem; }
-            .day-title { font-size: 0.9rem; }
-            .day-table-header { flex-direction: column; text-align: center; }
-            .attendance-table th, .attendance-table td {
-                padding: 8px 6px;
-                font-size: 0.7rem;
-            }
-            .attendance-table-wrapper {
-                overflow-x: auto;
-            }
-            .attendance-table {
-                min-width: 280px;
-            }
         }
     </style>
 </head>
@@ -987,760 +1050,125 @@
     let currentEmployeeShopId = null;
     let currentEmployeeIndex = null;
 
-    const availableIcons = [
-        "fas fa-store", "fas fa-shopping-cart", "fas fa-mobile-alt", "fas fa-laptop",
-        "fas fa-tshirt", "fas fa-shoe-prints", "fas fa-gift", "fas fa-ring",
-        "fas fa-car", "fas fa-plane", "fas fa-hotel", "fas fa-coffee",
-        "fas fa-pizza-slice", "fas fa-ice-cream", "fas fa-apple-alt", "fas fa-book"
-    ];
+    const availableIcons = ["fas fa-store", "fas fa-shopping-cart", "fas fa-mobile-alt", "fas fa-laptop", "fas fa-tshirt", "fas fa-shoe-prints", "fas fa-gift", "fas fa-ring", "fas fa-car", "fas fa-plane", "fas fa-hotel", "fas fa-coffee", "fas fa-pizza-slice", "fas fa-ice-cream", "fas fa-apple-alt", "fas fa-book"];
 
-    function generateAccessCode() {
-        return Math.floor(100000 + Math.random() * 900000).toString();
-    }
-    
-    function getRandomIcon() {
-        return availableIcons[Math.floor(Math.random() * availableIcons.length)];
-    }
-    
-    function getArabicDayName(date) {
-        const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-        return days[date.getDay()];
-    }
-    
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}/${month}/${day}`;
-    }
-    
-    function calculateTimeDifferenceInMinutes(checkinTime, checkoutTime) {
-        const date1 = new Date(checkinTime);
-        const date2 = new Date(checkoutTime);
-        const diffMinutes = (date2 - date1) / (1000 * 60);
-        return Math.round(diffMinutes);
-    }
-    
-    function formatMinutesToHoursAndMinutes(minutes) {
-        if (minutes <= 0) return '0 دقيقة';
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        if (hours === 0) return `${mins} دقيقة`;
-        if (mins === 0) return `${hours} ساعة`;
-        return `${hours} ساعة و ${mins} دقيقة`;
-    }
-    
-    function formatMinutesToHoursDecimal(minutes) {
-        const hours = minutes / 60;
-        return Math.round(hours * 10) / 10;
-    }
+    function generateAccessCode() { return Math.floor(100000 + Math.random() * 900000).toString(); }
+    function getRandomIcon() { return availableIcons[Math.floor(Math.random() * availableIcons.length)]; }
+    function getArabicDayName(date) { const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]; return days[date.getDay()]; }
+    function formatDate(date) { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}/${month}/${day}`; }
+    function calculateTimeDifferenceInMinutes(checkinTime, checkoutTime) { const diffMinutes = (new Date(checkoutTime) - new Date(checkinTime)) / (1000 * 60); return Math.round(diffMinutes); }
+    function formatMinutesToHoursAndMinutes(minutes) { if (minutes <= 0) return '0 دقيقة'; const hours = Math.floor(minutes / 60); const mins = minutes % 60; if (hours === 0) return `${mins} دقيقة`; if (mins === 0) return `${hours} ساعة`; return `${hours} ساعة و ${mins} دقيقة`; }
     
     async function calculateWorkHoursForEmployee(employeeName, branchName) {
-        const employeeRecords = attendanceRecords.filter(r => 
-            r.employeeName === employeeName && r.branchName === branchName
-        ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        
-        const dailyMinutes = {
-            "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0
-        };
-        
-        for (let i = 0; i < employeeRecords.length - 1; i++) {
-            if (employeeRecords[i].type === 'دخول' && employeeRecords[i+1].type === 'خروج') {
-                const date = new Date(employeeRecords[i].timestamp);
-                const dayName = getArabicDayName(date);
-                const minutes = calculateTimeDifferenceInMinutes(employeeRecords[i].timestamp, employeeRecords[i+1].timestamp);
-                if (minutes > 0 && minutes < 1440) {
-                    dailyMinutes[dayName] += minutes;
-                }
-            }
+        const employeeRecords = attendanceRecords.filter(r => r.employeeName === employeeName && r.branchName === branchName).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+        const dailyMinutes = {"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0};
+        for (let i=0;i<employeeRecords.length-1;i++) { 
+            if(employeeRecords[i].type==='دخول' && employeeRecords[i+1].type==='خروج'){
+                const date=new Date(employeeRecords[i].timestamp); 
+                const dayName=getArabicDayName(date); 
+                const minutes=calculateTimeDifferenceInMinutes(employeeRecords[i].timestamp,employeeRecords[i+1].timestamp); 
+                if(minutes>0 && minutes<1440) dailyMinutes[dayName]+=minutes; 
+            } 
         }
-        
         return dailyMinutes;
     }
     
-    async function updateAllEmployeesWorkHours() {
-        for (let shop of shopsData) {
-            if (shop.employees) {
-                for (let emp of shop.employees) {
-                    emp.workMinutes = await calculateWorkHoursForEmployee(emp.name, shop.name);
-                }
-            }
-        }
-        await saveDataToFirebase();
+    async function updateAllEmployeesWorkHours() { 
+        for(let shop of shopsData) if(shop.employees) for(let emp of shop.employees) emp.workMinutes = await calculateWorkHoursForEmployee(emp.name, shop.name); 
+        await saveDataToFirebase(); 
     }
     
-    function getEmployeeAttendanceRecords(employeeName, branchName) {
-        return attendanceRecords
-            .filter(r => r.employeeName === employeeName && r.branchName === branchName)
-            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    function getEmployeeAttendanceRecords(employeeName, branchName) { 
+        return attendanceRecords.filter(r => r.employeeName === employeeName && r.branchName === branchName).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)); 
     }
     
-    function groupAttendanceByDay(records) {
-        const grouped = {};
-        records.forEach(record => {
-            const date = new Date(record.timestamp);
-            const dateKey = formatDate(date);
-            if (!grouped[dateKey]) {
-                grouped[dateKey] = {
-                    date: dateKey,
-                    dateObj: date,
-                    dayName: getArabicDayName(date),
-                    records: []
-                };
-            }
-            grouped[dateKey].records.push(record);
-        });
-        
-        const sortedDays = Object.values(grouped).sort((a, b) => new Date(b.date) - new Date(a.date));
-        return sortedDays;
+    function groupAttendanceByDay(records) { 
+        const grouped={}; 
+        records.forEach(rec=>{ const dateKey=formatDate(new Date(rec.timestamp)); if(!grouped[dateKey]) grouped[dateKey]={date:dateKey,dateObj:new Date(rec.timestamp),dayName:getArabicDayName(new Date(rec.timestamp)),records:[]}; grouped[dateKey].records.push(rec); }); 
+        return Object.values(grouped).sort((a,b)=>new Date(b.date)-new Date(a.date)); 
     }
     
-    async function saveDataToFirebase() {
-        if (!window.firebaseDB) return;
-        try {
-            const dbRef = window.firebaseRef(window.firebaseDB, 'shopsData');
-            await window.firebaseSet(dbRef, shopsData);
-        } catch (error) {
-            console.warn("خطأ في حفظ البيانات:", error.message);
-        }
+    async function saveDataToFirebase() { if(window.firebaseDB) try{ await window.firebaseSet(window.firebaseRef(window.firebaseDB,'shopsData'), shopsData); }catch(e){} }
+    async function loadDataFromFirebase() { if(window.firebaseDB) try{ const snap=await window.firebaseGet(window.firebaseRef(window.firebaseDB,'shopsData')); if(snap.exists()) return snap.val(); }catch(e){} return null; }
+    async function loadAttendanceFromFirebase() { if(window.firebaseDB) try{ const snap=await window.firebaseGet(window.firebaseRef(window.firebaseDB,'attendanceRecords')); const records=[]; if(snap.exists()){ const data=snap.val(); for(const key in data) records.push({id:key,...data[key]}); } return records; }catch(e){} return []; }
+    async function saveAttendanceToFirebase() { if(window.firebaseDB && attendanceRecords.length){ const recordsObj={}; attendanceRecords.forEach(r=>{if(r.id) recordsObj[r.id]=r;}); await window.firebaseSet(window.firebaseRef(window.firebaseDB,'attendanceRecords'), recordsObj);} }
+    
+    function getDefaultShopsData() { 
+        const emptyMinutes = {"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; 
+        return [{ id:1,name:"متجر الأندلس",icon:"fas fa-crown",desc:"أفخر التشكيلات",employees:[{name:"أحمد الشجاع",accessCode:"111111",workMinutes:{...emptyMinutes}},{name:"عمرو",accessCode:"123456",workMinutes:{...emptyMinutes}}]},
+                { id:2,name:"رواد الخليج",icon:"fas fa-ship",desc:"ريادة في البحر",employees:[{name:"خالد النقبي",accessCode:"333333",workMinutes:{...emptyMinutes}},{name:"لينا العتيبي",accessCode:"444444",workMinutes:{...emptyMinutes}}]}]; 
     }
     
-    async function loadDataFromFirebase() {
-        if (!window.firebaseDB) return null;
-        try {
-            const dbRef = window.firebaseRef(window.firebaseDB, 'shopsData');
-            const snapshot = await window.firebaseGet(dbRef);
-            if (snapshot.exists()) return snapshot.val();
-            return null;
-        } catch (error) {
-            console.warn("خطأ في جلب البيانات:", error.message);
-            return null;
-        }
-    }
-    
-    async function loadAttendanceFromFirebase() {
-        if (!window.firebaseDB) return [];
-        try {
-            const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
-            const snapshot = await window.firebaseGet(attendanceRef);
-            const records = [];
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                for (const key in data) {
-                    records.push({ id: key, ...data[key] });
-                }
-            }
-            records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            return records;
-        } catch (error) {
-            console.warn("خطأ في جلب سجل الحضور:", error.message);
-            return [];
-        }
-    }
-    
-    function getDefaultShopsData() {
-        const emptyMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
-        return [
-            { id: 1, name: "متجر الأندلس", icon: "fas fa-crown", desc: "أفخر التشكيلات", employees: [
-                { name: "أحمد الشجاع", accessCode: "111111", workMinutes: {...emptyMinutes} },
-                { name: "سارة المنصور", accessCode: "222222", workMinutes: {...emptyMinutes} }
-            ]},
-            { id: 2, name: "رواد الخليج", icon: "fas fa-ship", desc: "ريادة في البحر", employees: [
-                { name: "خالد النقبي", accessCode: "333333", workMinutes: {...emptyMinutes} },
-                { name: "لينا العتيبي", accessCode: "444444", workMinutes: {...emptyMinutes} }
-            ]},
-            { id: 3, name: "زهور الشجاع", icon: "fas fa-leaf", desc: "طبيعة ورفاهية", employees: [
-                { name: "ريم الهاجري", accessCode: "555555", workMinutes: {...emptyMinutes} },
-                { name: "ناصر العتيق", accessCode: "666666", workMinutes: {...emptyMinutes} }
-            ]},
-            { id: 4, name: "الدرة بلازا", icon: "fas fa-gem", desc: "فخامة وتميز", employees: [
-                { name: "جمال السالم", accessCode: "777777", workMinutes: {...emptyMinutes} },
-                { name: "هبة العبيد", accessCode: "888888", workMinutes: {...emptyMinutes} }
-            ]},
-            { id: 5, name: "نخبة الشرق", icon: "fas fa-chart-line", desc: "ريادة أعمال", employees: [
-                { name: "ماجد الشهراني", accessCode: "999999", workMinutes: {...emptyMinutes} },
-                { name: "نوال الغامدي", accessCode: "101010", workMinutes: {...emptyMinutes} }
-            ]},
-            { id: 6, name: "قمة الشجاع", icon: "fas fa-mountain", desc: "أعلى القمم", employees: [
-                { name: "تركي العتيبي", accessCode: "111111", workMinutes: {...emptyMinutes} },
-                { name: "جواهر القاسم", accessCode: "121212", workMinutes: {...emptyMinutes} }
-            ]}
-        ];
-    }
-    
-    function showEditShopModal(shop, callback) {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="edit-modal">
-                <h3><i class="fas fa-edit"></i> تعديل اسم المحل</h3>
-                <input type="text" id="editShopName" value="${shop.name.replace(/"/g, '&quot;')}" placeholder="أدخل الاسم الجديد">
-                <div class="modal-buttons">
-                    <button class="modal-save"><i class="fas fa-check"></i> حفظ</button>
-                    <button class="modal-cancel"><i class="fas fa-times"></i> إلغاء</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        const input = modal.querySelector('#editShopName');
-        input.focus();
-        
-        modal.querySelector('.modal-save').addEventListener('click', async () => {
-            const newName = input.value.trim();
-            if (newName && newName !== shop.name) {
-                shop.name = newName;
-                await saveDataToFirebase();
-                if (callback) callback();
-            }
-            modal.remove();
-        });
-        
-        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-    }
-    
-    function showEditEmployeeModal(employee, shopId, callback) {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="edit-modal">
-                <h3><i class="fas fa-user-edit"></i> تعديل اسم الموظف</h3>
-                <input type="text" id="editEmployeeName" value="${employee.name.replace(/"/g, '&quot;')}" placeholder="أدخل الاسم الجديد">
-                <div class="modal-buttons">
-                    <button class="modal-save"><i class="fas fa-check"></i> حفظ</button>
-                    <button class="modal-cancel"><i class="fas fa-times"></i> إلغاء</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        const input = modal.querySelector('#editEmployeeName');
-        input.focus();
-        
-        modal.querySelector('.modal-save').addEventListener('click', async () => {
-            const newName = input.value.trim();
-            if (newName && newName !== employee.name) {
-                const oldName = employee.name;
-                employee.name = newName;
-                
-                for (let record of attendanceRecords) {
-                    if (record.employeeName === oldName && record.branchName === shopsData.find(s => s.id === shopId)?.name) {
-                        record.employeeName = newName;
-                    }
-                }
-                await saveDataToFirebase();
-                await saveAttendanceToFirebase();
-                if (callback) callback();
-            }
-            modal.remove();
-        });
-        
-        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-    }
-    
-    function showAddBranchModal(callback) {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="edit-modal">
-                <h3><i class="fas fa-store"></i> إضافة فرع جديد</h3>
-                <input type="text" id="newBranchName" placeholder="اسم الفرع الجديد">
-                <input type="text" id="newBranchDesc" placeholder="وصف الفرع (اختياري)">
-                <div class="modal-buttons">
-                    <button class="modal-save"><i class="fas fa-plus"></i> إضافة</button>
-                    <button class="modal-cancel"><i class="fas fa-times"></i> إلغاء</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        const nameInput = modal.querySelector('#newBranchName');
-        const descInput = modal.querySelector('#newBranchDesc');
-        nameInput.focus();
-        
-        modal.querySelector('.modal-save').addEventListener('click', async () => {
-            const newName = nameInput.value.trim();
-            if (!newName) {
-                alert('الرجاء إدخال اسم الفرع');
-                return;
-            }
-            
-            const newId = Math.max(...shopsData.map(s => s.id), 0) + 1;
-            const emptyMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
-            
-            shopsData.push({
-                id: newId,
-                name: newName,
-                icon: getRandomIcon(),
-                desc: descInput.value.trim() || "فرع جديد",
-                employees: []
-            });
-            
-            await saveDataToFirebase();
-            if (callback) callback();
-            modal.remove();
-            alert(`تم إضافة الفرع "${newName}" بنجاح`);
-        });
-        
-        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-    }
-    
-    function addScrollEffect() {
-        const header = document.querySelector('.main-header');
-        if (header) {
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 10) header.classList.add('scrolled');
-                else header.classList.remove('scrolled');
-            });
-        }
-    }
-    
-    async function saveAttendanceToFirebase() {
-        if (!window.firebaseDB || !attendanceRecords.length) return;
-        try {
-            const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
-            const recordsObj = {};
-            attendanceRecords.forEach(record => {
-                if (record.id) recordsObj[record.id] = record;
-            });
-            await window.firebaseSet(attendanceRef, recordsObj);
-        } catch (error) {
-            console.warn("خطأ في حفظ سجل الحضور:", error.message);
-        }
-    }
+    function deleteShopById(shopId) { const shopIndex = shopsData.findIndex(s=>s.id===shopId); if(shopIndex!==-1){ shopsData.splice(shopIndex,1); saveDataToFirebase(); renderHomePage(); alert(`تم حذف المحل بنجاح`); } }
+    function deleteEmployeeFromShop(shopId, employeeIndex) { const shop=shopsData.find(s=>s.id===shopId); if(shop && shop.employees[employeeIndex]){ shop.employees.splice(employeeIndex,1); saveDataToFirebase(); renderShopPage(shopId); alert(`تم حذف الموظف بنجاح`); } }
     
     function renderHomePage() {
-        currentView = 'home';
-        if (!shopsData.length) return;
-        const root = document.getElementById('appRoot');
-        let shopOptions = '';
-        shopsData.forEach(shop => { shopOptions += `<option value="${shop.id}">${shop.name}</option>`; });
-        let shopsHtml = '';
-        shopsData.forEach(shop => {
-            const totalEmployees = shop.employees?.length || 0;
-            shopsHtml += `<div class="shop-card" data-shop-id="${shop.id}">
-                <div class="shop-icon"><i class="${shop.icon}"></i></div>
-                <div class="shop-info">
-                    <div class="shop-name-wrapper">
-                        <div class="shop-name">${shop.name}</div>
-                        <button class="edit-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
-                    </div>
-                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.65rem; margin-left:3px;"></i> ${totalEmployees} موظف | ${shop.desc}</div>
-                </div>
-                <i class="fas fa-chevron-left arrow-icon"></i>
-            </div>`;
+        currentView='home'; if(!shopsData.length) return; const root=document.getElementById('appRoot');
+        let shopOptions=''; shopsData.forEach(shop=>{shopOptions+=`<option value="${shop.id}">${shop.name}</option>`;});
+        let shopsHtml=''; shopsData.forEach(shop=>{ const totalEmployees=shop.employees?.length||0; shopsHtml+=`<div class="shop-card" data-shop-id="${shop.id}"><div class="shop-icon"><i class="${shop.icon}"></i></div><div class="shop-info"><div class="shop-name-wrapper"><div class="shop-name">${shop.name}</div><button class="edit-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button><button class="delete-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-trash-alt"></i> حذف</button></div><div class="shop-desc"><i class="fas fa-users"></i> ${totalEmployees} موظف | ${shop.desc}</div></div><i class="fas fa-chevron-left arrow-icon"></i></div>`;});
+        const html=`<div class="main-header" id="mainHeader"><div class="header-brand"><div class="brand-icon"><i class="fas fa-crown"></i></div><div class="brand-text"><div class="brand-name">الشجاع جروب</div><div class="subhead">نظام إدارة الموظفين المتكامل</div></div></div><div class="header-actions"><button class="delete-header-btn" id="globalDeleteEmployeeBtn"><i class="fas fa-user-minus"></i> حذف موظف</button><button class="delete-header-btn" id="globalDeleteBranchBtn"><i class="fas fa-store-slash"></i> حذف محل</button></div><div class="back-button hidden" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div></div><div class="actions-bar"><div class="action-card-btn" id="addBranchBtn"><i class="fas fa-store-plus"></i><span>إضافة فرع جديد</span></div><div class="action-card-btn" id="showAddEmployeeBtn"><i class="fas fa-user-plus"></i><span>إضافة موظف جديد</span></div></div><div class="add-employee-form" id="addEmployeeForm"><div class="form-title"><i class="fas fa-user-plus"></i><span>إضافة موظف جديد</span></div><div class="form-row"><input type="text" id="newEmployeeName" class="form-input" placeholder="اسم الموظف"><select id="newEmployeeShop" class="form-select">${shopOptions}</select><button id="confirmAddEmployeeBtn" class="btn-add"><i class="fas fa-check"></i> تأكيد</button></div></div><div class="section-title"><i class="fas fa-building"></i> المتاجر والفروع</div><div class="shops-grid">${shopsHtml}</div><footer>سجل الحضور يتم مزامنته تلقائياً من Firebase</footer>`;
+        root.innerHTML=html;
+        
+        document.getElementById('globalBackBtn')?.classList.add('hidden');
+        document.getElementById('addBranchBtn').addEventListener('click',()=>{ showAddBranchModal(()=>renderHomePage()); });
+        document.getElementById('showAddEmployeeBtn').addEventListener('click',()=>{ document.getElementById('addEmployeeForm').classList.toggle('active'); });
+        document.getElementById('confirmAddEmployeeBtn').addEventListener('click',async()=>{ const nameInput=document.getElementById('newEmployeeName'); const shopSelect=document.getElementById('newEmployeeShop'); const employeeName=nameInput.value.trim(); const shopId=parseInt(shopSelect.value); if(!employeeName) return alert('الرجاء إدخال الاسم'); const shop=shopsData.find(s=>s.id===shopId); if(shop){ const emptyMinutes={"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; shop.employees.push({name:employeeName,accessCode:generateAccessCode(),workMinutes:{...emptyMinutes}}); await saveDataToFirebase(); nameInput.value=''; document.getElementById('addEmployeeForm').classList.remove('active'); renderHomePage(); alert(`تم إضافة الموظف: ${employeeName}`); } });
+        document.querySelectorAll('.shop-card').forEach(card=>{ card.addEventListener('click',(e)=>{ if(!e.target.closest('.edit-shop-btn') && !e.target.closest('.delete-shop-btn')){ currentShopId=parseInt(card.getAttribute('data-shop-id')); renderShopPage(currentShopId); } }); });
+        document.querySelectorAll('.edit-shop-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const shopId=parseInt(btn.getAttribute('data-shop-id')); const shop=shopsData.find(s=>s.id===shopId); if(shop) showEditShopModal(shop,()=>renderHomePage()); }); });
+        document.querySelectorAll('.delete-shop-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const shopId=parseInt(btn.getAttribute('data-shop-id')); if(confirm('حذف المحل؟')) deleteShopById(shopId); }); });
+        
+        document.getElementById('globalDeleteEmployeeBtn').addEventListener('click',()=>{ 
+            const shopSelectHtml=`<select id="deleteEmpShopSelect" style="width:100%; margin-bottom:12px; padding:10px;">${shopsData.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select>`; 
+            const modalDiv=document.createElement('div'); modalDiv.className='modal-overlay'; modalDiv.innerHTML=`<div class="edit-modal"><h3>حذف موظف</h3>${shopSelectHtml}<select id="deleteEmpNameSelect" style="width:100%; padding:10px;"><option>اختر الموظف</option></select><div class="modal-buttons"><button id="confirmDeleteEmpBtn" class="modal-save">حذف</button><button id="cancelModalBtn" class="modal-cancel">إلغاء</button></div></div>`; document.body.appendChild(modalDiv); 
+            const shopSel=modalDiv.querySelector('#deleteEmpShopSelect'); const empSel=modalDiv.querySelector('#deleteEmpNameSelect'); 
+            function updateEmpList(){ const shopId=parseInt(shopSel.value); const shop=shopsData.find(s=>s.id===shopId); empSel.innerHTML=shop&&shop.employees.length?shop.employees.map((e,idx)=>`<option value="${idx}">${e.name}</option>`).join(''):'<option disabled>لا يوجد موظفون</option>'; } 
+            shopSel.addEventListener('change',updateEmpList); updateEmpList(); 
+            modalDiv.querySelector('#confirmDeleteEmpBtn').addEventListener('click',()=>{ const shopId=parseInt(shopSel.value); const empIdx=parseInt(empSel.value); if(!isNaN(empIdx)){ deleteEmployeeFromShop(shopId,empIdx); modalDiv.remove(); } else alert('اختر موظفاً'); }); 
+            modalDiv.querySelector('#cancelModalBtn').addEventListener('click',()=>modalDiv.remove()); 
         });
-        const html = `
-            <div class="main-header" id="mainHeader">
-                <div class="brand-icon">
-                    <i class="fas fa-crown"></i>
-                </div>
-                <div class="brand-name">الشجاع جروب</div>
-                <div class="subhead">نظام إدارة الموظفين المتكامل</div>
-                <div class="dashboard-badge"><i class="fas fa-wifi"></i> متصل بـ Firebase</div>
-                <div class="back-button hidden" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
-            </div>
-            
-            <div class="actions-bar">
-                <div class="action-card-btn" id="addBranchBtn">
-                    <i class="fas fa-store-plus"></i>
-                    <span>إضافة فرع جديد</span>
-                </div>
-                <div class="action-card-btn" id="showAddEmployeeBtn">
-                    <i class="fas fa-user-plus"></i>
-                    <span>إضافة موظف جديد</span>
-                </div>
-            </div>
-            
-            <div class="add-employee-form" id="addEmployeeForm">
-                <div class="form-title"><i class="fas fa-user-plus"></i><span>إضافة موظف جديد</span></div>
-                <div class="form-row">
-                    <input type="text" id="newEmployeeName" class="form-input" placeholder="اسم الموظف">
-                    <select id="newEmployeeShop" class="form-select">${shopOptions}</select>
-                    <button id="confirmAddEmployeeBtn" class="btn-add"><i class="fas fa-check"></i> تأكيد</button>
-                </div>
-            </div>
-            
-            <div class="section-title"><i class="fas fa-building"></i> المتاجر والفروع</div>
-            <div class="shops-grid">
-                ${shopsHtml}
-            </div>
-            <footer>يتم احتساب ساعات العمل تلقائياً من تسجيلات الدخول والخروج</footer>
-        `;
-        root.innerHTML = html;
-        addScrollEffect();
-        
-        const backBtn = document.getElementById('globalBackBtn');
-        if (backBtn) backBtn.classList.add('hidden');
-        
-        const addEmployeeForm = document.getElementById('addEmployeeForm');
-        let formVisible = false;
-        
-        document.getElementById('addBranchBtn').addEventListener('click', () => {
-            showAddBranchModal(() => renderHomePage());
-        });
-        
-        document.getElementById('showAddEmployeeBtn').addEventListener('click', () => {
-            if (formVisible) {
-                addEmployeeForm.classList.remove('active');
-                formVisible = false;
-            } else {
-                addEmployeeForm.classList.add('active');
-                formVisible = true;
-            }
-        });
-        
-        document.getElementById('confirmAddEmployeeBtn').addEventListener('click', async () => {
-            const nameInput = document.getElementById('newEmployeeName');
-            const shopSelect = document.getElementById('newEmployeeShop');
-            const employeeName = nameInput.value.trim();
-            const shopId = parseInt(shopSelect.value);
-            if (!employeeName) { alert('الرجاء إدخال اسم الموظف'); return; }
-            const shop = shopsData.find(s => s.id === shopId);
-            if (shop) {
-                const emptyMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
-                const newCode = generateAccessCode();
-                shop.employees.push({ 
-                    name: employeeName, 
-                    accessCode: newCode,
-                    workMinutes: {...emptyMinutes}
-                });
-                await saveDataToFirebase();
-                nameInput.value = '';
-                addEmployeeForm.classList.remove('active');
-                formVisible = false;
-                renderHomePage();
-                alert(`تم إضافة الموظف: ${employeeName}\nرمز الدخول: ${newCode}`);
-            }
-        });
-        
-        document.querySelectorAll('.shop-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (!e.target.closest('.edit-shop-btn')) {
-                    currentShopId = parseInt(card.getAttribute('data-shop-id'));
-                    renderShopPage(currentShopId);
-                }
-            });
-        });
-        
-        document.querySelectorAll('.edit-shop-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const shopId = parseInt(btn.getAttribute('data-shop-id'));
-                const shop = shopsData.find(s => s.id === shopId);
-                if (shop) showEditShopModal(shop, () => renderHomePage());
-            });
+        document.getElementById('globalDeleteBranchBtn').addEventListener('click',()=>{ 
+            const shopSelectHtml=`<select id="deleteBranchSelect" style="width:100%; margin-bottom:16px; padding:10px;">${shopsData.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select>`; 
+            const modalDiv=document.createElement('div'); modalDiv.className='modal-overlay'; modalDiv.innerHTML=`<div class="edit-modal"><h3>حذف محل</h3>${shopSelectHtml}<div class="modal-buttons"><button id="confirmDelBranchBtn" class="modal-save">حذف</button><button id="cancelBranchBtn" class="modal-cancel">إلغاء</button></div></div>`; document.body.appendChild(modalDiv); 
+            modalDiv.querySelector('#confirmDelBranchBtn').addEventListener('click',()=>{ const shopId=parseInt(modalDiv.querySelector('#deleteBranchSelect').value); if(confirm('حذف المحل وجميع موظفيه؟')){ deleteShopById(shopId); modalDiv.remove(); } }); 
+            modalDiv.querySelector('#cancelBranchBtn').addEventListener('click',()=>modalDiv.remove()); 
         });
     }
     
-    function renderShopPage(shopId) {
-        currentView = 'shop';
-        currentShopId = shopId;
-        const shop = shopsData.find(s => s.id === shopId);
-        if (!shop) return;
-        let employeesHtml = '';
-        shop.employees.forEach((emp, idx) => {
-            const totalMinutes = Object.values(emp.workMinutes || {}).reduce((a, b) => a + b, 0);
-            const totalHoursFormatted = formatMinutesToHoursAndMinutes(totalMinutes);
-            employeesHtml += `
-            <div class="employee-card" data-emp-index="${idx}" data-shop-id="${shop.id}">
-                <div class="employee-avatar"><i class="fas fa-user-tie"></i></div>
-                <div class="employee-details">
-                    <div class="employee-name-wrapper">
-                        <div class="employee-name">${emp.name}</div>
-                        <button class="edit-employee-btn" data-emp-index="${idx}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
-                    </div>
-                    <div class="employee-hours">
-                        <span><i class="fas fa-clock"></i> ${totalHoursFormatted}</span>
-                    </div>
-                    <div class="employee-pin"><i class="fas fa-key"></i> ${emp.accessCode}</div>
-                </div>
-                <i class="fas fa-chevron-left arrow-icon"></i>
-            </div>`;
-        });
-        
-        const html = `
-            <div class="main-header" id="mainHeader">
-                <div class="brand-icon">
-                    <i class="${shop.icon}"></i>
-                </div>
-                <div class="brand-name" style="font-size: 1.4rem;">${shop.name}</div>
-                <div class="subhead">إدارة طاقم العمل وسجل الحضور</div>
-                <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
-            </div>
-            
-            <div class="shop-header">
-                <div class="shop-title"><i class="${shop.icon}"></i> ${shop.name}</div>
-                <div style="color:#667eea; font-weight:600; font-size:0.8rem;"><i class="fas fa-users"></i> ${shop.employees.length} موظف</div>
-            </div>
-            
-            <div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div>
-            <div class="employees-grid">
-                ${employeesHtml || '<div class="no-data">لا يوجد موظفين في هذا الفرع</div>'}
-            </div>
-            
-            <footer>اختر موظفاً لعرض سجل الحضور والانصراف المفصل</footer>
-        `;
-        document.getElementById('appRoot').innerHTML = html;
-        addScrollEffect();
-        
-        const backBtn = document.getElementById('globalBackBtn');
-        if (backBtn) backBtn.classList.remove('hidden');
-        backBtn.addEventListener('click', () => renderHomePage());
-        
-        document.querySelectorAll('.employee-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (!e.target.closest('.edit-employee-btn')) {
-                    const empIndex = parseInt(card.getAttribute('data-emp-index'));
-                    const sId = parseInt(card.getAttribute('data-shop-id'));
-                    currentEmployeeShopId = sId;
-                    currentEmployeeIndex = empIndex;
-                    const targetShop = shopsData.find(s => s.id === sId);
-                    if (targetShop && targetShop.employees[empIndex]) {
-                        currentEmployeeData = targetShop.employees[empIndex];
-                        renderEmployeePage(currentEmployeeData, sId, empIndex);
-                    }
-                }
-            });
-        });
-        
-        document.querySelectorAll('.edit-employee-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const empIndex = parseInt(btn.getAttribute('data-emp-index'));
-                const sId = shopId;
-                const targetShop = shopsData.find(s => s.id === sId);
-                if (targetShop && targetShop.employees[empIndex]) {
-                    showEditEmployeeModal(targetShop.employees[empIndex], sId, () => renderShopPage(shopId));
-                }
-            });
-        });
+    function renderShopPage(shopId) { 
+        currentView='shop'; currentShopId=shopId; const shop=shopsData.find(s=>s.id===shopId); if(!shop) return; 
+        let employeesHtml=''; shop.employees.forEach((emp,idx)=>{ const totalMinutes=Object.values(emp.workMinutes||{}).reduce((a,b)=>a+b,0); employeesHtml+=`<div class="employee-card" data-emp-index="${idx}" data-shop-id="${shop.id}"><div class="employee-avatar"><i class="fas fa-user-tie"></i></div><div class="employee-details"><div class="employee-name-wrapper"><div class="employee-name">${emp.name}</div><button class="edit-employee-btn" data-emp-index="${idx}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button><button class="delete-employee-btn" data-emp-index="${idx}" onclick="event.stopPropagation()"><i class="fas fa-trash-alt"></i> حذف</button></div><div class="employee-hours"><span><i class="fas fa-clock"></i> ${formatMinutesToHoursAndMinutes(totalMinutes)}</span></div><div class="employee-pin"><i class="fas fa-key"></i> ${emp.accessCode}</div></div><i class="fas fa-chevron-left arrow-icon"></i></div>`; });
+        const html=`<div class="main-header"><div class="header-brand"><div class="brand-icon"><i class="${shop.icon}"></i></div><div class="brand-text"><div class="brand-name">الشجاع جروب</div><div class="subhead">${shop.name}</div></div></div><div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div></div><div class="shop-header"><div class="shop-title"><i class="${shop.icon}"></i> ${shop.name}</div><div><i class="fas fa-users"></i> ${shop.employees.length} موظف</div></div><div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div><div class="employees-grid">${employeesHtml||'<div class="no-data">لا يوجد موظفين</div>'}</div><footer>اختر موظفاً لعرض سجل الحضور</footer>`;
+        document.getElementById('appRoot').innerHTML=html; 
+        document.getElementById('globalBackBtn').addEventListener('click',()=>renderHomePage());
+        document.querySelectorAll('.employee-card').forEach(card=>{ card.addEventListener('click',(e)=>{ if(!e.target.closest('.edit-employee-btn') && !e.target.closest('.delete-employee-btn')){ const empIdx=parseInt(card.getAttribute('data-emp-index')); const sId=parseInt(card.getAttribute('data-shop-id')); const targetShop=shopsData.find(s=>s.id===sId); if(targetShop&&targetShop.employees[empIdx]) renderEmployeePage(targetShop.employees[empIdx],sId,empIdx); } }); });
+        document.querySelectorAll('.edit-employee-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const empIdx=parseInt(btn.getAttribute('data-emp-index')); const targetShop=shopsData.find(s=>s.id===shopId); if(targetShop&&targetShop.employees[empIdx]) showEditEmployeeModal(targetShop.employees[empIdx],shopId,()=>renderShopPage(shopId)); }); });
+        document.querySelectorAll('.delete-employee-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const empIdx=parseInt(btn.getAttribute('data-emp-index')); if(confirm('حذف الموظف؟')) deleteEmployeeFromShop(shopId,empIdx); }); });
     }
     
-    function renderEmployeePage(employee, returnShopId, employeeIndex) {
-        currentView = 'employee';
-        currentEmployeeData = employee;
-        currentEmployeeShopId = returnShopId;
-        currentEmployeeIndex = employeeIndex;
-        
-        const totalMinutes = Object.values(employee.workMinutes || {}).reduce((a, b) => a + b, 0);
-        const totalHoursFormatted = formatMinutesToHoursAndMinutes(totalMinutes);
-        const totalHoursDecimal = formatMinutesToHoursDecimal(totalMinutes);
-        
-        const shop = shopsData.find(s => s.id === returnShopId);
-        const employeeRecords = getEmployeeAttendanceRecords(employee.name, shop?.name || '');
-        const groupedDays = groupAttendanceByDay(employeeRecords);
-        
-        let daysHtml = '';
-        
-        groupedDays.forEach(day => {
-            const checkins = day.records.filter(r => r.type === 'دخول').sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            const checkouts = day.records.filter(r => r.type === 'خروج').sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            let tableRows = '';
-            const maxPairs = Math.max(checkins.length, checkouts.length);
-            
-            for (let i = 0; i < maxPairs; i++) {
-                const checkin = checkins[i];
-                const checkout = checkouts[i];
-                
-                let checkinTime = '—';
-                let checkoutTime = '—';
-                let durationText = '—';
-                let durationMinutes = 0;
-                
-                if (checkin) {
-                    checkinTime = new Date(checkin.timestamp).toLocaleTimeString('ar-EG');
-                }
-                if (checkout) {
-                    checkoutTime = new Date(checkout.timestamp).toLocaleTimeString('ar-EG');
-                }
-                if (checkin && checkout) {
-                    durationMinutes = calculateTimeDifferenceInMinutes(checkin.timestamp, checkout.timestamp);
-                    durationText = formatMinutesToHoursAndMinutes(durationMinutes);
-                } else if (checkin && !checkout) {
-                    durationText = 'لم يخرج بعد';
-                } else if (!checkin && checkout) {
-                    durationText = 'دخول غير مسجل';
-                }
-                
-                tableRows += `
-                    <tr>
-                        <td class="checkin-cell"><i class="fas fa-sign-in-alt checkin-icon"></i> ${checkinTime}</td>
-                        <td class="checkout-cell"><i class="fas fa-sign-out-alt checkout-icon"></i> ${checkoutTime}</td>
-                        <td class="duration-cell"><i class="fas fa-hourglass-half duration-icon"></i> ${durationText}</td>
-                    </tr>
-                `;
-            }
-            
-            if (tableRows === '') {
-                tableRows = '<tr><td colspan="3" class="no-data-cell">📭 لا توجد تسجيلات حضور في هذا اليوم</td></tr>';
-            }
-            
-            daysHtml += `
-                <div class="day-attendance-card">
-                    <div class="day-table-header" data-day="${day.dayName}">
-                        <div class="day-title">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>${day.dayName}</span>
-                        </div>
-                        <div class="day-date-badge">
-                            <i class="far fa-calendar-check"></i> ${day.date}
-                        </div>
-                    </div>
-                    <div class="attendance-table-wrapper">
-                        <table class="attendance-table">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-sign-in-alt"></i> وقت الدخول</th>
-                                    <th><i class="fas fa-sign-out-alt"></i> وقت الخروج</th>
-                                    <th><i class="fas fa-hourglass-half"></i> عدد الساعات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableRows}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-        });
-        
-        if (daysHtml === '') {
-            daysHtml = '<div class="no-data">✨ لا توجد سجلات حضور لهذا الموظف</div>';
-        }
-        
-        const html = `
-            <div class="main-header" id="mainHeader">
-                <div class="brand-icon">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="brand-name" style="font-size: 1.3rem;">الملف الشخصي</div>
-                <div class="subhead">سجل الحضور والانصراف</div>
-                <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
-            </div>
-            
-            <div class="employee-profile">
-                <div class="profile-avatar"><i class="fas fa-user"></i></div>
-                <div class="profile-name">${employee.name}</div>
-                <div class="employee-pin" style="margin: 0 auto; display: inline-block;"><i class="fas fa-key"></i> ${employee.accessCode}</div>
-                <br>
-                <div class="total-hours-card">
-                    <div class="total-hours-number">${totalHoursFormatted}</div>
-                    <div class="total-hours-label">إجمالي ساعات العمل المسجلة (${totalHoursDecimal} ساعة)</div>
-                </div>
-            </div>
-            
-            <div class="attendance-days-container">
-                ${daysHtml}
-            </div>
-            
-            <footer>
-                <i class="fas fa-check-circle" style="color: #34c759;"></i> الدخول &nbsp;&nbsp;
-                <i class="fas fa-times-circle" style="color: #ff3b30;"></i> الخروج &nbsp;&nbsp;
-                <i class="fas fa-chart-line" style="color: #667eea;"></i> المدة
-            </footer>
-        `;
-        document.getElementById('appRoot').innerHTML = html;
-        addScrollEffect();
-        
-        const backBtn = document.getElementById('globalBackBtn');
-        if (backBtn) backBtn.classList.remove('hidden');
-        backBtn.addEventListener('click', () => renderShopPage(returnShopId));
+    function renderEmployeePage(employee, returnShopId, employeeIndex) { 
+        currentView='employee'; currentEmployeeData=employee; currentEmployeeShopId=returnShopId; currentEmployeeIndex=employeeIndex; 
+        const totalMinutes=Object.values(employee.workMinutes||{}).reduce((a,b)=>a+b,0); const shop=shopsData.find(s=>s.id===returnShopId); 
+        const records=getEmployeeAttendanceRecords(employee.name,shop?.name||''); const grouped=groupAttendanceByDay(records); 
+        let daysHtml=''; grouped.forEach(day=>{ let rows=''; const checkins=day.records.filter(r=>r.type==='دخول'); const checkouts=day.records.filter(r=>r.type==='خروج'); for(let i=0;i<Math.max(checkins.length,checkouts.length);i++){ const ci=checkins[i]; const co=checkouts[i]; let duration='—'; if(ci&&co) duration=formatMinutesToHoursAndMinutes(calculateTimeDifferenceInMinutes(ci.timestamp,co.timestamp)); rows+=`<tr><td class="checkin-cell">${ci?new Date(ci.timestamp).toLocaleTimeString('ar-EG'):'—'}<td><td class="checkout-cell">${co?new Date(co.timestamp).toLocaleTimeString('ar-EG'):'—'}</td><td class="duration-cell">${duration}</td></tr>`; } daysHtml+=`<div class="day-attendance-card"><div class="day-table-header" data-day="${day.dayName}"><div class="day-title"><span>${day.dayName}</span></div><div class="day-date-badge">${day.date}</div></div><div class="attendance-table-wrapper"><table class="attendance-table"><thead><tr><th>دخول</th><th>خروج</th><th>المدة</th></tr></thead><tbody>${rows||'<tr><td colspan="3" class="no-data-cell">لا توجد تسجيلات</td></tr>'}</tbody></table></div></div>`; });
+        const html=`<div class="main-header"><div class="header-brand"><div class="brand-icon"><i class="fas fa-user-circle"></i></div><div class="brand-text"><div class="brand-name">الملف الشخصي</div><div class="subhead">${employee.name}</div></div></div><div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div></div><div class="employee-profile"><div class="profile-avatar"><i class="fas fa-user"></i></div><div class="profile-name">${employee.name}</div><div class="employee-pin" style="margin:0 auto;"><i class="fas fa-key"></i> ${employee.accessCode}</div><div class="total-hours-card"><div class="total-hours-number">${formatMinutesToHoursAndMinutes(totalMinutes)}</div><div class="total-hours-label">إجمالي ساعات العمل</div></div></div><div class="attendance-days-container">${daysHtml||'<div class="no-data">لا توجد سجلات حضور بعد</div>'}</div><footer>جميع تسجيلات الدخول والخروج من Firebase</footer>`;
+        document.getElementById('appRoot').innerHTML=html; 
+        document.getElementById('globalBackBtn').addEventListener('click',()=>renderShopPage(returnShopId));
     }
     
-    function listenToFirebaseChanges() {
-        if (!window.firebaseDB) return;
-        
-        const shopsRef = window.firebaseRef(window.firebaseDB, 'shopsData');
-        window.firebaseOnValue(shopsRef, async (snapshot) => {
-            if (snapshot.exists()) shopsData = snapshot.val();
-            await updateAllEmployeesWorkHours();
-            if (currentView === 'home') renderHomePage();
-            else if (currentView === 'shop' && currentShopId) renderShopPage(currentShopId);
-            else if (currentView === 'employee' && currentEmployeeData && currentEmployeeShopId !== null && currentEmployeeIndex !== null) {
-                const shop = shopsData.find(s => s.id === currentEmployeeShopId);
-                if (shop && shop.employees[currentEmployeeIndex]) {
-                    renderEmployeePage(shop.employees[currentEmployeeIndex], currentEmployeeShopId, currentEmployeeIndex);
-                }
-            }
-        });
-        
-        const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
-        window.firebaseOnValue(attendanceRef, async (snapshot) => {
-            const records = [];
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                for (const key in data) records.push({ id: key, ...data[key] });
-            }
-            records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            attendanceRecords = records;
-            await updateAllEmployeesWorkHours();
-            if (currentView === 'home') renderHomePage();
-            else if (currentView === 'shop' && currentShopId) renderShopPage(currentShopId);
-            else if (currentView === 'employee' && currentEmployeeData && currentEmployeeShopId !== null && currentEmployeeIndex !== null) {
-                const shop = shopsData.find(s => s.id === currentEmployeeShopId);
-                if (shop && shop.employees[currentEmployeeIndex]) {
-                    renderEmployeePage(shop.employees[currentEmployeeIndex], currentEmployeeShopId, currentEmployeeIndex);
-                }
-            }
-        });
+    function showEditShopModal(shop,callback){ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div class="edit-modal"><h3>تعديل المحل</h3><input id="editShopName" value="${shop.name.replace(/"/g, '&quot;')}"><div class="modal-buttons"><button class="modal-save">حفظ</button><button class="modal-cancel">إلغاء</button></div></div>`; document.body.appendChild(modal); const input=modal.querySelector('#editShopName'); input.focus(); modal.querySelector('.modal-save').addEventListener('click',async()=>{ const newName=input.value.trim(); if(newName && newName!==shop.name){ shop.name=newName; await saveDataToFirebase(); if(callback) callback(); } modal.remove(); }); modal.querySelector('.modal-cancel').addEventListener('click',()=>modal.remove()); }
+    function showEditEmployeeModal(employee,shopId,callback){ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div class="edit-modal"><h3>تعديل الموظف</h3><input id="editEmployeeName" value="${employee.name.replace(/"/g, '&quot;')}"><div class="modal-buttons"><button class="modal-save">حفظ</button><button class="modal-cancel">إلغاء</button></div></div>`; document.body.appendChild(modal); const input=modal.querySelector('#editEmployeeName'); input.focus(); modal.querySelector('.modal-save').addEventListener('click',async()=>{ const newName=input.value.trim(); if(newName && newName!==employee.name){ const oldName=employee.name; employee.name=newName; for(let rec of attendanceRecords) if(rec.employeeName===oldName && rec.branchName===shopsData.find(s=>s.id===shopId)?.name) rec.employeeName=newName; await saveDataToFirebase(); await saveAttendanceToFirebase(); if(callback) callback(); } modal.remove(); }); modal.querySelector('.modal-cancel').addEventListener('click',()=>modal.remove()); }
+    function showAddBranchModal(callback){ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div class="edit-modal"><h3>إضافة فرع</h3><input id="newBranchName" placeholder="الاسم"><input id="newBranchDesc" placeholder="الوصف"><div class="modal-buttons"><button class="modal-save">إضافة</button><button class="modal-cancel">إلغاء</button></div></div>`; document.body.appendChild(modal); modal.querySelector('.modal-save').addEventListener('click',async()=>{ const name=modal.querySelector('#newBranchName').value.trim(); if(!name) return alert('أدخل الاسم'); const newId=Math.max(...shopsData.map(s=>s.id),0)+1; shopsData.push({id:newId,name:name,icon:getRandomIcon(),desc:modal.querySelector('#newBranchDesc').value.trim()||"فرع جديد",employees:[]}); await saveDataToFirebase(); if(callback) callback(); modal.remove(); alert(`تم إضافة "${name}"`); }); modal.querySelector('.modal-cancel').addEventListener('click',()=>modal.remove()); }
+    
+    function listenToFirebaseChanges(){ 
+        if(window.firebaseDB){ 
+            window.firebaseOnValue(window.firebaseRef(window.firebaseDB,'shopsData'),async(snap)=>{ if(snap.exists()) shopsData=snap.val(); await updateAllEmployeesWorkHours(); if(currentView==='home') renderHomePage(); else if(currentView==='shop' && currentShopId) renderShopPage(currentShopId); else if(currentView==='employee' && currentEmployeeData && currentEmployeeShopId!==null) renderEmployeePage(currentEmployeeData,currentEmployeeShopId,currentEmployeeIndex); }); 
+            window.firebaseOnValue(window.firebaseRef(window.firebaseDB,'attendanceRecords'),async(snap)=>{ const records=[]; if(snap.exists()){ const data=snap.val(); for(const key in data) records.push({id:key,...data[key]}); } attendanceRecords=records; await updateAllEmployeesWorkHours(); if(currentView==='home') renderHomePage(); else if(currentView==='shop' && currentShopId) renderShopPage(currentShopId); else if(currentView==='employee' && currentEmployeeData && currentEmployeeShopId!==null) renderEmployeePage(currentEmployeeData,currentEmployeeShopId,currentEmployeeIndex); }); 
+        } 
     }
     
-    let appStarted = false;
-    const startApplication = async () => {
-        if (appStarted) return;
-        appStarted = true;
-        
-        try {
-            const savedShops = await loadDataFromFirebase();
-            const savedAttendance = await loadAttendanceFromFirebase();
-            attendanceRecords = savedAttendance;
-            
-            if (savedShops && savedShops.length) {
-                shopsData = savedShops;
-                let updated = false;
-                for (let shop of shopsData) {
-                    if (shop.employees) {
-                        for (let emp of shop.employees) {
-                            if (!emp.accessCode) {
-                                emp.accessCode = generateAccessCode();
-                                updated = true;
-                            }
-                            if (!emp.workMinutes) {
-                                emp.workMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
-                                updated = true;
-                            }
-                        }
-                    }
-                }
-                if (updated) await saveDataToFirebase();
-            } else {
-                shopsData = getDefaultShopsData();
-                await saveDataToFirebase();
-            }
-            
-            await updateAllEmployeesWorkHours();
-            listenToFirebaseChanges();
-            renderHomePage();
-        } catch (error) {
-            console.error("خطأ في التهيئة:", error);
-            shopsData = getDefaultShopsData();
-            renderHomePage();
-        }
-    };
-    
-    window.addEventListener('firebaseReady', startApplication);
-    
-    setTimeout(() => {
-        if (!appStarted) {
-            console.warn("تأخر Firebase، بدء التشغيل محلياً");
-            startApplication();
-        }
-    }, 3000);
+    let appStarted=false; 
+    const startApplication=async()=>{ if(appStarted) return; appStarted=true; const savedShops=await loadDataFromFirebase(); const savedAttendance=await loadAttendanceFromFirebase(); attendanceRecords=savedAttendance; if(savedShops&&savedShops.length){ shopsData=savedShops; let updated=false; for(let shop of shopsData) if(shop.employees) for(let emp of shop.employees){ if(!emp.accessCode){ emp.accessCode=generateAccessCode(); updated=true; } if(!emp.workMinutes){ emp.workMinutes={"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; updated=true; } } if(updated) await saveDataToFirebase(); } else { shopsData=getDefaultShopsData(); await saveDataToFirebase(); } await updateAllEmployeesWorkHours(); listenToFirebaseChanges(); renderHomePage(); };
+    window.addEventListener('firebaseReady',startApplication); setTimeout(()=>{ if(!appStarted) startApplication(); },3000);
 </script>
 </body>
 </html>
