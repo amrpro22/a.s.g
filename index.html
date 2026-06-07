@@ -59,6 +59,7 @@
             --text-muted: #8d99ae;
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --border-color: #edf2f7;
             --radius-sm: 12px;
             --radius-md: 20px;
@@ -293,15 +294,38 @@
             color: #ffffff;
         }
 
-        .shop-info, .employee-details {
+        .shop-info {
             flex: 1;
+        }
+
+        .shop-name-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
         }
 
         .shop-name {
             font-size: 1.3rem;
             font-weight: 800;
             color: var(--text-main);
-            margin-bottom: 4px;
+        }
+
+        .edit-shop-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .edit-shop-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
         .shop-desc {
@@ -377,6 +401,76 @@
         .shop-card:hover .arrow-icon, .employee-card:hover .arrow-icon {
             color: var(--primary);
             transform: translateX(-5px);
+        }
+
+        /* --- Modal for editing --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .edit-modal {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--shadow-hover);
+            text-align: center;
+        }
+
+        .edit-modal h3 {
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+        }
+
+        .edit-modal input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .edit-modal input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-save {
+            background: var(--primary);
+            color: white;
+        }
+
+        .modal-cancel {
+            background: #e2e8f0;
+            color: var(--text-main);
         }
 
         /* --- Section Headers --- */
@@ -753,7 +847,7 @@
             return null;
         } catch (error) {
             console.warn("تعذر جلب البيانات من Firebase، سيتم استخدام البيانات الافتراضية:", error.message);
-            return null; // إرجاع فارغ ليقوم النظام بتحميل البيانات الافتراضية بدلاً من التعليق
+            return null;
         }
     }
     
@@ -786,6 +880,44 @@
         ];
     }
     
+    // عرض نافذة تعديل اسم المحل
+    function showEditShopModal(shop, callback) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="edit-modal">
+                <h3><i class="fas fa-edit"></i> تعديل اسم المحل</h3>
+                <input type="text" id="editShopName" value="${shop.name.replace(/"/g, '&quot;')}" placeholder="أدخل الاسم الجديد">
+                <div class="modal-buttons">
+                    <button class="modal-save"><i class="fas fa-check"></i> حفظ</button>
+                    <button class="modal-cancel"><i class="fas fa-times"></i> إلغاء</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const input = modal.querySelector('#editShopName');
+        input.focus();
+        
+        modal.querySelector('.modal-save').addEventListener('click', async () => {
+            const newName = input.value.trim();
+            if (newName && newName !== shop.name) {
+                shop.name = newName;
+                await saveDataToFirebase();
+                if (callback) callback();
+            }
+            modal.remove();
+        });
+        
+        modal.querySelector('.modal-cancel').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+    
     // دوال العرض مع زر رجوع موحد
     function renderHomePage() {
         if (!shopsData.length) return;
@@ -797,7 +929,10 @@
             shopsHtml += `<div class="shop-card" data-shop-id="${shop.id}">
                 <div class="shop-icon"><i class="${shop.icon}"></i></div>
                 <div class="shop-info">
-                    <div class="shop-name">${shop.name}</div>
+                    <div class="shop-name-wrapper">
+                        <div class="shop-name">${shop.name}</div>
+                        <button class="edit-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
+                    </div>
                     <div class="shop-desc"><i class="fas fa-users" style="font-size:0.8rem; margin-left:3px;"></i> عدد الموظفين: ${shop.employees.length} | ${shop.desc}</div>
                 </div>
                 <i class="fas fa-chevron-left arrow-icon"></i>
@@ -852,8 +987,26 @@
             }
         });
         
+        // إضافة مستمعي الأحداث لبطاقات المحلات وأزرار التعديل
         document.querySelectorAll('.shop-card').forEach(card => {
-            card.addEventListener('click', () => { renderShopPage(parseInt(card.getAttribute('data-shop-id'))); });
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.edit-shop-btn')) {
+                    renderShopPage(parseInt(card.getAttribute('data-shop-id')));
+                }
+            });
+        });
+        
+        document.querySelectorAll('.edit-shop-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const shopId = parseInt(btn.getAttribute('data-shop-id'));
+                const shop = shopsData.find(s => s.id === shopId);
+                if (shop) {
+                    showEditShopModal(shop, () => {
+                        renderHomePage();
+                    });
+                }
+            });
         });
     }
     
@@ -914,6 +1067,7 @@
         });
     }
     
+    // الدالة المصححة التي تحفظ البيانات في Firebase بشكل صحيح
     async function renderEmployeePage(employee, returnShopId, employeeIndex) {
         const weeklyData = generateWeeklySchedule(employee.entryBase, employee.exitBase);
         const totalWeeklyMinutes = weeklyData.reduce((sum, day) => sum + getMinutesDifference(day.entryRaw, day.exitRaw), 0);
@@ -980,11 +1134,19 @@
         if (backBtn) backBtn.classList.remove('hidden');
         backBtn.addEventListener('click', () => renderShopPage(returnShopId));
         
+        // زر إعادة التعيين - يقوم بحفظ البيانات في Firebase ثم إعادة تحميل الصفحة
         document.getElementById('deleteScheduleBtn').addEventListener('click', async () => {
             if (confirm(`هل أنت متأكد من إعادة ضبط دوام الموظف "${employee.name}" إلى القيم الافتراضية (9 صباحاً - 5 مساءً)؟`)) {
-                employee.entryBase = "09:00"; employee.exitBase = "17:00";
-                employee.entryLabel = "09:00 صباحاً"; employee.exitLabel = "05:00 مساءً";
+                // تحديث بيانات الموظف
+                employee.entryBase = "09:00";
+                employee.exitBase = "17:00";
+                employee.entryLabel = "09:00 صباحاً";
+                employee.exitLabel = "05:00 مساءً";
+                
+                // حفظ التغييرات في Firebase
                 await saveDataToFirebase();
+                
+                // إعادة عرض الصفحة مع البيانات الجديدة
                 renderEmployeePage(employee, returnShopId, employeeIndex);
             }
         });
