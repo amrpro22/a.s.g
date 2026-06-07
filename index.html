@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>الشجاع جروب | نظام إدارة الموظفين المتكامل - Firebase</title>
     
-    <!-- Google Fonts: Cairo -->
+    <!-- Apple Fonts - San Francisco Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Firebase SDKs -->
@@ -44,26 +46,6 @@
     </script>
 
     <style>
-        :root {
-            --primary: #4361ee;
-            --primary-dark: #3a0ca3;
-            --primary-light: #eef2ff;
-            --secondary: #4cc9f0;
-            --bg-color: #f4f7fe;
-            --card-bg: #ffffff;
-            --text-main: #2b2d42;
-            --text-muted: #8d99ae;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --border-color: #edf2f7;
-            --radius-sm: 12px;
-            --radius-md: 20px;
-            --radius-lg: 32px;
-            --shadow-soft: 0 10px 40px -10px rgba(67, 97, 238, 0.1);
-            --shadow-hover: 0 20px 40px -10px rgba(67, 97, 238, 0.2);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -72,11 +54,12 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            font-family: 'Cairo', sans-serif;
-            color: var(--text-main);
+            background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+            font-family: 'Inter', -apple-system, 'San Francisco', 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
+            color: #1d1d1f;
             min-height: 100vh;
-            line-height: 1.6;
+            line-height: 1.5;
+            letter-spacing: -0.01em;
         }
 
         .main-header {
@@ -84,60 +67,123 @@
             top: 0;
             z-index: 100;
             text-align: center;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             padding: 32px 20px;
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-            box-shadow: 0 16px 32px -8px rgba(58, 12, 163, 0.4);
-            overflow: hidden;
-            width: 100%;
+            border-bottom: none;
             transition: all 0.3s ease;
-        }
-        
-        .main-header.scrolled {
-            box-shadow: 0 4px 20px rgba(58, 12, 163, 0.3);
-            padding: 20px 20px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
         }
         
         .main-header::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: stars 20s linear infinite;
             pointer-events: none;
         }
-
-        .app-container {
-            max-width: 760px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 24px 16px 40px 16px;
+        
+        @keyframes stars {
+            from { transform: translate(0, 0); }
+            to { transform: translate(40px, 40px); }
         }
-
+        
+        .main-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                #fff 0%, 
+                #ffd700 20%, 
+                #fff 40%, 
+                #ffd700 60%, 
+                #fff 80%, 
+                #ffd700 100%);
+            animation: shimmer 2s infinite linear;
+            background-size: 200% 100%;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 0% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            margin-bottom: 12px;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .brand-icon i {
+            font-size: 1.8rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        
+        .main-header.scrolled {
+            padding: 20px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .main-header.scrolled .brand-icon {
+            width: 46px;
+            height: 46px;
+        }
+        
+        .main-header.scrolled .brand-icon i {
+            font-size: 1.4rem;
+        }
+        
         .brand-name {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #ffffff;
-            letter-spacing: -0.5px;
-            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
         .subhead {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: -0.01em;
         }
 
         .dashboard-badge {
-            font-size: 0.85rem;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-weight: 600;
-            margin-top: 16px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            margin-top: 14px;
             color: #ffffff;
             border: 1px solid rgba(255,255,255,0.2);
         }
@@ -149,20 +195,20 @@
             right: 24px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         .back-button i {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #ffffff;
         }
 
@@ -172,127 +218,197 @@
         }
         
         .back-button:active {
-            transform: translateY(-50%) scale(0.95);
+            transform: translateY(-50%) scale(0.96);
         }
 
         .back-button.hidden {
             display: none;
         }
 
-        .add-employee-form {
-            background: var(--card-bg);
-            border-radius: var(--radius-md);
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 24px 20px 48px 20px;
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .action-card-btn {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 0.5px solid #d2d2d6;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1d1d1f;
+            background: #ffffff;
+        }
+
+        .action-card-btn:hover {
+            background: #f5f5f7;
+            transform: scale(0.98);
+        }
+
+        .action-card-btn i {
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .add-employee-form, .add-branch-form {
+            background: #ffffff;
+            border-radius: 18px;
             padding: 24px;
             margin-bottom: 28px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 0.5px solid #e5e5ea;
+            display: none;
+        }
+
+        .add-employee-form.active, .add-branch-form.active {
+            display: block;
+            animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .form-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: var(--primary-dark);
+            gap: 8px;
+            color: #1d1d1f;
         }
 
         .form-row {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
         .form-input, .form-select {
-            padding: 14px 20px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            border: 0.5px solid #d2d2d6;
+            border-radius: 14px;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            background: #f8fafc;
+            background: #ffffff;
             outline: none;
-            transition: all 0.3s ease;
-            color: var(--text-main);
+            transition: all 0.2s ease;
+            color: #1d1d1f;
         }
 
-        .form-input { flex: 2; min-width: 200px; }
-        .form-select { flex: 1.5; min-width: 150px; cursor: pointer; }
-
         .form-input:focus, .form-select:focus {
-            border-color: var(--primary);
-            background: #ffffff;
-            box-shadow: 0 0 0 4px var(--primary-light);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
         }
 
         .btn-add {
             flex: 1;
             min-width: 120px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
-            border-radius: var(--radius-md);
+            border-radius: 14px;
             color: white;
             font-family: inherit;
-            font-weight: 700;
-            font-size: 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            transition: all 0.2s ease;
         }
 
         .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+            background: linear-gradient(135deg, #5a67d8, #6a3d8f);
+            transform: translateY(-1px);
         }
 
         .btn-add:active {
             transform: scale(0.97);
         }
 
-        .shop-card, .employee-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-md);
+        .shops-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        
+        .shop-card {
+            background: #ffffff;
+            border-radius: 20px;
             padding: 20px;
-            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 18px;
-            box-shadow: var(--shadow-soft);
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             position: relative;
             overflow: hidden;
         }
-
-        .shop-card:hover, .employee-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--primary-light);
+        
+        .shop-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 0 4px 4px 0;
         }
 
+        .shop-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-color: rgba(102,126,234,0.2);
+        }
+        
+        .shop-card:hover::before {
+            width: 6px;
+        }
+        
         .shop-icon {
-            background: var(--primary-light);
+            background: linear-gradient(135deg, #f5f5f7, #e5e5ea);
             width: 64px;
             height: 64px;
-            border-radius: 18px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.8rem;
-            color: var(--primary);
+            color: #667eea;
             flex-shrink: 0;
             transition: all 0.3s ease;
         }
 
         .shop-card:hover .shop-icon {
-            background: var(--primary);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: #ffffff;
+            transform: scale(1.02);
         }
 
         .shop-info {
@@ -302,106 +418,424 @@
         .shop-name-wrapper {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
 
         .shop-name {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--text-main);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.01em;
         }
 
         .edit-shop-btn {
-            background: none;
+            background: #f5f5f7;
             border: none;
-            color: var(--text-muted);
+            color: #86868b;
             cursor: pointer;
-            font-size: 0.9rem;
-            padding: 4px 8px;
-            border-radius: 8px;
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 20px;
             transition: all 0.2s ease;
-        }
-
-        .edit-shop-btn:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .shop-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
             font-weight: 500;
         }
 
-        .employee-card {
-            padding: 16px 20px;
-            gap: 16px;
+        .edit-shop-btn:hover {
+            background: #e5e5ea;
+            color: #667eea;
         }
 
+        .shop-desc {
+            font-size: 0.8rem;
+            color: #86868b;
+            font-weight: 500;
+        }
+
+        .arrow-icon {
+            color: #c6c6c8;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        
+        .shop-card:hover .arrow-icon {
+            color: #667eea;
+            transform: translateX(-5px);
+        }
+
+        .employees-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .employee-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: linear-gradient(180deg, #34c759, #28a745);
+            border-radius: 3px 0 0 3px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .employee-card:hover::before {
+            opacity: 1;
+            top: 15%;
+            bottom: 15%;
+        }
+
+        .employee-card:hover {
+            transform: translateX(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border-color: rgba(52,199,89,0.2);
+        }
+        
         .employee-avatar {
-            background: #f1f5f9;
-            width: 56px;
-            height: 56px;
+            background: linear-gradient(135deg, #f5f5f7, #e5e5ea);
+            width: 54px;
+            height: 54px;
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
-            color: var(--primary);
+            font-size: 1.5rem;
+            color: #667eea;
             flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .employee-card:hover .employee-avatar {
+            background: linear-gradient(135deg, #34c759, #28a745);
+            color: #ffffff;
+            transform: scale(1.02);
+        }
+
+        .employee-name-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
         }
 
         .employee-name {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--primary-dark);
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .edit-employee-btn {
+            background: none;
+            border: none;
+            color: #86868b;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .edit-employee-btn:hover {
+            background: #f5f5f7;
+            color: #667eea;
         }
 
         .employee-hours {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
+            gap: 10px;
+            font-size: 0.75rem;
+            color: #86868b;
+            font-weight: 500;
         }
         
         .employee-hours span {
             display: flex;
             align-items: center;
             gap: 5px;
-            background: #f8fafc;
-            padding: 4px 10px;
-            border-radius: 8px;
+            background: #f5f5f7;
+            padding: 4px 12px;
+            border-radius: 30px;
         }
 
         .employee-pin {
-            background: rgba(67, 97, 238, 0.1);
-            border: 1px dashed var(--primary);
-            border-radius: 10px;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--primary);
+            background: #e8f0fe;
+            border-radius: 30px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #667eea;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            margin-top: 10px;
+            margin-top: 8px;
             direction: ltr;
         }
 
-        .arrow-icon {
-            color: #cbd5e1;
-            font-size: 1.2rem;
-            transition: 0.3s;
+        .employee-details {
+            flex: 1;
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            background: #ffffff;
+            padding: 18px 24px;
+            border-radius: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border: 0.5px solid #e5e5ea;
+        }
+
+        .shop-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1d1d1f;
+        }
+
+        .section-title {
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .employee-profile {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 32px 24px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border: 0.5px solid #e5e5ea;
+        }
+
+        .profile-avatar {
+            background: linear-gradient(135deg, #f5f5f7, #e5e5ea);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 3rem;
+            color: #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .total-hours-card {
+            background: #f5f5f7;
+            border-radius: 18px;
+            padding: 20px;
+            margin: 20px 0;
+            border: none;
+        }
+
+        .total-hours-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .total-hours-label {
+            font-size: 0.85rem;
+            color: #86868b;
+            margin-top: 5px;
+        }
+
+        /* جدول الحضور - صفوف أفقية */
+        .attendance-days-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 24px 0 16px;
         }
         
-        .shop-card:hover .arrow-icon, .employee-card:hover .arrow-icon {
-            color: var(--primary);
-            transform: translateX(-5px);
+        .day-attendance-card {
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .day-attendance-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+        
+        /* رأس الجدول */
+        .day-table-header {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        /* ألوان مختلفة لكل يوم */
+        .day-table-header[data-day="السبت"] { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .day-table-header[data-day="الأحد"] { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .day-table-header[data-day="الإثنين"] { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .day-table-header[data-day="الثلاثاء"] { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .day-table-header[data-day="الأربعاء"] { background: linear-gradient(135deg, #fa709a, #fee140); }
+        .day-table-header[data-day="الخميس"] { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+        .day-table-header[data-day="الجمعة"] { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+        
+        .day-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .day-date-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: white;
+            direction: ltr;
+            font-family: monospace;
+            font-weight: 500;
+        }
+        
+        /* الجدول الأفقي - صفوف */
+        .attendance-table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: inherit;
+        }
+        
+        .attendance-table th {
+            background: #f8f9fa;
+            padding: 14px 16px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1d1d1f;
+            border-bottom: 2px solid #e5e5ea;
+        }
+        
+        .attendance-table td {
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .attendance-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .attendance-table tr:hover td {
+            background: #fbfbfd;
+        }
+        
+        /* الخلايا */
+        .checkin-cell {
+            color: #28a745;
+            font-weight: 700;
+            direction: ltr;
+        }
+        
+        .checkout-cell {
+            color: #dc2626;
+            font-weight: 700;
+            direction: ltr;
+        }
+        
+        .duration-cell {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .checkin-icon, .checkout-icon, .duration-icon {
+            margin-left: 6px;
+        }
+        
+        .no-data-cell {
+            text-align: center;
+            padding: 30px;
+            color: #86868b;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #86868b;
+            padding-top: 24px;
+            border-top: 0.5px solid #e5e5ea;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+            color: #667eea;
+            font-size: 1rem;
+            font-weight: 500;
+            gap: 16px;
+        }
+        
+        .loading i {
+            font-size: 2.5rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #86868b;
+            font-size: 0.85rem;
         }
 
         .modal-overlay {
@@ -410,8 +844,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -419,33 +853,37 @@
         }
 
         .edit-modal {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
+            background: #ffffff;
+            border-radius: 28px;
             padding: 28px;
             width: 90%;
-            max-width: 400px;
-            box-shadow: var(--shadow-hover);
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             text-align: center;
         }
 
         .edit-modal h3 {
-            margin-bottom: 20px;
-            color: var(--primary-dark);
+            margin-bottom: 24px;
+            color: #1d1d1f;
+            font-weight: 600;
+            font-size: 1.2rem;
         }
 
         .edit-modal input {
             width: 100%;
             padding: 14px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
+            border: 0.5px solid #d2d2d6;
+            border-radius: 14px;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin-bottom: 20px;
+            background: #ffffff;
         }
 
         .edit-modal input:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
         }
 
         .modal-buttons {
@@ -457,208 +895,44 @@
             flex: 1;
             padding: 12px;
             border: none;
-            border-radius: var(--radius-md);
-            font-weight: 700;
+            border-radius: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-family: inherit;
         }
 
         .modal-save {
-            background: var(--primary);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
 
+        .modal-save:hover {
+            background: linear-gradient(135deg, #5a67d8, #6a3d8f);
+        }
+
         .modal-cancel {
-            background: #e2e8f0;
-            color: var(--text-main);
+            background: #f5f5f7;
+            color: #1d1d1f;
         }
 
-        .shop-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            background: #ffffff;
-            padding: 18px 24px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-soft);
-            border-right: 5px solid var(--primary);
+        .modal-cancel:hover {
+            background: #e5e5ea;
         }
 
-        .shop-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--primary-dark);
-        }
-
-        .section-title {
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .employee-profile {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 32px 24px;
-            margin-bottom: 24px;
-            text-align: center;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .profile-avatar {
-            background: linear-gradient(135deg, var(--primary-light), #e0e7ff);
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 3.5rem;
-            color: var(--primary);
-            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.15);
-            border: 4px solid #ffffff;
-        }
-
-        .profile-name {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 16px;
-        }
-
-        .total-hours-card {
-            background: var(--primary-light);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid var(--primary);
-        }
-
-        .total-hours-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-        }
-
-        .total-hours-label {
-            font-size: 1rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        .hours-list {
-            background: #f8fafc;
-            border-radius: var(--radius-md);
-            padding: 16px;
-            margin-top: 20px;
-            text-align: right;
-        }
-
-        .hours-list h4 {
-            margin-bottom: 12px;
-            color: var(--primary-dark);
-        }
-
-        .hours-day-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.95rem;
-        }
-
-        .hours-day-item:last-child {
-            border-bottom: none;
-        }
-
-        .hours-day-name {
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .hours-value {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            padding-top: 24px;
-            border-top: 2px dashed var(--border-color);
-        }
-
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 60vh;
-            color: var(--primary);
-            font-size: 1.2rem;
-            font-weight: 700;
-            gap: 16px;
-        }
-        
-        .loading i {
-            font-size: 3rem;
-            filter: drop-shadow(0 4px 6px rgba(67, 97, 238, 0.3));
-        }
-
-        .attendance-list {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .attendance-item {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 10px 16px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            border-right: 4px solid var(--primary);
-        }
-        
-        .attendance-type.checkin { color: var(--success); }
-        .attendance-type.checkout { color: var(--danger); }
-        
-        .attendance-time {
-            color: var(--text-muted);
-            direction: ltr;
-            font-size: 0.75rem;
-        }
-
-        @media (max-width: 600px) {
-            .main-header { 
-                padding: 24px 16px;
-                border-radius: 0 0 24px 24px;
-            }
-            .brand-name { font-size: 1.8rem; }
-            .back-button { right: 16px; width: 38px; height: 38px; }
+        @media (max-width: 768px) {
+            .brand-name { font-size: 1.6rem; }
+            .back-button { right: 16px; width: 36px; height: 36px; }
             .form-input, .form-select, .btn-add { flex: 100%; }
-            
-            .hours-day-item {
-                flex-direction: column;
-                gap: 5px;
-                text-align: center;
+            .actions-bar { flex-direction: column; }
+            .profile-name { font-size: 1.4rem; }
+            .shop-icon { width: 50px; height: 50px; font-size: 1.4rem; }
+            .shop-name { font-size: 1.1rem; }
+            .day-title { font-size: 1rem; }
+            .day-table-header { flex-direction: column; text-align: center; }
+            .attendance-table th, .attendance-table td {
+                padding: 10px 8px;
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -671,17 +945,58 @@
 <script>
     let shopsData = [];
     let attendanceRecords = [];
-    let currentView = 'home'; // home, shop, employee
-    
+    let currentView = 'home';
+    let currentShopId = null;
+    let currentEmployeeData = null;
+    let currentEmployeeShopId = null;
+    let currentEmployeeIndex = null;
+
+    const availableIcons = [
+        "fas fa-store", "fas fa-shopping-cart", "fas fa-mobile-alt", "fas fa-laptop",
+        "fas fa-tshirt", "fas fa-shoe-prints", "fas fa-gift", "fas fa-ring",
+        "fas fa-car", "fas fa-plane", "fas fa-hotel", "fas fa-coffee",
+        "fas fa-pizza-slice", "fas fa-ice-cream", "fas fa-apple-alt", "fas fa-book"
+    ];
+
     function generateAccessCode() {
         return Math.floor(100000 + Math.random() * 900000).toString();
     }
     
-    function calculateHoursBetween(checkinTime, checkoutTime) {
+    function getRandomIcon() {
+        return availableIcons[Math.floor(Math.random() * availableIcons.length)];
+    }
+    
+    function getArabicDayName(date) {
+        const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+        return days[date.getDay()];
+    }
+    
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}/${month}/${day}`;
+    }
+    
+    function calculateTimeDifferenceInMinutes(checkinTime, checkoutTime) {
         const date1 = new Date(checkinTime);
         const date2 = new Date(checkoutTime);
-        const diffHours = (date2 - date1) / (1000 * 60 * 60);
-        return Math.round(diffHours * 10) / 10;
+        const diffMinutes = (date2 - date1) / (1000 * 60);
+        return Math.round(diffMinutes);
+    }
+    
+    function formatMinutesToHoursAndMinutes(minutes) {
+        if (minutes <= 0) return '0 دقيقة';
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        if (hours === 0) return `${mins} دقيقة`;
+        if (mins === 0) return `${hours} ساعة`;
+        return `${hours} ساعة و ${mins} دقيقة`;
+    }
+    
+    function formatMinutesToHoursDecimal(minutes) {
+        const hours = minutes / 60;
+        return Math.round(hours * 10) / 10;
     }
     
     async function calculateWorkHoursForEmployee(employeeName, branchName) {
@@ -689,36 +1004,59 @@
             r.employeeName === employeeName && r.branchName === branchName
         ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         
-        const dailyHours = {
-            "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0
+        const dailyMinutes = {
+            "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0
         };
-        
-        const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
         
         for (let i = 0; i < employeeRecords.length - 1; i++) {
             if (employeeRecords[i].type === 'دخول' && employeeRecords[i+1].type === 'خروج') {
                 const date = new Date(employeeRecords[i].timestamp);
-                const dayIndex = date.getDay();
-                const dayName = dayNames[dayIndex];
-                const hours = calculateHoursBetween(employeeRecords[i].timestamp, employeeRecords[i+1].timestamp);
-                if (hours > 0 && hours < 24) {
-                    dailyHours[dayName] = Math.round((dailyHours[dayName] + hours) * 10) / 10;
+                const dayName = getArabicDayName(date);
+                const minutes = calculateTimeDifferenceInMinutes(employeeRecords[i].timestamp, employeeRecords[i+1].timestamp);
+                if (minutes > 0 && minutes < 1440) {
+                    dailyMinutes[dayName] += minutes;
                 }
             }
         }
         
-        return dailyHours;
+        return dailyMinutes;
     }
     
     async function updateAllEmployeesWorkHours() {
         for (let shop of shopsData) {
             if (shop.employees) {
                 for (let emp of shop.employees) {
-                    emp.workHours = await calculateWorkHoursForEmployee(emp.name, shop.name);
+                    emp.workMinutes = await calculateWorkHoursForEmployee(emp.name, shop.name);
                 }
             }
         }
         await saveDataToFirebase();
+    }
+    
+    function getEmployeeAttendanceRecords(employeeName, branchName) {
+        return attendanceRecords
+            .filter(r => r.employeeName === employeeName && r.branchName === branchName)
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    }
+    
+    function groupAttendanceByDay(records) {
+        const grouped = {};
+        records.forEach(record => {
+            const date = new Date(record.timestamp);
+            const dateKey = formatDate(date);
+            if (!grouped[dateKey]) {
+                grouped[dateKey] = {
+                    date: dateKey,
+                    dateObj: date,
+                    dayName: getArabicDayName(date),
+                    records: []
+                };
+            }
+            grouped[dateKey].records.push(record);
+        });
+        
+        const sortedDays = Object.values(grouped).sort((a, b) => new Date(b.date) - new Date(a.date));
+        return sortedDays;
     }
     
     async function saveDataToFirebase() {
@@ -728,20 +1066,6 @@
             await window.firebaseSet(dbRef, shopsData);
         } catch (error) {
             console.warn("خطأ في حفظ البيانات:", error.message);
-        }
-    }
-    
-    async function saveAttendanceToFirebase() {
-        if (!window.firebaseDB || !attendanceRecords.length) return;
-        try {
-            const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
-            const recordsObj = {};
-            attendanceRecords.forEach(record => {
-                if (record.id) recordsObj[record.id] = record;
-            });
-            await window.firebaseSet(attendanceRef, recordsObj);
-        } catch (error) {
-            console.warn("خطأ في حفظ سجل الحضور:", error.message);
         }
     }
     
@@ -779,31 +1103,31 @@
     }
     
     function getDefaultShopsData() {
-        const emptyHours = { "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0 };
+        const emptyMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
         return [
             { id: 1, name: "متجر الأندلس", icon: "fas fa-crown", desc: "أفخر التشكيلات", employees: [
-                { name: "أحمد الشجاع", accessCode: "111111", workHours: {...emptyHours} },
-                { name: "سارة المنصور", accessCode: "222222", workHours: {...emptyHours} }
+                { name: "أحمد الشجاع", accessCode: "111111", workMinutes: {...emptyMinutes} },
+                { name: "سارة المنصور", accessCode: "222222", workMinutes: {...emptyMinutes} }
             ]},
             { id: 2, name: "رواد الخليج", icon: "fas fa-ship", desc: "ريادة في البحر", employees: [
-                { name: "خالد النقبي", accessCode: "333333", workHours: {...emptyHours} },
-                { name: "لينا العتيبي", accessCode: "444444", workHours: {...emptyHours} }
+                { name: "خالد النقبي", accessCode: "333333", workMinutes: {...emptyMinutes} },
+                { name: "لينا العتيبي", accessCode: "444444", workMinutes: {...emptyMinutes} }
             ]},
             { id: 3, name: "زهور الشجاع", icon: "fas fa-leaf", desc: "طبيعة ورفاهية", employees: [
-                { name: "ريم الهاجري", accessCode: "555555", workHours: {...emptyHours} },
-                { name: "ناصر العتيق", accessCode: "666666", workHours: {...emptyHours} }
+                { name: "ريم الهاجري", accessCode: "555555", workMinutes: {...emptyMinutes} },
+                { name: "ناصر العتيق", accessCode: "666666", workMinutes: {...emptyMinutes} }
             ]},
             { id: 4, name: "الدرة بلازا", icon: "fas fa-gem", desc: "فخامة وتميز", employees: [
-                { name: "جمال السالم", accessCode: "777777", workHours: {...emptyHours} },
-                { name: "هبة العبيد", accessCode: "888888", workHours: {...emptyHours} }
+                { name: "جمال السالم", accessCode: "777777", workMinutes: {...emptyMinutes} },
+                { name: "هبة العبيد", accessCode: "888888", workMinutes: {...emptyMinutes} }
             ]},
             { id: 5, name: "نخبة الشرق", icon: "fas fa-chart-line", desc: "ريادة أعمال", employees: [
-                { name: "ماجد الشهراني", accessCode: "999999", workHours: {...emptyHours} },
-                { name: "نوال الغامدي", accessCode: "101010", workHours: {...emptyHours} }
+                { name: "ماجد الشهراني", accessCode: "999999", workMinutes: {...emptyMinutes} },
+                { name: "نوال الغامدي", accessCode: "101010", workMinutes: {...emptyMinutes} }
             ]},
             { id: 6, name: "قمة الشجاع", icon: "fas fa-mountain", desc: "أعلى القمم", employees: [
-                { name: "تركي العتيبي", accessCode: "111111", workHours: {...emptyHours} },
-                { name: "جواهر القاسم", accessCode: "121212", workHours: {...emptyHours} }
+                { name: "تركي العتيبي", accessCode: "111111", workMinutes: {...emptyMinutes} },
+                { name: "جواهر القاسم", accessCode: "121212", workMinutes: {...emptyMinutes} }
             ]}
         ];
     }
@@ -840,6 +1164,94 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
     }
     
+    function showEditEmployeeModal(employee, shopId, callback) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="edit-modal">
+                <h3><i class="fas fa-user-edit"></i> تعديل اسم الموظف</h3>
+                <input type="text" id="editEmployeeName" value="${employee.name.replace(/"/g, '&quot;')}" placeholder="أدخل الاسم الجديد">
+                <div class="modal-buttons">
+                    <button class="modal-save"><i class="fas fa-check"></i> حفظ</button>
+                    <button class="modal-cancel"><i class="fas fa-times"></i> إلغاء</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const input = modal.querySelector('#editEmployeeName');
+        input.focus();
+        
+        modal.querySelector('.modal-save').addEventListener('click', async () => {
+            const newName = input.value.trim();
+            if (newName && newName !== employee.name) {
+                const oldName = employee.name;
+                employee.name = newName;
+                
+                for (let record of attendanceRecords) {
+                    if (record.employeeName === oldName && record.branchName === shopsData.find(s => s.id === shopId)?.name) {
+                        record.employeeName = newName;
+                    }
+                }
+                await saveDataToFirebase();
+                await saveAttendanceToFirebase();
+                if (callback) callback();
+            }
+            modal.remove();
+        });
+        
+        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    }
+    
+    function showAddBranchModal(callback) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="edit-modal">
+                <h3><i class="fas fa-store"></i> إضافة فرع جديد</h3>
+                <input type="text" id="newBranchName" placeholder="اسم الفرع الجديد">
+                <input type="text" id="newBranchDesc" placeholder="وصف الفرع (اختياري)">
+                <div class="modal-buttons">
+                    <button class="modal-save"><i class="fas fa-plus"></i> إضافة</button>
+                    <button class="modal-cancel"><i class="fas fa-times"></i> إلغاء</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const nameInput = modal.querySelector('#newBranchName');
+        const descInput = modal.querySelector('#newBranchDesc');
+        nameInput.focus();
+        
+        modal.querySelector('.modal-save').addEventListener('click', async () => {
+            const newName = nameInput.value.trim();
+            if (!newName) {
+                alert('الرجاء إدخال اسم الفرع');
+                return;
+            }
+            
+            const newId = Math.max(...shopsData.map(s => s.id), 0) + 1;
+            const emptyMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
+            
+            shopsData.push({
+                id: newId,
+                name: newName,
+                icon: getRandomIcon(),
+                desc: descInput.value.trim() || "فرع جديد",
+                employees: []
+            });
+            
+            await saveDataToFirebase();
+            if (callback) callback();
+            modal.remove();
+            alert(`تم إضافة الفرع "${newName}" بنجاح`);
+        });
+        
+        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    }
+    
     function addScrollEffect() {
         const header = document.querySelector('.main-header');
         if (header) {
@@ -847,6 +1259,20 @@
                 if (window.scrollY > 10) header.classList.add('scrolled');
                 else header.classList.remove('scrolled');
             });
+        }
+    }
+    
+    async function saveAttendanceToFirebase() {
+        if (!window.firebaseDB || !attendanceRecords.length) return;
+        try {
+            const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
+            const recordsObj = {};
+            attendanceRecords.forEach(record => {
+                if (record.id) recordsObj[record.id] = record;
+            });
+            await window.firebaseSet(attendanceRef, recordsObj);
+        } catch (error) {
+            console.warn("خطأ في حفظ سجل الحضور:", error.message);
         }
     }
     
@@ -866,31 +1292,47 @@
                         <div class="shop-name">${shop.name}</div>
                         <button class="edit-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
                     </div>
-                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.8rem; margin-left:3px;"></i> عدد الموظفين: ${totalEmployees} | ${shop.desc}</div>
+                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.7rem; margin-left:3px;"></i> ${totalEmployees} موظف | ${shop.desc}</div>
                 </div>
                 <i class="fas fa-chevron-left arrow-icon"></i>
             </div>`;
         });
         const html = `
             <div class="main-header" id="mainHeader">
+                <div class="brand-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
                 <div class="brand-name">الشجاع جروب</div>
-                <div class="subhead">نظام إدارة الموظفين - ساعات العمل المحسوبة تلقائياً</div>
+                <div class="subhead">نظام إدارة الموظفين المتكامل</div>
                 <div class="dashboard-badge"><i class="fas fa-wifi"></i> متصل بـ Firebase</div>
                 <div class="back-button hidden" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
-            <div class="add-employee-form">
+            <div class="actions-bar">
+                <div class="action-card-btn" id="addBranchBtn">
+                    <i class="fas fa-store-plus"></i>
+                    <span>إضافة فرع جديد</span>
+                </div>
+                <div class="action-card-btn" id="showAddEmployeeBtn">
+                    <i class="fas fa-user-plus"></i>
+                    <span>إضافة موظف جديد</span>
+                </div>
+            </div>
+            
+            <div class="add-employee-form" id="addEmployeeForm">
                 <div class="form-title"><i class="fas fa-user-plus"></i><span>إضافة موظف جديد</span></div>
                 <div class="form-row">
-                    <input type="text" id="newEmployeeName" class="form-input" placeholder="اكتب اسم الموظف هنا...">
+                    <input type="text" id="newEmployeeName" class="form-input" placeholder="اسم الموظف">
                     <select id="newEmployeeShop" class="form-select">${shopOptions}</select>
-                    <button id="addEmployeeBtn" class="btn-add"><i class="fas fa-plus-circle"></i> إضافة الآن</button>
+                    <button id="confirmAddEmployeeBtn" class="btn-add"><i class="fas fa-check"></i> تأكيد</button>
                 </div>
             </div>
             
             <div class="section-title"><i class="fas fa-building"></i> المتاجر والفروع</div>
-            ${shopsHtml}
-            <footer><i class="fas fa-chart-line"></i> يتم احتساب ساعات العمل تلقائياً من تسجيلات الدخول والخروج | جميع البيانات محفوظة في السحابة</footer>
+            <div class="shops-grid">
+                ${shopsHtml}
+            </div>
+            <footer>يتم احتساب ساعات العمل تلقائياً من تسجيلات الدخول والخروج</footer>
         `;
         root.innerHTML = html;
         addScrollEffect();
@@ -898,30 +1340,52 @@
         const backBtn = document.getElementById('globalBackBtn');
         if (backBtn) backBtn.classList.add('hidden');
         
-        document.getElementById('addEmployeeBtn').addEventListener('click', async () => {
+        const addEmployeeForm = document.getElementById('addEmployeeForm');
+        let formVisible = false;
+        
+        document.getElementById('addBranchBtn').addEventListener('click', () => {
+            showAddBranchModal(() => renderHomePage());
+        });
+        
+        document.getElementById('showAddEmployeeBtn').addEventListener('click', () => {
+            if (formVisible) {
+                addEmployeeForm.classList.remove('active');
+                formVisible = false;
+            } else {
+                addEmployeeForm.classList.add('active');
+                formVisible = true;
+            }
+        });
+        
+        document.getElementById('confirmAddEmployeeBtn').addEventListener('click', async () => {
             const nameInput = document.getElementById('newEmployeeName');
             const shopSelect = document.getElementById('newEmployeeShop');
             const employeeName = nameInput.value.trim();
             const shopId = parseInt(shopSelect.value);
-            if (!employeeName) { alert('الرجاء إدخال اسم الموظف أولاً'); return; }
+            if (!employeeName) { alert('الرجاء إدخال اسم الموظف'); return; }
             const shop = shopsData.find(s => s.id === shopId);
             if (shop) {
-                const emptyHours = { "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0 };
+                const emptyMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
+                const newCode = generateAccessCode();
                 shop.employees.push({ 
                     name: employeeName, 
-                    accessCode: generateAccessCode(),
-                    workHours: {...emptyHours}
+                    accessCode: newCode,
+                    workMinutes: {...emptyMinutes}
                 });
                 await saveDataToFirebase();
+                nameInput.value = '';
+                addEmployeeForm.classList.remove('active');
+                formVisible = false;
                 renderHomePage();
-                alert(`تم بنجاح إضافة الموظف: ${employeeName}\n\nرمز الدخول: ${generateAccessCode()}`);
+                alert(`تم إضافة الموظف: ${employeeName}\nرمز الدخول: ${newCode}`);
             }
         });
         
         document.querySelectorAll('.shop-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('.edit-shop-btn')) {
-                    renderShopPage(parseInt(card.getAttribute('data-shop-id')));
+                    currentShopId = parseInt(card.getAttribute('data-shop-id'));
+                    renderShopPage(currentShopId);
                 }
             });
         });
@@ -938,20 +1402,25 @@
     
     function renderShopPage(shopId) {
         currentView = 'shop';
+        currentShopId = shopId;
         const shop = shopsData.find(s => s.id === shopId);
         if (!shop) return;
         let employeesHtml = '';
         shop.employees.forEach((emp, idx) => {
-            const totalHours = Object.values(emp.workHours || {}).reduce((a, b) => a + b, 0);
+            const totalMinutes = Object.values(emp.workMinutes || {}).reduce((a, b) => a + b, 0);
+            const totalHoursFormatted = formatMinutesToHoursAndMinutes(totalMinutes);
             employeesHtml += `
             <div class="employee-card" data-emp-index="${idx}" data-shop-id="${shop.id}">
                 <div class="employee-avatar"><i class="fas fa-user-tie"></i></div>
                 <div class="employee-details">
-                    <div class="employee-name">${emp.name}</div>
-                    <div class="employee-hours">
-                        <span><i class="fas fa-clock"></i> إجمالي الساعات المسجلة: ${totalHours.toFixed(1)} ساعة</span>
+                    <div class="employee-name-wrapper">
+                        <div class="employee-name">${emp.name}</div>
+                        <button class="edit-employee-btn" data-emp-index="${idx}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
                     </div>
-                    <div class="employee-pin"><i class="fas fa-key"></i> رمز الدخول: ${emp.accessCode}</div>
+                    <div class="employee-hours">
+                        <span><i class="fas fa-clock"></i> ${totalHoursFormatted}</span>
+                    </div>
+                    <div class="employee-pin"><i class="fas fa-key"></i> ${emp.accessCode}</div>
                 </div>
                 <i class="fas fa-chevron-left arrow-icon"></i>
             </div>`;
@@ -959,20 +1428,25 @@
         
         const html = `
             <div class="main-header" id="mainHeader">
-                <div class="brand-name" style="font-size: 1.8rem;">${shop.name}</div>
-                <div class="subhead">إدارة طاقم العمل وساعات العمل</div>
+                <div class="brand-icon">
+                    <i class="${shop.icon}"></i>
+                </div>
+                <div class="brand-name" style="font-size: 1.6rem;">${shop.name}</div>
+                <div class="subhead">إدارة طاقم العمل وسجل الحضور</div>
                 <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
             <div class="shop-header">
                 <div class="shop-title"><i class="${shop.icon}"></i> ${shop.name}</div>
-                <div style="color:var(--primary); font-weight:700;"><i class="fas fa-users"></i> ${shop.employees.length} موظف</div>
+                <div style="color:#667eea; font-weight:600;"><i class="fas fa-users"></i> ${shop.employees.length} موظف</div>
             </div>
             
             <div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div>
-            ${employeesHtml}
+            <div class="employees-grid">
+                ${employeesHtml || '<div class="no-data">لا يوجد موظفين في هذا الفرع</div>'}
+            </div>
             
-            <footer><i class="fas fa-chart-line"></i> ساعات العمل محسوبة تلقائياً من تسجيلات الحضور | ${shop.name}</footer>
+            <footer>اختر موظفاً لعرض سجل الحضور والانصراف المفصل</footer>
         `;
         document.getElementById('appRoot').innerHTML = html;
         addScrollEffect();
@@ -982,80 +1456,159 @@
         backBtn.addEventListener('click', () => renderHomePage());
         
         document.querySelectorAll('.employee-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const empIndex = parseInt(card.getAttribute('data-emp-index'));
-                const sId = parseInt(card.getAttribute('data-shop-id'));
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.edit-employee-btn')) {
+                    const empIndex = parseInt(card.getAttribute('data-emp-index'));
+                    const sId = parseInt(card.getAttribute('data-shop-id'));
+                    currentEmployeeShopId = sId;
+                    currentEmployeeIndex = empIndex;
+                    const targetShop = shopsData.find(s => s.id === sId);
+                    if (targetShop && targetShop.employees[empIndex]) {
+                        currentEmployeeData = targetShop.employees[empIndex];
+                        renderEmployeePage(currentEmployeeData, sId, empIndex);
+                    }
+                }
+            });
+        });
+        
+        document.querySelectorAll('.edit-employee-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const empIndex = parseInt(btn.getAttribute('data-emp-index'));
+                const sId = shopId;
                 const targetShop = shopsData.find(s => s.id === sId);
-                if (targetShop && targetShop.employees[empIndex]) renderEmployeePage(targetShop.employees[empIndex], sId, empIndex);
+                if (targetShop && targetShop.employees[empIndex]) {
+                    showEditEmployeeModal(targetShop.employees[empIndex], sId, () => renderShopPage(shopId));
+                }
             });
         });
     }
     
     function renderEmployeePage(employee, returnShopId, employeeIndex) {
         currentView = 'employee';
-        const totalHours = Object.values(employee.workHours || {}).reduce((a, b) => a + b, 0);
-        const weekDays = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"];
+        currentEmployeeData = employee;
+        currentEmployeeShopId = returnShopId;
+        currentEmployeeIndex = employeeIndex;
         
-        let hoursListHtml = '';
-        weekDays.forEach(day => {
-            const hoursValue = employee.workHours?.[day] || 0;
-            hoursListHtml += `
-                <div class="hours-day-item">
-                    <span class="hours-day-name">${day}</span>
-                    <span class="hours-value">${hoursValue.toFixed(1)} ساعة</span>
+        const totalMinutes = Object.values(employee.workMinutes || {}).reduce((a, b) => a + b, 0);
+        const totalHoursFormatted = formatMinutesToHoursAndMinutes(totalMinutes);
+        const totalHoursDecimal = formatMinutesToHoursDecimal(totalMinutes);
+        
+        const shop = shopsData.find(s => s.id === returnShopId);
+        const employeeRecords = getEmployeeAttendanceRecords(employee.name, shop?.name || '');
+        const groupedDays = groupAttendanceByDay(employeeRecords);
+        
+        let daysHtml = '';
+        
+        groupedDays.forEach(day => {
+            // تجميع سجلات الدخول والخروج في أزواج
+            const checkins = day.records.filter(r => r.type === 'دخول').sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const checkouts = day.records.filter(r => r.type === 'خروج').sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            let tableRows = '';
+            const maxPairs = Math.max(checkins.length, checkouts.length);
+            
+            for (let i = 0; i < maxPairs; i++) {
+                const checkin = checkins[i];
+                const checkout = checkouts[i];
+                
+                let checkinTime = '—';
+                let checkoutTime = '—';
+                let durationText = '—';
+                let durationMinutes = 0;
+                
+                if (checkin) {
+                    checkinTime = new Date(checkin.timestamp).toLocaleTimeString('ar-EG');
+                }
+                if (checkout) {
+                    checkoutTime = new Date(checkout.timestamp).toLocaleTimeString('ar-EG');
+                }
+                if (checkin && checkout) {
+                    durationMinutes = calculateTimeDifferenceInMinutes(checkin.timestamp, checkout.timestamp);
+                    durationText = formatMinutesToHoursAndMinutes(durationMinutes);
+                } else if (checkin && !checkout) {
+                    durationText = 'لم يخرج بعد';
+                } else if (!checkin && checkout) {
+                    durationText = 'دخول غير مسجل';
+                }
+                
+                tableRows += `
+                    <tr>
+                        <td class="checkin-cell"><i class="fas fa-sign-in-alt checkin-icon"></i> ${checkinTime}</td>
+                        <td class="checkout-cell"><i class="fas fa-sign-out-alt checkout-icon"></i> ${checkoutTime}</td>
+                        <td class="duration-cell"><i class="fas fa-hourglass-half duration-icon"></i> ${durationText}</td>
+                    </tr>
+                `;
+            }
+            
+            if (tableRows === '') {
+                tableRows = '<tr><td colspan="3" class="no-data-cell">📭 لا توجد تسجيلات حضور في هذا اليوم</td></tr>';
+            }
+            
+            daysHtml += `
+                <div class="day-attendance-card">
+                    <div class="day-table-header" data-day="${day.dayName}">
+                        <div class="day-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>${day.dayName}</span>
+                        </div>
+                        <div class="day-date-badge">
+                            <i class="far fa-calendar-check"></i> ${day.date}
+                        </div>
+                    </div>
+                    <div class="attendance-table-wrapper">
+                        <table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-sign-in-alt"></i> وقت الدخول</th>
+                                    <th><i class="fas fa-sign-out-alt"></i> وقت الخروج</th>
+                                    <th><i class="fas fa-hourglass-half"></i> عدد الساعات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
         });
         
-        const employeeAttendance = attendanceRecords.filter(r => 
-            r.employeeName === employee.name
-        ).slice(0, 10);
-        
-        let attendanceHtml = '';
-        employeeAttendance.forEach(record => {
-            attendanceHtml += `
-                <div class="attendance-item">
-                    <span class="attendance-type ${record.type === 'دخول' ? 'checkin' : 'checkout'}">
-                        <i class="fas ${record.type === 'دخول' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i> ${record.type}
-                    </span>
-                    <span class="attendance-time">${record.date || new Date(record.timestamp).toLocaleDateString('ar-EG')} | ${record.time || new Date(record.timestamp).toLocaleTimeString('ar-EG')}</span>
-                </div>
-            `;
-        });
-        
-        if (attendanceHtml === '') attendanceHtml = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد تسجيلات حضور بعد</div>';
+        if (daysHtml === '') {
+            daysHtml = '<div class="no-data">✨ لا توجد سجلات حضور لهذا الموظف</div>';
+        }
         
         const html = `
             <div class="main-header" id="mainHeader">
-                <div class="brand-name" style="font-size: 1.6rem;">الملف الشخصي</div>
-                <div class="subhead">ساعات العمل المحسوبة تلقائياً</div>
+                <div class="brand-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="brand-name" style="font-size: 1.4rem;">الملف الشخصي</div>
+                <div class="subhead">سجل الحضور والانصراف - جدول أفقي لكل يوم</div>
                 <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
             <div class="employee-profile">
                 <div class="profile-avatar"><i class="fas fa-user"></i></div>
                 <div class="profile-name">${employee.name}</div>
-                <div class="employee-pin" style="margin: 0 auto; display: inline-block;"><i class="fas fa-key"></i> رمز الدخول: ${employee.accessCode}</div>
+                <div class="employee-pin" style="margin: 0 auto; display: inline-block;"><i class="fas fa-key"></i> ${employee.accessCode}</div>
                 <br>
                 <div class="total-hours-card">
-                    <div class="total-hours-number">${totalHours.toFixed(1)}</div>
-                    <div class="total-hours-label">إجمالي ساعات العمل المسجلة</div>
-                </div>
-                
-                <div class="hours-list">
-                    <h4><i class="fas fa-calendar-week"></i> ساعات العمل حسب اليوم</h4>
-                    ${hoursListHtml}
-                </div>
-                
-                <div class="hours-list">
-                    <h4><i class="fas fa-history"></i> آخر تسجيلات الحضور</h4>
-                    <div class="attendance-list">
-                        ${attendanceHtml}
-                    </div>
+                    <div class="total-hours-number">${totalHoursFormatted}</div>
+                    <div class="total-hours-label">إجمالي ساعات العمل المسجلة (${totalHoursDecimal} ساعة)</div>
                 </div>
             </div>
             
-            <footer><i class="fas fa-sync-alt"></i> يتم تحديث ساعات العمل تلقائياً من كود تسجيل الدخول | بيانات الموظف: ${employee.name}</footer>
+            <div class="attendance-days-container">
+                ${daysHtml}
+            </div>
+            
+            <footer>
+                <i class="fas fa-check-circle" style="color: #34c759;"></i> الدخول باللون الأخضر &nbsp;&nbsp;
+                <i class="fas fa-times-circle" style="color: #ff3b30;"></i> الخروج باللون الأحمر &nbsp;&nbsp;
+                <i class="fas fa-chart-line" style="color: #667eea;"></i> المدة باللون الأزرق &nbsp;&nbsp;
+                <i class="fas fa-table"></i> جدول أفقي لكل يوم
+            </footer>
         `;
         document.getElementById('appRoot').innerHTML = html;
         addScrollEffect();
@@ -1073,7 +1626,13 @@
             if (snapshot.exists()) shopsData = snapshot.val();
             await updateAllEmployeesWorkHours();
             if (currentView === 'home') renderHomePage();
-            else if (currentView === 'shop' && window.currentShopId) renderShopPage(window.currentShopId);
+            else if (currentView === 'shop' && currentShopId) renderShopPage(currentShopId);
+            else if (currentView === 'employee' && currentEmployeeData && currentEmployeeShopId !== null && currentEmployeeIndex !== null) {
+                const shop = shopsData.find(s => s.id === currentEmployeeShopId);
+                if (shop && shop.employees[currentEmployeeIndex]) {
+                    renderEmployeePage(shop.employees[currentEmployeeIndex], currentEmployeeShopId, currentEmployeeIndex);
+                }
+            }
         });
         
         const attendanceRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
@@ -1087,11 +1646,11 @@
             attendanceRecords = records;
             await updateAllEmployeesWorkHours();
             if (currentView === 'home') renderHomePage();
-            else if (currentView === 'shop' && window.currentShopId) renderShopPage(window.currentShopId);
-            else if (currentView === 'employee' && window.currentEmployeeData) {
-                const shop = shopsData.find(s => s.id === window.currentEmployeeShopId);
-                if (shop && shop.employees[window.currentEmployeeIndex]) {
-                    renderEmployeePage(shop.employees[window.currentEmployeeIndex], window.currentEmployeeShopId, window.currentEmployeeIndex);
+            else if (currentView === 'shop' && currentShopId) renderShopPage(currentShopId);
+            else if (currentView === 'employee' && currentEmployeeData && currentEmployeeShopId !== null && currentEmployeeIndex !== null) {
+                const shop = shopsData.find(s => s.id === currentEmployeeShopId);
+                if (shop && shop.employees[currentEmployeeIndex]) {
+                    renderEmployeePage(shop.employees[currentEmployeeIndex], currentEmployeeShopId, currentEmployeeIndex);
                 }
             }
         });
@@ -1117,8 +1676,8 @@
                                 emp.accessCode = generateAccessCode();
                                 updated = true;
                             }
-                            if (!emp.workHours) {
-                                emp.workHours = { "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0, "الأحد": 0 };
+                            if (!emp.workMinutes) {
+                                emp.workMinutes = { "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0, "السبت": 0 };
                                 updated = true;
                             }
                         }
