@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, maximum-scale=1.0, user-scalable=no">
     <title>الشجاع جروب | نظام إدارة الموظفين المتكامل - Firebase</title>
     
     <!-- Apple Fonts - San Francisco Pro -->
@@ -53,6 +53,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* منع التمرير الأفقي */
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            position: relative !important;
+        }
+
         body {
             background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
             font-family: 'Inter', -apple-system, 'San Francisco', 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
@@ -60,6 +67,8 @@
             min-height: 100vh;
             line-height: 1.5;
             letter-spacing: -0.01em;
+            overflow-x: hidden !important;
+            width: 100% !important;
         }
 
         .main-header {
@@ -226,10 +235,10 @@
         }
 
         .app-container {
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 100%;
             width: 100%;
-            padding: 24px 20px 48px 20px;
+            padding: 24px 16px 48px 16px;
+            overflow-x: hidden !important;
         }
 
         .actions-bar {
@@ -353,6 +362,7 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
+            width: 100%;
         }
         
         .shop-card {
@@ -368,6 +378,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             position: relative;
             overflow: hidden;
+            width: 100%;
         }
         
         .shop-card::before {
@@ -393,13 +404,13 @@
         
         .shop-icon {
             background: linear-gradient(135deg, #f5f5f7, #e5e5ea);
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: #667eea;
             flex-shrink: 0;
             transition: all 0.3s ease;
@@ -413,21 +424,23 @@
 
         .shop-info {
             flex: 1;
+            min-width: 0;
         }
 
         .shop-name-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
             margin-bottom: 8px;
         }
 
         .shop-name {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: #1d1d1f;
             letter-spacing: -0.01em;
+            word-break: break-word;
         }
 
         .edit-shop-btn {
@@ -435,11 +448,12 @@
             border: none;
             color: #86868b;
             cursor: pointer;
-            font-size: 0.75rem;
-            padding: 5px 12px;
+            font-size: 0.7rem;
+            padding: 4px 10px;
             border-radius: 20px;
             transition: all 0.2s ease;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .edit-shop-btn:hover {
@@ -448,15 +462,17 @@
         }
 
         .shop-desc {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #86868b;
             font-weight: 500;
+            word-break: break-word;
         }
 
         .arrow-icon {
             color: #c6c6c8;
             font-size: 1rem;
             transition: 0.2s;
+            flex-shrink: 0;
         }
         
         .shop-card:hover .arrow-icon {
@@ -468,20 +484,22 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            width: 100%;
         }
         
         .employee-card {
             background: #ffffff;
             border-radius: 18px;
-            padding: 18px;
+            padding: 16px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(0,0,0,0.05);
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             position: relative;
+            width: 100%;
         }
         
         .employee-card::before {
@@ -511,13 +529,13 @@
         
         .employee-avatar {
             background: linear-gradient(135deg, #f5f5f7, #e5e5ea);
-            width: 54px;
-            height: 54px;
-            border-radius: 16px;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: #667eea;
             flex-shrink: 0;
             transition: all 0.3s ease;
@@ -532,15 +550,16 @@
         .employee-name-wrapper {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 6px;
         }
 
         .employee-name {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #1d1d1f;
+            word-break: break-word;
         }
 
         .edit-employee-btn {
@@ -548,11 +567,12 @@
             border: none;
             color: #86868b;
             cursor: pointer;
-            font-size: 0.7rem;
-            padding: 4px 10px;
+            font-size: 0.65rem;
+            padding: 3px 8px;
             border-radius: 20px;
             transition: all 0.2s ease;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .edit-employee-btn:hover {
@@ -563,8 +583,8 @@
         .employee-hours {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            font-size: 0.75rem;
+            gap: 8px;
+            font-size: 0.7rem;
             color: #86868b;
             font-weight: 500;
         }
@@ -572,28 +592,29 @@
         .employee-hours span {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             background: #f5f5f7;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 30px;
         }
 
         .employee-pin {
             background: #e8f0fe;
             border-radius: 30px;
-            padding: 5px 12px;
-            font-size: 0.7rem;
+            padding: 4px 10px;
+            font-size: 0.65rem;
             font-weight: 600;
             color: #667eea;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 5px;
+            margin-top: 6px;
             direction: ltr;
         }
 
         .employee-details {
             flex: 1;
+            min-width: 0;
         }
 
         .shop-header {
@@ -602,24 +623,26 @@
             align-items: center;
             margin-bottom: 24px;
             background: #ffffff;
-            padding: 18px 24px;
+            padding: 16px 20px;
             border-radius: 18px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             border: 0.5px solid #e5e5ea;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .shop-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             color: #1d1d1f;
         }
 
         .section-title {
             margin-bottom: 16px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #1d1d1f;
             display: flex;
@@ -630,7 +653,7 @@
         .employee-profile {
             background: #ffffff;
             border-radius: 24px;
-            padding: 32px 24px;
+            padding: 28px 20px;
             margin-bottom: 24px;
             text-align: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
@@ -639,62 +662,65 @@
 
         .profile-avatar {
             background: linear-gradient(135deg, #f5f5f7, #e5e5ea);
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 3rem;
+            margin: 0 auto 16px;
+            font-size: 2.5rem;
             color: #667eea;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border: 1px solid rgba(255,255,255,0.5);
         }
 
         .profile-name {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #1d1d1f;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             letter-spacing: -0.02em;
+            word-break: break-word;
         }
 
         .total-hours-card {
             background: #f5f5f7;
             border-radius: 18px;
-            padding: 20px;
-            margin: 20px 0;
+            padding: 18px;
+            margin: 16px 0;
             border: none;
         }
 
         .total-hours-number {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: #667eea;
         }
 
         .total-hours-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #86868b;
             margin-top: 5px;
         }
 
-        /* جدول الحضور - صفوف أفقية */
+        /* جدول الحضور - صفوف أفقية مع منع التمرير */
         .attendance-days-container {
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            margin: 24px 0 16px;
+            gap: 20px;
+            margin: 20px 0 16px;
+            width: 100%;
         }
         
         .day-attendance-card {
             background: #ffffff;
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
             border: 1px solid rgba(0,0,0,0.05);
+            width: 100%;
         }
         
         .day-attendance-card:hover {
@@ -702,17 +728,15 @@
             box-shadow: 0 12px 30px rgba(0,0,0,0.12);
         }
         
-        /* رأس الجدول */
         .day-table-header {
-            padding: 16px 24px;
+            padding: 14px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
         
-        /* ألوان مختلفة لكل يوم */
         .day-table-header[data-day="السبت"] { background: linear-gradient(135deg, #667eea, #764ba2); }
         .day-table-header[data-day="الأحد"] { background: linear-gradient(135deg, #f093fb, #f5576c); }
         .day-table-header[data-day="الإثنين"] { background: linear-gradient(135deg, #4facfe, #00f2fe); }
@@ -722,48 +746,51 @@
         .day-table-header[data-day="الجمعة"] { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
         
         .day-title {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 700;
             color: white;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .day-date-badge {
             background: rgba(255,255,255,0.25);
-            padding: 6px 14px;
+            padding: 4px 10px;
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             color: white;
             direction: ltr;
             font-family: monospace;
             font-weight: 500;
         }
         
-        /* الجدول الأفقي - صفوف */
+        /* الجدول - منع التمرير الأفقي */
         .attendance-table-wrapper {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
         }
         
         .attendance-table {
             width: 100%;
+            min-width: 300px;
             border-collapse: collapse;
             font-family: inherit;
         }
         
         .attendance-table th {
             background: #f8f9fa;
-            padding: 14px 16px;
+            padding: 12px 10px;
             text-align: center;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #1d1d1f;
             border-bottom: 2px solid #e5e5ea;
         }
         
         .attendance-table td {
-            padding: 14px 16px;
+            padding: 12px 10px;
             text-align: center;
             border-bottom: 1px solid #f0f0f0;
         }
@@ -776,42 +803,45 @@
             background: #fbfbfd;
         }
         
-        /* الخلايا */
         .checkin-cell {
             color: #28a745;
             font-weight: 700;
             direction: ltr;
+            font-size: 0.8rem;
         }
         
         .checkout-cell {
             color: #dc2626;
             font-weight: 700;
             direction: ltr;
+            font-size: 0.8rem;
         }
         
         .duration-cell {
             color: #667eea;
             font-weight: 700;
+            font-size: 0.8rem;
         }
         
         .checkin-icon, .checkout-icon, .duration-icon {
-            margin-left: 6px;
+            margin-left: 5px;
+            font-size: 0.7rem;
         }
         
         .no-data-cell {
             text-align: center;
             padding: 30px;
             color: #86868b;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         footer {
-            margin-top: 48px;
+            margin-top: 40px;
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 500;
             color: #86868b;
-            padding-top: 24px;
+            padding-top: 20px;
             border-top: 0.5px solid #e5e5ea;
         }
 
@@ -855,23 +885,23 @@
         .edit-modal {
             background: #ffffff;
             border-radius: 28px;
-            padding: 28px;
+            padding: 24px;
             width: 90%;
-            max-width: 380px;
+            max-width: 340px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             text-align: center;
         }
 
         .edit-modal h3 {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             color: #1d1d1f;
             font-weight: 600;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .edit-modal input {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border: 0.5px solid #d2d2d6;
             border-radius: 14px;
             font-family: inherit;
@@ -893,7 +923,7 @@
 
         .modal-buttons button {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
             border-radius: 14px;
             font-weight: 600;
@@ -921,18 +951,24 @@
         }
 
         @media (max-width: 768px) {
-            .brand-name { font-size: 1.6rem; }
+            .brand-name { font-size: 1.5rem; }
             .back-button { right: 16px; width: 36px; height: 36px; }
             .form-input, .form-select, .btn-add { flex: 100%; }
             .actions-bar { flex-direction: column; }
-            .profile-name { font-size: 1.4rem; }
-            .shop-icon { width: 50px; height: 50px; font-size: 1.4rem; }
-            .shop-name { font-size: 1.1rem; }
-            .day-title { font-size: 1rem; }
+            .profile-name { font-size: 1.3rem; }
+            .shop-icon { width: 50px; height: 50px; font-size: 1.3rem; }
+            .shop-name { font-size: 1rem; }
+            .day-title { font-size: 0.9rem; }
             .day-table-header { flex-direction: column; text-align: center; }
             .attendance-table th, .attendance-table td {
-                padding: 10px 8px;
-                font-size: 0.75rem;
+                padding: 8px 6px;
+                font-size: 0.7rem;
+            }
+            .attendance-table-wrapper {
+                overflow-x: auto;
+            }
+            .attendance-table {
+                min-width: 280px;
             }
         }
     </style>
@@ -1292,7 +1328,7 @@
                         <div class="shop-name">${shop.name}</div>
                         <button class="edit-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation()"><i class="fas fa-pen"></i> تعديل</button>
                     </div>
-                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.7rem; margin-left:3px;"></i> ${totalEmployees} موظف | ${shop.desc}</div>
+                    <div class="shop-desc"><i class="fas fa-users" style="font-size:0.65rem; margin-left:3px;"></i> ${totalEmployees} موظف | ${shop.desc}</div>
                 </div>
                 <i class="fas fa-chevron-left arrow-icon"></i>
             </div>`;
@@ -1431,14 +1467,14 @@
                 <div class="brand-icon">
                     <i class="${shop.icon}"></i>
                 </div>
-                <div class="brand-name" style="font-size: 1.6rem;">${shop.name}</div>
+                <div class="brand-name" style="font-size: 1.4rem;">${shop.name}</div>
                 <div class="subhead">إدارة طاقم العمل وسجل الحضور</div>
                 <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
             <div class="shop-header">
                 <div class="shop-title"><i class="${shop.icon}"></i> ${shop.name}</div>
-                <div style="color:#667eea; font-weight:600;"><i class="fas fa-users"></i> ${shop.employees.length} موظف</div>
+                <div style="color:#667eea; font-weight:600; font-size:0.8rem;"><i class="fas fa-users"></i> ${shop.employees.length} موظف</div>
             </div>
             
             <div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div>
@@ -1501,7 +1537,6 @@
         let daysHtml = '';
         
         groupedDays.forEach(day => {
-            // تجميع سجلات الدخول والخروج في أزواج
             const checkins = day.records.filter(r => r.type === 'دخول').sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             const checkouts = day.records.filter(r => r.type === 'خروج').sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             
@@ -1583,8 +1618,8 @@
                 <div class="brand-icon">
                     <i class="fas fa-user-circle"></i>
                 </div>
-                <div class="brand-name" style="font-size: 1.4rem;">الملف الشخصي</div>
-                <div class="subhead">سجل الحضور والانصراف - جدول أفقي لكل يوم</div>
+                <div class="brand-name" style="font-size: 1.3rem;">الملف الشخصي</div>
+                <div class="subhead">سجل الحضور والانصراف</div>
                 <div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div>
             </div>
             
@@ -1604,10 +1639,9 @@
             </div>
             
             <footer>
-                <i class="fas fa-check-circle" style="color: #34c759;"></i> الدخول باللون الأخضر &nbsp;&nbsp;
-                <i class="fas fa-times-circle" style="color: #ff3b30;"></i> الخروج باللون الأحمر &nbsp;&nbsp;
-                <i class="fas fa-chart-line" style="color: #667eea;"></i> المدة باللون الأزرق &nbsp;&nbsp;
-                <i class="fas fa-table"></i> جدول أفقي لكل يوم
+                <i class="fas fa-check-circle" style="color: #34c759;"></i> الدخول &nbsp;&nbsp;
+                <i class="fas fa-times-circle" style="color: #ff3b30;"></i> الخروج &nbsp;&nbsp;
+                <i class="fas fa-chart-line" style="color: #667eea;"></i> المدة
             </footer>
         `;
         document.getElementById('appRoot').innerHTML = html;
