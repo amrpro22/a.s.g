@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -53,9 +54,8 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* منع التمرير الأفقي */
-        html, body {
-            overflow-x: hidden !important;
+        /* منع التمرير الأفقي بشكل صحيح لا يؤثر على الـ sticky */
+        html {
             width: 100% !important;
             position: relative !important;
         }
@@ -79,7 +79,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             padding: 12px 16px;
             border-bottom: none;
-            width: 100%;
+            width: calc(100% + 32px) !important;
+            margin: -24px -16px 24px -16px;
             overflow: hidden;
             box-shadow: 0 2px 12px rgba(102, 126, 234, 0.3);
             display: flex;
@@ -273,7 +274,7 @@
             max-width: 100%;
             width: 100%;
             padding: 24px 16px 48px 16px;
-            overflow-x: hidden !important;
+            /* تم إزالة overflow-x: hidden ليعمل الهيدر الثابت */
         }
 
         .actions-bar {
@@ -1110,7 +1111,7 @@
     }
     
     function deleteShopById(shopId) { const shopIndex = shopsData.findIndex(s=>s.id===shopId); if(shopIndex!==-1){ shopsData.splice(shopIndex,1); saveDataToFirebase(); renderHomePage(); alert(`تم حذف المحل بنجاح`); } }
-    function deleteEmployeeFromShop(shopId, employeeIndex) { const shop=shopsData.find(s=>s.id===shopId); if(shop && shop.employees[employeeIndex]){ shop.employees.splice(employeeIndex,1); saveDataToFirebase(); renderShopPage(shopId); alert(`تم حذف الموظف بنجاح`); } }
+    function deleteEmployeeFromShop(shopId, employeeIndex) { const shop=shopsData.find(s=>s.id===shopId); if(shop && shop.employees && shop.employees[employeeIndex]){ shop.employees.splice(employeeIndex,1); saveDataToFirebase(); renderShopPage(shopId); alert(`تم حذف الموظف بنجاح`); } }
     
     function renderHomePage() {
         currentView='home'; if(!shopsData.length) return; const root=document.getElementById('appRoot');
@@ -1122,7 +1123,27 @@
         document.getElementById('globalBackBtn')?.classList.add('hidden');
         document.getElementById('addBranchBtn').addEventListener('click',()=>{ showAddBranchModal(()=>renderHomePage()); });
         document.getElementById('showAddEmployeeBtn').addEventListener('click',()=>{ document.getElementById('addEmployeeForm').classList.toggle('active'); });
-        document.getElementById('confirmAddEmployeeBtn').addEventListener('click',async()=>{ const nameInput=document.getElementById('newEmployeeName'); const shopSelect=document.getElementById('newEmployeeShop'); const employeeName=nameInput.value.trim(); const shopId=parseInt(shopSelect.value); if(!employeeName) return alert('الرجاء إدخال الاسم'); const shop=shopsData.find(s=>s.id===shopId); if(shop){ const emptyMinutes={"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; const newPin = generateAccessCode(); shop.employees.push({name:employeeName,accessCode:newPin,workMinutes:{...emptyMinutes}}); await saveDataToFirebase(); nameInput.value=''; document.getElementById('addEmployeeForm').classList.remove('active'); renderHomePage(); alert(`تم إضافة الموظف: ${employeeName}\nالرقم السري: ${newPin}`); } });
+        
+        document.getElementById('confirmAddEmployeeBtn').addEventListener('click',async()=>{ 
+            const nameInput=document.getElementById('newEmployeeName'); 
+            const shopSelect=document.getElementById('newEmployeeShop'); 
+            const employeeName=nameInput.value.trim(); 
+            const shopId=parseInt(shopSelect.value); 
+            if(!employeeName) return alert('الرجاء إدخال الاسم'); 
+            const shop=shopsData.find(s=>s.id===shopId); 
+            if(shop){ 
+                if(!shop.employees) shop.employees = []; // تم إضافة هذا السطر لمنع توقف الكود إذا كانت قائمة الموظفين فارغة وغير موجودة
+                const emptyMinutes={"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; 
+                const newPin = generateAccessCode(); 
+                shop.employees.push({name:employeeName,accessCode:newPin,workMinutes:{...emptyMinutes}}); 
+                await saveDataToFirebase(); 
+                nameInput.value=''; 
+                document.getElementById('addEmployeeForm').classList.remove('active'); 
+                renderHomePage(); 
+                alert(`تم إضافة الموظف: ${employeeName}\nالرقم السري: ${newPin}`); 
+            } 
+        });
+        
         document.querySelectorAll('.shop-card').forEach(card=>{ card.addEventListener('click',(e)=>{ if(!e.target.closest('.edit-shop-btn') && !e.target.closest('.delete-shop-btn')){ currentShopId=parseInt(card.getAttribute('data-shop-id')); renderShopPage(currentShopId); } }); });
         document.querySelectorAll('.edit-shop-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const shopId=parseInt(btn.getAttribute('data-shop-id')); const shop=shopsData.find(s=>s.id===shopId); if(shop) showEditShopModal(shop,()=>renderHomePage()); }); });
         document.querySelectorAll('.delete-shop-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const shopId=parseInt(btn.getAttribute('data-shop-id')); if(confirm('حذف المحل؟')) deleteShopById(shopId); }); });
@@ -1131,7 +1152,7 @@
             const shopSelectHtml=`<select id="deleteEmpShopSelect" style="width:100%; margin-bottom:12px; padding:10px;">${shopsData.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select>`; 
             const modalDiv=document.createElement('div'); modalDiv.className='modal-overlay'; modalDiv.innerHTML=`<div class="edit-modal"><h3>حذف موظف</h3>${shopSelectHtml}<select id="deleteEmpNameSelect" style="width:100%; padding:10px;"><option>اختر الموظف</option></select><div class="modal-buttons"><button id="confirmDeleteEmpBtn" class="modal-save">حذف</button><button id="cancelModalBtn" class="modal-cancel">إلغاء</button></div></div>`; document.body.appendChild(modalDiv); 
             const shopSel=modalDiv.querySelector('#deleteEmpShopSelect'); const empSel=modalDiv.querySelector('#deleteEmpNameSelect'); 
-            function updateEmpList(){ const shopId=parseInt(shopSel.value); const shop=shopsData.find(s=>s.id===shopId); empSel.innerHTML=shop&&shop.employees.length?shop.employees.map((e,idx)=>`<option value="${idx}">${e.name}</option>`).join(''):'<option disabled>لا يوجد موظفون</option>'; } 
+            function updateEmpList(){ const shopId=parseInt(shopSel.value); const shop=shopsData.find(s=>s.id===shopId); empSel.innerHTML=shop&&shop.employees&&shop.employees.length?shop.employees.map((e,idx)=>`<option value="${idx}">${e.name}</option>`).join(''):'<option disabled>لا يوجد موظفون</option>'; } 
             shopSel.addEventListener('change',updateEmpList); updateEmpList(); 
             modalDiv.querySelector('#confirmDeleteEmpBtn').addEventListener('click',()=>{ const shopId=parseInt(shopSel.value); const empIdx=parseInt(empSel.value); if(!isNaN(empIdx)){ deleteEmployeeFromShop(shopId,empIdx); modalDiv.remove(); } else alert('اختر موظفاً'); }); 
             modalDiv.querySelector('#cancelModalBtn').addEventListener('click',()=>modalDiv.remove()); 
@@ -1155,7 +1176,7 @@
         } else {
             employeesHtml = '<div class="no-data">لا يوجد موظفين</div>';
         }
-        const html=`<div class="main-header"><div class="header-brand"><div class="brand-icon"><i class="${shop.icon}"></i></div><div class="brand-text"><div class="brand-name">الشجاع جروب</div><div class="subhead">${shop.name}</div></div></div><div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div></div><div class="shop-header"><div class="shop-title"><i class="${shop.icon}"></i> ${shop.name}</div><div><i class="fas fa-users"></i> ${shop.employees.length} موظف</div></div><div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div><div class="employees-grid">${employeesHtml}</div><footer>اختر موظفاً لعرض سجل الحضور</footer>`;
+        const html=`<div class="main-header"><div class="header-brand"><div class="brand-icon"><i class="${shop.icon}"></i></div><div class="brand-text"><div class="brand-name">الشجاع جروب</div><div class="subhead">${shop.name}</div></div></div><div class="back-button" id="globalBackBtn"><i class="fas fa-arrow-right"></i></div></div><div class="shop-header"><div class="shop-title"><i class="${shop.icon}"></i> ${shop.name}</div><div><i class="fas fa-users"></i> ${shop.employees ? shop.employees.length : 0} موظف</div></div><div class="section-title"><i class="fas fa-id-card-clip"></i> قائمة الموظفين</div><div class="employees-grid">${employeesHtml}</div><footer>اختر موظفاً لعرض سجل الحضور</footer>`;
         document.getElementById('appRoot').innerHTML=html; 
         document.getElementById('globalBackBtn').addEventListener('click',()=>renderHomePage());
         document.querySelectorAll('.employee-card').forEach(card=>{ card.addEventListener('click',(e)=>{ if(!e.target.closest('.edit-employee-btn') && !e.target.closest('.delete-employee-btn')){ const empIdx=parseInt(card.getAttribute('data-emp-index')); const sId=parseInt(card.getAttribute('data-shop-id')); const targetShop=shopsData.find(s=>s.id===sId); if(targetShop&&targetShop.employees[empIdx]) renderEmployeePage(targetShop.employees[empIdx],sId,empIdx); } }); });
@@ -1185,8 +1206,9 @@
     }
     
     let appStarted=false; 
-    const startApplication=async()=>{ if(appStarted) return; appStarted=true; const savedShops=await loadDataFromFirebase(); const savedAttendance=await loadAttendanceFromFirebase(); attendanceRecords=savedAttendance; if(savedShops&&savedShops.length){ shopsData=savedShops; let updated=false; for(let shop of shopsData) if(shop.employees) for(let emp of shop.employees){ if(!emp.accessCode || emp.accessCode.length !== 6){ emp.accessCode=generateAccessCode(); updated=true; } if(!emp.workMinutes){ emp.workMinutes={"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; updated=true; } } if(updated) await saveDataToFirebase(); } else { shopsData=getDefaultShopsData(); await saveDataToFirebase(); } await updateAllEmployeesWorkHours(); listenToFirebaseChanges(); renderHomePage(); };
+    const startApplication=async()=>{ if(appStarted) return; appStarted=true; const savedShops=await loadDataFromFirebase(); const savedAttendance=await loadAttendanceFromFirebase(); attendanceRecords=savedAttendance; if(savedShops&&savedShops.length){ shopsData=savedShops; let updated=false; for(let shop of shopsData) { if(!shop.employees) { shop.employees=[]; updated=true; } if(shop.employees) { for(let emp of shop.employees){ if(!emp.accessCode || emp.accessCode.length !== 6){ emp.accessCode=generateAccessCode(); updated=true; } if(!emp.workMinutes){ emp.workMinutes={"الأحد":0,"الإثنين":0,"الثلاثاء":0,"الأربعاء":0,"الخميس":0,"الجمعة":0,"السبت":0}; updated=true; } } } } if(updated) await saveDataToFirebase(); } else { shopsData=getDefaultShopsData(); await saveDataToFirebase(); } await updateAllEmployeesWorkHours(); listenToFirebaseChanges(); renderHomePage(); };
     window.addEventListener('firebaseReady',startApplication); setTimeout(()=>{ if(!appStarted) startApplication(); },3000);
 </script>
 </body>
 </html>
+
