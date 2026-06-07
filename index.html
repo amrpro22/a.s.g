@@ -831,6 +831,11 @@
             </div>`; 
         });
 
+        // إضافة زر حذف السجلات كزر أحمر ناعم بجانب عنوان سجل الحضور في حال توفر السجلات
+        const deleteRecordsBtnHtml = records.length > 0 
+            ? `<button id="clearEmployeeRecordsBtn" class="btn-header-action" style="background: rgba(247, 37, 133, 0.1); color: var(--danger); border: 1px solid rgba(247, 37, 133, 0.2);"><i class="fas fa-trash-can"></i> حذف السجلات</button>` 
+            : '';
+
         document.getElementById('appRoot').innerHTML = `
             <div class="main-header">
                 <button class="btn-icon" id="globalBackBtn"><i class="fas fa-arrow-right"></i></button>
@@ -848,11 +853,36 @@
                         إجمالي العمل: ${formatMinutesToHoursAndMinutes(totalMinutes)}
                     </div>
                 </div>
-                <div class="section-title"><i class="fas fa-calendar-check"></i> سجل الحضور</div>
+                <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span><i class="fas fa-calendar-check"></i> سجل الحضور</span>
+                    ${deleteRecordsBtnHtml}
+                </div>
                 ${daysHtml || '<div style="text-align:center; padding:20px; color:var(--text-muted)">لا يوجد سجلات حضور</div>'}
             </div>
         `;
+
         document.getElementById('globalBackBtn').addEventListener('click',()=>renderShopPage(returnShopId));
+
+        // ربط حدث الضغط على زر حذف جميع السجلات الخاصة بهذا الموظف
+        const clearBtn = document.getElementById('clearEmployeeRecordsBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', async () => {
+                if (confirm(`هل أنت متأكد من حذف جميع سجلات الحضور الخاصة بالموظف (${employee.name}) في فرع (${shop?.name || ''}) نهائياً؟`)) {
+                    // تصفية وحذف سجلات الموظف الحالي في هذا الفرع
+                    attendanceRecords = attendanceRecords.filter(r => !(r.employeeName === employee.name && r.branchName === (shop?.name || '')));
+                    
+                    // حفظ التحديثات في Firebase
+                    await saveAttendanceToFirebase();
+                    
+                    // إعادة احتساب ساعات العمل وتحديثها
+                    await updateAllEmployeesWorkHours();
+                    
+                    // إعادة تحميل الصفحة لعرض التغييرات فوراً
+                    renderEmployeePage(employee, returnShopId, employeeIndex);
+                    alert('تم حذف جميع السجلات بنجاح');
+                }
+            });
+        }
     }
 
     // تعديل نافذة تعديل الفرع لتشمل خيار تخصيص/تغيير الأيقونة
