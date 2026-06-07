@@ -83,20 +83,20 @@
             text-size-adjust: 100%;
         }
 
-        /* Header Styling */
+        /* Header Styling - تم إضافة لون متدرج ناعم وأنيق يتناسب مع هوية التطبيق البصرية */
         .main-header {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.85);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12), rgba(76, 201, 240, 0.15));
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+            border-bottom: 1px solid rgba(67, 97, 238, 0.15);
+            box-shadow: 0 4px 30px rgba(67, 97, 238, 0.05);
         }
 
         .header-brand {
@@ -875,9 +875,20 @@
 
     function showEditEmployeeModal(employee,shopId,callback){
         const modal=document.createElement('div'); modal.className='modal-overlay';
+        const currentCode = employee.accessCode || '';
         modal.innerHTML=`<div class="modal-content">
-            <h3 style="margin-bottom:15px">تعديل اسم الموظف</h3>
-            <input id="editEmployeeName" class="form-input" value="${employee.name}">
+            <h3 style="margin-bottom:15px">تعديل بيانات الموظف</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">اسم الموظف</label>
+                <input id="editEmployeeName" class="form-input" value="${employee.name}">
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; text-align: right;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">كلمة المرور / كود الدخول</label>
+                <input id="editEmployeeAccessCode" class="form-input" value="${currentCode}" placeholder="أدخل كلمة المرور الجديدة">
+            </div>
+
             <div class="modal-buttons">
                 <button class="btn-add modal-save">حفظ</button>
                 <button class="btn-header-action modal-cancel">إلغاء</button>
@@ -885,10 +896,12 @@
         </div>`;
         document.body.appendChild(modal);
         modal.querySelector('.modal-save').onclick = async() => {
-            const newName = modal.querySelector('#editEmployeeName').value;
-            if(newName) {
+            const newName = modal.querySelector('#editEmployeeName').value.trim();
+            const newCode = modal.querySelector('#editEmployeeAccessCode').value.trim();
+            if(newName && newCode) {
                 const oldName = employee.name;
                 employee.name = newName;
+                employee.accessCode = newCode; // حفظ كلمة المرور الجديدة في الكود
                 attendanceRecords.forEach(r => {
                     if(r.employeeName === oldName) r.employeeName = newName;
                 });
@@ -896,6 +909,8 @@
                 await saveAttendanceToFirebase();
                 callback();
                 modal.remove();
+            } else {
+                alert('الرجاء التأكد من تعبئة حقل الاسم وكلمة المرور');
             }
         };
         modal.querySelector('.modal-cancel').onclick = () => modal.remove();
@@ -945,3 +960,4 @@
 </script>
 </body>
 </html>
+
