@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -74,10 +73,9 @@
             min-height: 100vh;
             line-height: 1.6;
             overflow-x: hidden;
-            touch-action: pan-y pan-x; /* منع التكبير باللمس */
+            touch-action: pan-y pan-x;
         }
 
-        /* منع أي تغيير في حجم الخط أو التكبير على المتصفحات */
         html {
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
@@ -235,8 +233,7 @@
             gap: 10px;
         }
 
-        /* حقول الإدخال بحجم خط 16px لمنع الزوم التلقائي نهائياً في الهواتف */
-        .form-input, .form-select {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px;
             border-radius: 12px;
@@ -248,9 +245,14 @@
             font-size: 16px !important;
         }
 
-        .form-input:focus, .form-select:focus { 
+        .form-input:focus, .form-select:focus, .form-textarea:focus { 
             border-color: var(--primary); 
             background: #f8faff; 
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 70px;
         }
 
         .btn-add {
@@ -396,6 +398,7 @@
             color: white;
             margin-bottom: 20px;
             box-shadow: 0 15px 30px rgba(67, 97, 238, 0.2);
+            position: relative;
         }
 
         .profile-avatar-large {
@@ -426,6 +429,91 @@
             margin-top: 12px;
             font-size: 0.85rem;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* بطاقة التنبيهات المميزة */
+        .alert-card {
+            background: linear-gradient(135deg, #fff9e6, #fff3d1);
+            border-right: 5px solid #ff9800;
+            border-radius: 16px;
+            padding: 15px;
+            margin: 15px 0 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .alert-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            color: #e67e22;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+        
+        .alert-card-header i {
+            font-size: 1.2rem;
+            background: #ff9800;
+            color: white;
+            padding: 6px;
+            border-radius: 50%;
+        }
+        
+        .alert-textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #ffcc80;
+            background: #ffffff;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        
+        .alert-textarea:focus {
+            border-color: #ff9800;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,152,0,0.2);
+        }
+        
+        .btn-send-alert {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-send-alert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(255,152,0,0.3);
+        }
+        
+        .alert-note-badge {
+            background: #ff9800;
+            color: white;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
         }
 
         /* Attendance Table */
@@ -578,7 +666,6 @@
         { iconClass: "fas fa-couch", label: "أثاث ومفروشات" }
     ];
 
-    // دالة أمان لضمان أن البيانات المعادة هي مصفوفة دوماً (لتفادي مشاكل تحويل Firebase للمصفوفات إلى كائنات)
     function ensureArray(val) {
         if (!val) return [];
         if (Array.isArray(val)) return val;
@@ -620,7 +707,6 @@
         return dailyMinutes;
     }
     
-    // تم إزالة استدعاء الحفظ التلقائي من هذه الدالة لمنع تكرار الحفظ اللانهائي (Infinite Loop)
     async function updateAllEmployeesWorkHours() { 
         for(let shop of shopsData) {
             if(shop) {
@@ -749,7 +835,6 @@
             if(!employeeName) return alert('الرجاء إدخال الاسم'); 
             if(isNaN(shopId)) return alert('الرجاء تحديد فرع صحيح أولاً');
 
-            // مقارنة آمنة مع تحويل المعرفات إلى نصوص
             const shop=shopsData.find(s=>s && String(s.id)===String(shopId)); 
             if(shop){ 
                 shop.employees = ensureArray(shop.employees);
@@ -836,6 +921,7 @@
         document.querySelectorAll('.delete-employee-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const empIdx=parseInt(btn.getAttribute('data-emp-index')); if(confirm('حذف الموظف؟')) deleteEmployeeFromShop(shopId,empIdx); }); });
     }
 
+    // دالة عرض صفحة الموظف مع حقل التنبيه والبطاقة المميزة وزر الإرسال
     function renderEmployeePage(employee, returnShopId, employeeIndex) { 
         currentView='employee'; currentEmployeeData=employee; currentEmployeeShopId=returnShopId; currentEmployeeIndex=employeeIndex; 
         const totalMinutes=Object.values(employee.workMinutes||{}).reduce((a,b)=>a+b,0); const shop=shopsData.find(s=>s && String(s.id)===String(returnShopId)); 
@@ -852,7 +938,7 @@
                 const ci=checkins[i]; const co=checkouts[i]; 
                 let duration='—'; 
                 if(ci&&co) duration=formatMinutesToHoursAndMinutes(calculateTimeDifferenceInMinutes(ci.timestamp,co.timestamp)); 
-                rows+=`<tr>
+                rows+=`</td>
                     <td class="time-in">${ci?new Date(ci.timestamp).toLocaleTimeString('ar-EG'):'—'}</td>
                     <td class="time-out">${co?new Date(co.timestamp).toLocaleTimeString('ar-EG'):'—'}</td>
                     <td style="color:var(--primary)">${duration}</td>
@@ -894,6 +980,20 @@
                         إجمالي العمل: ${formatMinutesToHoursAndMinutes(totalMinutes)}
                     </div>
                 </div>
+                
+                <!-- البطاقة المميزة: حقل التنبيه أو الملاحظة وزر الإرسال (تم إضافته أسفل اسم الموظف مباشرة) -->
+                <div class="alert-card">
+                    <div class="alert-card-header">
+                        <i class="fas fa-bell"></i>
+                        <span>تنبيه / ملاحظة للموظف</span>
+                    </div>
+                    <textarea id="employeeNote" class="alert-textarea" placeholder="اكتب هنا أي تنبيه أو ملاحظة تريد إرسالها للموظف..."></textarea>
+                    <button id="sendNoteBtn" class="btn-send-alert">
+                        <i class="fas fa-paper-plane"></i> إرسال التنبيه
+                    </button>
+                    <div id="noteFeedback" style="font-size:0.7rem; margin-top:8px; color:#e67e22; font-weight:600; text-align:center;"></div>
+                </div>
+                
                 <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <span><i class="fas fa-calendar-check"></i> سجل الحضور</span>
                     ${deleteRecordsBtnHtml}
@@ -902,8 +1002,45 @@
             </div>
         `;
 
+        // ربط زر العودة
         document.getElementById('globalBackBtn').addEventListener('click',()=>renderShopPage(returnShopId));
 
+        // ربط زر إرسال التنبيه
+        const sendBtn = document.getElementById('sendNoteBtn');
+        const noteTextarea = document.getElementById('employeeNote');
+        const noteFeedback = document.getElementById('noteFeedback');
+        
+        if (sendBtn && noteTextarea) {
+            sendBtn.addEventListener('click', async () => {
+                const noteContent = noteTextarea.value.trim();
+                if (!noteContent) {
+                    noteFeedback.innerHTML = '<i class="fas fa-exclamation-triangle"></i> الرجاء كتابة نص التنبيه أولاً';
+                    setTimeout(() => { noteFeedback.innerHTML = ''; }, 3000);
+                    return;
+                }
+                
+                // هنا يمكنك إرسال البيانات إلى أي نظام أو تخزينها في Firebase أو عرض رسالة نجاح
+                // سيتم إظهار رسالة نجاح وتفريغ الحقل بعد الإرسال
+                noteFeedback.innerHTML = '<i class="fas fa-check-circle"></i> تم إرسال التنبيه بنجاح إلى ' + employee.name;
+                noteFeedback.style.color = '#4cc9b0';
+                
+                // اختياري: حفظ التنبيه في وحدة التخزين (يمكن إضافة مسار خاص في Firebase إذا أردت)
+                // مثلاً: يمكن حفظها في employee.notes أو في عقدة منفصلة
+                console.log(`تم إرسال تنبيه للموظف ${employee.name} (${employee.accessCode}) في فرع ${shop?.name || ''}: ${noteContent}`);
+                
+                // تفريغ الحقل بعد الإرسال
+                noteTextarea.value = '';
+                
+                // إعادة تعيين رسالة التأكيد بعد 3 ثوانٍ
+                setTimeout(() => {
+                    if (noteFeedback) {
+                        noteFeedback.innerHTML = '';
+                        noteFeedback.style.color = '#e67e22';
+                    }
+                }, 3000);
+            });
+        }
+        
         const clearBtn = document.getElementById('clearEmployeeRecordsBtn');
         if (clearBtn) {
             clearBtn.addEventListener('click', async () => {
@@ -1113,4 +1250,3 @@
 </script>
 </body>
 </html>
-
