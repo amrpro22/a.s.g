@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -12,6 +13,9 @@
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <!-- Firebase SDKs -->
     <script type="module">
@@ -51,6 +55,7 @@
             --accent: #4cc9f0;
             --danger: #f72585;
             --success: #4cc9b0;
+            --warning: #ff9800;
             --bg: #f8faff;
             --card-bg: #ffffff;
             --text-main: #1e293b;
@@ -273,7 +278,7 @@
             gap: 12px;
         }
 
-        .shop-card, .employee-card {
+        .shop-card, .employee-card, .report-card {
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 15px;
@@ -285,6 +290,72 @@
             box-shadow: var(--shadow);
             border: 1px solid transparent;
             position: relative;
+        }
+        
+        .report-card {
+            cursor: default;
+            flex-wrap: wrap;
+        }
+        
+        .report-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .report-employee {
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        
+        .report-branch {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .report-date {
+            font-size: 0.7rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-report {
+            padding: 8px 14px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-view {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-delete-report {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-pdf {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-report:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
         }
 
         .shop-card:hover, .employee-card:hover {
@@ -613,7 +684,89 @@
             opacity: 1;
             transform: translateX(-50%) scale(1);
         }
-
+        
+        /* Reports page styles */
+        .reports-header {
+            background: linear-gradient(135deg, var(--warning), #e67e22);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .reports-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .reports-header p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .filter-bar {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .filter-select {
+            padding: 10px 16px;
+            border-radius: 30px;
+            border: 1px solid #e2e8f0;
+            font-family: inherit;
+            font-weight: 600;
+            background: white;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-reports {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            background: var(--card-bg);
+            border-radius: var(--radius);
+        }
+        
+        /* Report view modal styles */
+        .report-view-modal {
+            max-width: 95%;
+            width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #f1f5f9;
+            border-radius: 24px;
+        }
+        
+        .report-view-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 24px 24px 0 0;
+            position: sticky;
+            top: 0;
+        }
+        
+        .report-view-content {
+            padding: 20px;
+        }
+        
         @media (max-width: 600px) {
             .app-container { padding: 12px; }
             .brand-text h1 { font-size: 0.95rem; }
@@ -622,6 +775,11 @@
             .shop-card, .employee-card { padding: 12px; }
             .shop-icon, .employee-avatar { width: 44px; height: 44px; font-size: 1.15rem; }
             .toast-message { white-space: normal; text-align: center; max-width: 85%; font-size: 0.8rem; bottom: 20px; }
+            .filter-bar { flex-direction: column; }
+            .filter-select { width: 100%; }
+            .report-actions { margin-top: 10px; width: 100%; justify-content: center; }
+            .report-card { flex-direction: column; text-align: center; }
+            .report-info { text-align: center; }
         }
     </style>
 </head>
@@ -637,11 +795,17 @@
 <script>
     let shopsData = [];
     let attendanceRecords = [];
+    let financialReports = [];
     let currentView = 'home';
     let currentShopId = null;
     let currentEmployeeData = null;
     let currentEmployeeShopId = null;
     let currentEmployeeIndex = null;
+    
+    let currentReportsFilter = {
+        employeeName: null,
+        branchName: null
+    };
 
     const availableIconsList = [
         { iconClass: "fas fa-store", label: "متجر عام" },
@@ -697,7 +861,10 @@
         return `${year}/${month}/${day}`; 
     }
     
-    // حساب فرق الوقت بدقة بالدقائق
+    function formatDateTime(date) {
+        return date.toLocaleString('ar-EG', { hour12: true });
+    }
+    
     function calculateTimeDifferenceInMinutes(checkinTime, checkoutTime) { 
         const checkin = new Date(checkinTime);
         const checkout = new Date(checkoutTime);
@@ -708,7 +875,6 @@
         return diffMinutes;
     }
     
-    // تنسيق الدقائق إلى ساعات ودقائق
     function formatMinutesToHoursAndMinutes(minutes) { 
         if (minutes <= 0) return '0 دقيقة'; 
         const hours = Math.floor(minutes / 60); 
@@ -718,44 +884,37 @@
         return hours + ' ساعة و ' + mins + ' دقيقة'; 
     }
     
-    // حساب إجمالي ساعات العمل للموظف من سجلات الحضور مباشرة
     function calculateTotalWorkMinutesForEmployee(employeeName, branchName) {
         const records = attendanceRecords
             .filter(r => r.employeeName === employeeName && r.branchName === branchName)
             .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         
         let totalMinutes = 0;
-        
-        // البحث عن أزواج دخول وخروج
         let i = 0;
         while (i < records.length) {
             if (records[i].type === 'دخول') {
-                // البحث عن خروج بعد هذا الدخول
                 for (let j = i + 1; j < records.length; j++) {
                     if (records[j].type === 'خروج') {
                         const minutes = calculateTimeDifferenceInMinutes(records[i].timestamp, records[j].timestamp);
                         if (minutes > 0 && minutes < 1440) {
                             totalMinutes += minutes;
                         }
-                        i = j; // تخطي إلى بعد سجل الخروج
+                        i = j;
                         break;
                     }
                 }
             }
             i++;
         }
-        
         return totalMinutes;
     }
     
-    // حساب ساعات العمل لكل موظف وتحديث data
     async function updateAllEmployeesWorkHours() { 
         for (let shop of shopsData) {
             if (shop) {
                 shop.employees = ensureArray(shop.employees);
                 for (let emp of shop.employees) {
                     if (emp) {
-                        // حساب إجمالي الدقائق مباشرة من attendanceRecords
                         emp.totalMinutes = calculateTotalWorkMinutesForEmployee(emp.name, shop.name);
                     }
                 }
@@ -770,11 +929,8 @@
             .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
     }
     
-    // تجميع سجلات الحضور حسب اليوم مع حساب المدة لكل زوج
     function groupAttendanceByDay(records) { 
         const grouped = {}; 
-        
-        // أولاً: تجميع السجلات حسب التاريخ
         records.forEach(rec => { 
             const dateKey = formatDate(new Date(rec.timestamp)); 
             if (!grouped[dateKey]) {
@@ -788,18 +944,13 @@
             grouped[dateKey].records.push(rec); 
         });
         
-        // ثانياً: لكل يوم، ترتيب السجلات وحساب المدة لكل زوج
         const result = Object.values(grouped).sort((a, b) => new Date(b.date) - new Date(a.date));
         
         result.forEach(day => {
-            // ترتيب سجلات اليوم حسب الوقت
             day.records.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            // إنشاء أزواج الدخول والخروج
             const pairedRecords = [];
             for (let i = 0; i < day.records.length; i++) {
                 if (day.records[i].type === 'دخول') {
-                    // البحث عن خروج بعد هذا الدخول
                     let checkout = null;
                     for (let j = i + 1; j < day.records.length; j++) {
                         if (day.records[j].type === 'خروج') {
@@ -816,13 +967,10 @@
                 }
             }
             day.pairedRecords = pairedRecords;
-            
-            // حساب مجموع دقائق اليوم
             day.totalMinutes = pairedRecords.reduce((sum, pair) => {
                 return sum + calculateTimeDifferenceInMinutes(pair.checkin.timestamp, pair.checkout.timestamp);
             }, 0);
         });
-        
         return result;
     }
     
@@ -859,6 +1007,23 @@
         return []; 
     }
     
+    async function loadFinancialReportsFromFirebase() {
+        if (window.firebaseDB) {
+            try {
+                const snap = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'financialReports'));
+                const reports = [];
+                if (snap.exists()) {
+                    const data = snap.val();
+                    for (const key in data) {
+                        reports.push({ id: key, ...data[key] });
+                    }
+                }
+                return reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            } catch(e) { console.warn(e); }
+        }
+        return [];
+    }
+    
     async function saveAttendanceToFirebase() { 
         if (window.firebaseDB && attendanceRecords.length) { 
             const recordsObj = {}; 
@@ -867,6 +1032,25 @@
                 await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'attendanceRecords'), recordsObj);
             } catch(e) { console.warn(e); }
         }
+    }
+    
+    async function deleteFinancialReport(reportId) {
+        if (window.firebaseDB && reportId) {
+            try {
+                await window.firebaseRemove(window.firebaseRef(window.firebaseDB, `financialReports/${reportId}`));
+                financialReports = financialReports.filter(r => r.id !== reportId);
+                showToastMessage("تم حذف التقرير بنجاح");
+                if (currentView === 'reports') {
+                    renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
+                }
+                return true;
+            } catch(e) {
+                console.warn(e);
+                showToastMessage("حدث خطأ في حذف التقرير", true);
+                return false;
+            }
+        }
+        return false;
     }
     
     async function sendNoteToEmployee(employeeName, branchName, noteContent) {
@@ -933,6 +1117,455 @@
             renderShopPage(shopId); 
             showToastMessage("تم حذف الموظف بنجاح"); 
         } 
+    }
+    
+    // ============ دوال التقارير العامة ============
+    // دالة عرض التقرير بشكل منظم ومنسق (داخل التطبيق)
+    function generateReportHTML(report, forPDF = false) {
+        if (forPDF) {
+            // نسخة مخصصة بالكامل للـ PDF بنظام الجداول الصريحة لضمان التنظيم وعدم التداخل
+            return `
+            <div style="font-family: 'Cairo', sans-serif; direction: rtl; padding: 25px; background-color: #ffffff; color: #1e293b; max-width: 100%;">
+                <!-- Header -->
+                <div style="text-align: center; border-bottom: 3px solid #4361ee; padding-bottom: 15px; margin-bottom: 25px;">
+                    <h2 style="color: #4361ee; font-size: 20px; margin-bottom: 8px; font-weight: 800;">💰 Cash Drawer Count Sheet</h2>
+                    <p style="color: #64748b; font-size: 13px; margin-bottom: 10px;">تقرير جرد صندوق الكاشير المالي والتفصيلي</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr>
+                            <td style="text-align: right; font-size: 13px; padding: 5px;"><strong>الموظف:</strong> ${report.name || report.employeeName || ''}</td>
+                            <td style="text-align: left; font-size: 13px; padding: 5px;"><strong>الفرع:</strong> ${report.branchName || ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right; font-size: 13px; padding: 5px;"><strong>التاريخ:</strong> ${report.date || ''}</td>
+                            <td style="text-align: left; font-size: 13px; padding: 5px;"><strong>الوردية:</strong> ${report.shift || ''}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Drawer Totals -->
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <td style="width: 50%; padding-left: 10px; vertical-align: top;">
+                            <div style="background-color: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 15px; text-align: center;">
+                                <h3 style="color: #15803d; font-size: 14px; margin-bottom: 8px; font-weight: 700;">📥 الرصيد الافتتاحي (BEGINNING)</h3>
+                                <div style="font-size: 18px; font-weight: 800; color: #166534;">${report.beginningTotal || '0.00'} $</div>
+                            </div>
+                        </td>
+                        <td style="width: 50%; padding-right: 10px; vertical-align: top;">
+                            <div style="background-color: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 12px; padding: 15px; text-align: center;">
+                                <h3 style="color: #b91c1c; font-size: 14px; margin-bottom: 8px; font-weight: 700;">📤 الرصيد الختامي (END)</h3>
+                                <div style="font-size: 18px; font-weight: 800; color: #991b1b;">${report.endingTotal || '0.00'} $</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Cigarettes Section -->
+                <div style="border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px; background-color: #fafafa;">
+                    <h3 style="font-size: 14px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700;"><i class="fas fa-smoking"></i> تفاصيل الدخان (CIG COUNT)</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; width: 35%;">بداية الوردية (Beg. Shift)</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left;">${report.cigBeginning || '-'}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; width: 35%;">الكمية 1</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left;">${report.cig1 || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">نهاية الوردية (End. Shift)</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left;">${report.cigEnd || '-'}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">الكمية 2</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left;">${report.cig2 || '-'}</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top: 15px; background-color: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: center;">
+                            <tr>
+                                <td style="padding: 5px;"><strong>كاش (CASH):</strong> ${report.cigCash || '0'} $</td>
+                                <td style="padding: 5px; border-right: 1.5px solid #e2e8f0;"><strong>شبكة (DEBIT):</strong> ${report.cigDebit || '0'} $</td>
+                                <td style="padding: 5px; border-right: 1.5px solid #e2e8f0; color: #4361ee;"><strong>الإجمالي (TOTAL):</strong> ${report.cigTotal || '0'} $</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Initial Box -->
+                <div style="border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px; background-color: #fafafa;">
+                    <h3 style="font-size: 14px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700;"><i class="fas fa-file-invoice"></i> تسوية الصندوق (INITIAL)</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">رصيد بداية الوردية (Beginning Shift Balance):</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: bold;">${report.initBeg || '0.00'} $</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; color: #b91c1c;">رصيد نهاية الوردية (END OF SHIFT):</td>
+                            <td style="padding: 8px; text-align: left; font-weight: 800; color: #b91c1c;">${report.initEnd || '0.00'} $</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Second Drawer Box -->
+                <div style="border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 15px; background-color: #fafafa;">
+                    <h3 style="font-size: 14px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700;"><i class="fas fa-box-open"></i> الصندوق الإضافي الثاني (SECOND DRAWER)</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; width: 50%;">رصيد البداية الإجمالي (Beginning Total):</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: bold;">${report.secBegTotal || '0.00'} $</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; width: 50%;">رصيد النهاية الإجمالي (End Total):</td>
+                            <td style="padding: 8px; text-align: left; font-weight: bold; color: #4361ee;">${report.secEndTotal || '0.00'} $</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>`;
+        } else {
+            // النسخة الأصلية للعرض المباشر على الشاشة داخل التطبيق بدون تغيير
+            return `
+            <div style="font-family: 'Cairo', 'Inter', sans-serif; direction: rtl;">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
+                    <h2 style="color: #0f172a;">💰 Cash Drawer Count Sheet</h2>
+                    <p style="color: #64748b;">Track beginning & end balances with precision</p>
+                    <p><strong>${report.name || report.employeeName || ''}</strong> | ${report.branchName || ''} | التاريخ: ${report.date || ''} | الوردية: ${report.shift || ''}</p>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 15px;">
+                        <h3 style="color: #059669; margin-bottom: 10px;">📥 BEGINNING</h3>
+                        <p><strong>Total Drawer:</strong> ${report.beginningTotal || '0.00'} $</p>
+                    </div>
+                    <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 15px;">
+                        <h3 style="color: #dc2626; margin-bottom: 10px;">📤 END</h3>
+                        <p><strong>Total Drawer:</strong> ${report.endingTotal || '0.00'} $</p>
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border-radius: 16px; padding: 15px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">🚬 CIG COUNT</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <p><strong>Beginning of shift:</strong> ${report.cigBeginning || '-'}</p>
+                        <p><strong>1:</strong> ${report.cig1 || '-'}</p>
+                        <p><strong>End of shift:</strong> ${report.cigEnd || '-'}</p>
+                        <p><strong>2:</strong> ${report.cig2 || '-'}</p>
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                        <p><strong>1-CASH:</strong> ${report.cigCash || '0'} $</p>
+                        <p><strong>2-DEBIT:</strong> ${report.cigDebit || '0'} $</p>
+                        <p><strong>3-TOTAL:</strong> ${report.cigTotal || '0'} $</p>
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border-radius: 16px; padding: 15px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">📝 INITIAL</h3>
+                    <p><strong>Beginning of Shift Balance:</strong> ${report.initBeg || '0.00'} $</p>
+                    <p><strong>END OF SHIFT =</strong> ${report.initEnd || '0.00'} $</p>
+                </div>
+
+                <div style="background: #f8fafc; border-radius: 16px; padding: 15px;">
+                    <h3 style="margin-bottom: 10px;">🗄️ SECOND DRAWER</h3>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1;">
+                            <p><strong>Beginning Total:</strong> ${report.secBegTotal || '0.00'} $</p>
+                        </div>
+                        <div style="flex: 1;">
+                            <p><strong>End Total:</strong> ${report.secEndTotal || '0.00'} $</p>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+    }
+    
+    // دوال عامة يمكن استدعاؤها من onClick
+    window.viewReportDetails = function(reportId) {
+        const report = financialReports.find(r => r.id === reportId);
+        if (!report) return;
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        
+        const reportDate = report.timestamp ? new Date(report.timestamp).toLocaleString('ar-EG') : 'تاريخ غير معروف';
+        
+        modal.innerHTML = `
+            <div class="report-view-modal">
+                <div class="report-view-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><i class="fas fa-file-invoice"></i> تقرير الجرد</h3>
+                        <button onclick="this.closest('.modal-overlay').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <p><i class="fas fa-user"></i> ${report.employeeName || 'غير معروف'} | <i class="fas fa-store"></i> ${report.branchName || 'غير معروف'}</p>
+                    <p><i class="fas fa-calendar"></i> ${reportDate}</p>
+                </div>
+                <div class="report-view-content" id="reportFullContent">
+                    <div style="background: white; border-radius: 16px; padding: 20px;">
+                        ${generateReportHTML(report, false)}
+                    </div>
+                </div>
+                <div style="padding: 15px 20px; background: white; border-radius: 0 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="window.printSpecificReport('${reportId}')" class="btn-report btn-pdf" style="padding: 10px 20px;"><i class="fas fa-print"></i> طباعة</button>
+                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-header-action">إغلاق</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        setTimeout(() => modal.style.opacity = '1', 10);
+    };
+    
+    window.printSpecificReport = function(reportId) {
+        const report = financialReports.find(r => r.id === reportId);
+        if (report) {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>تقرير الجرد - ${report.employeeName || ''}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            font-family: 'Cairo', 'Inter', sans-serif;
+                            padding: 30px;
+                            max-width: 800px;
+                            margin: 0 auto;
+                            direction: rtl;
+                            line-height: 1.6;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        td, th {
+                            padding: 8px;
+                            vertical-align: top;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${generateReportHTML(report, true)}
+                    <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #94a3b8;">
+                        <p>تم إنشاء هذا التقرير بواسطة نظام الشجاع جروب</p>
+                        <p>${new Date().toLocaleString('ar-EG')}</p>
+                    </div>
+                    <script>window.print(); setTimeout(() => window.close(), 100);<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+    };
+    
+    window.printReportAsPDF = async function(reportId) {
+        const report = financialReports.find(r => r.id === reportId);
+        if (!report) return;
+        
+        // تجهيز عنصر مؤقت ومنسق خصيصاً للـ PDF لعدم التداخل
+        const element = document.createElement('div');
+        element.style.padding = '25px';
+        element.style.backgroundColor = 'white';
+        element.style.fontFamily = "'Cairo', sans-serif";
+        element.style.direction = 'rtl';
+        element.style.width = '790px'; // لتلائم مقاس A4 تماماً
+        element.style.margin = '0';
+        element.innerHTML = generateReportHTML(report, true);
+        
+        // إعدادات تصدير الـ PDF المحسنة لحل مشكلة التداخل والعربية
+        const opt = {
+            margin: [15, 10, 15, 10], // هوامش مريحة تمنع قص البيانات
+            filename: `تقرير_الجرد_${report.employeeName || 'موظف'}_${report.date || 'غير_محدد'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: false, // تم الإيقاف لتفادي تشويه نصوص اللغة العربية
+                allowTaint: true,
+                logging: false
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        showToastMessage("جاري تحضير ملف PDF التقرير المرتب...");
+        
+        // إطلاق دالة التحويل مع تأخير بسيط لضمان رندر العناصر بالكامل
+        setTimeout(() => {
+            html2pdf().set(opt).from(element).save()
+            .then(() => {
+                showToastMessage("تم تنزيل تقرير الـ PDF بنجاح!");
+            })
+            .catch((err) => {
+                console.error("خطأ في تصدير PDF:", err);
+                showToastMessage("حدث خطأ أثناء محاولة حفظ ملف الـ PDF", true);
+            });
+        }, 500);
+    };
+    
+    window.deleteReport = async function(reportId) {
+        if (confirm('هل أنت متأكد من حذف هذا التقرير نهائياً؟')) {
+            await deleteFinancialReport(reportId);
+        }
+    };
+    
+    function filterReports(branchName, employeeName) {
+        let filtered = [...financialReports];
+        if (branchName) {
+            filtered = filtered.filter(r => r.branchName === branchName);
+        }
+        if (employeeName) {
+            filtered = filtered.filter(r => r.employeeName === employeeName);
+        }
+        
+        const reportsList = document.getElementById('reportsList');
+        if (!reportsList) return;
+        
+        if (filtered.length === 0) {
+            reportsList.innerHTML = '<div class="empty-reports"><i class="fas fa-file-alt fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i><p>لا توجد تقارير تطابق معايير البحث</p></div>';
+            return;
+        }
+        
+        let reportsHtml = '';
+        filtered.forEach(report => {
+            const reportDate = report.timestamp ? new Date(report.timestamp).toLocaleString('ar-EG') : 'تاريخ غير معروف';
+            reportsHtml += `
+            <div class="report-card" data-report-id="${report.id}">
+                <div class="report-info">
+                    <div class="report-employee"><i class="fas fa-user"></i> ${report.employeeName || 'غير معروف'}</div>
+                    <div class="report-branch"><i class="fas fa-store"></i> ${report.branchName || 'غير معروف'}</div>
+                    <div class="report-date"><i class="fas fa-calendar"></i> ${reportDate}</div>
+                </div>
+                <div class="report-actions">
+                    <button class="btn-report btn-view" onclick="window.viewReportDetails('${report.id}')"><i class="fas fa-eye"></i> عرض التقرير</button>
+                    <button class="btn-report btn-pdf" onclick="window.printReportAsPDF('${report.id}')"><i class="fas fa-file-pdf"></i> طباعة PDF</button>
+                    <button class="btn-report btn-delete-report" onclick="window.deleteReport('${report.id}')"><i class="fas fa-trash"></i> حذف</button>
+                </div>
+            </div>`;
+        });
+        reportsList.innerHTML = reportsHtml;
+    }
+    
+    // دالة عرض التقارير مع إمكانية التصفية حسب الموظف والفرع
+    function renderReportsPage(filterEmployeeName = null, filterBranchName = null) {
+        currentView = 'reports';
+        
+        currentReportsFilter = {
+            employeeName: filterEmployeeName,
+            branchName: filterBranchName
+        };
+        
+        let reportsToShow = [...financialReports];
+        if (filterEmployeeName) {
+            reportsToShow = reportsToShow.filter(r => r.employeeName === filterEmployeeName);
+        }
+        if (filterBranchName) {
+            reportsToShow = reportsToShow.filter(r => r.branchName === filterBranchName);
+        }
+        
+        const branches = [...new Set(reportsToShow.map(r => r.branchName).filter(Boolean))];
+        const employees = [...new Set(reportsToShow.map(r => r.employeeName).filter(Boolean))];
+        
+        let reportsHtml = '';
+        if (reportsToShow.length === 0) {
+            let emptyMessage = 'لا توجد تقارير جرد بعد';
+            if (filterEmployeeName) {
+                emptyMessage = `لا توجد تقارير جرد للموظف "${filterEmployeeName}" حتى الآن`;
+            }
+            reportsHtml = `<div class="empty-reports"><i class="fas fa-file-alt fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i><p>${emptyMessage}</p><p style="font-size: 0.8rem;">سيظهر هنا التقارير المرسلة من الموظف</p></div>`;
+        } else {
+            reportsToShow.forEach(report => {
+                const reportDate = report.timestamp ? new Date(report.timestamp).toLocaleString('ar-EG') : 'تاريخ غير معروف';
+                reportsHtml += `
+                <div class="report-card" data-report-id="${report.id}">
+                    <div class="report-info">
+                        <div class="report-employee"><i class="fas fa-user"></i> ${report.employeeName || 'غير معروف'}</div>
+                        <div class="report-branch"><i class="fas fa-store"></i> ${report.branchName || 'غير معروف'}</div>
+                        <div class="report-date"><i class="fas fa-calendar"></i> ${reportDate}</div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn-report btn-view" onclick="window.viewReportDetails('${report.id}')"><i class="fas fa-eye"></i> عرض التقرير</button>
+                        <button class="btn-report btn-pdf" onclick="window.printReportAsPDF('${report.id}')"><i class="fas fa-file-pdf"></i> طباعة PDF</button>
+                        <button class="btn-report btn-delete-report" onclick="window.deleteReport('${report.id}')"><i class="fas fa-trash"></i> حذف</button>
+                    </div>
+                </div>`;
+            });
+        }
+        
+        let headerTitle = 'تقارير الجرد';
+        let headerSubtitle = 'التقارير المالية المقدمة من الموظفين';
+        if (filterEmployeeName) {
+            headerTitle = `تقارير الجرد - ${filterEmployeeName}`;
+            headerSubtitle = `عرض التقارير المالية الخاصة بالموظف ${filterEmployeeName}`;
+        }
+        
+        const html = `
+            <div class="main-header">
+                <div class="header-brand">
+                    <button class="btn-icon" id="backFromReportsBtn" style="margin-left:10px;"><i class="fas fa-arrow-right"></i></button>
+                    <div class="brand-text">
+                        <h1>${headerTitle}</h1>
+                        <p>${headerSubtitle}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="app-container">
+                <div class="reports-header">
+                    <h2><i class="fas fa-chart-line"></i> ${headerTitle}</h2>
+                    <p>${headerSubtitle}</p>
+                </div>
+                ${!filterEmployeeName ? `
+                <div class="filter-bar">
+                    <select id="branchFilter" class="filter-select">
+                        <option value="">جميع الفروع</option>
+                        ${branches.map(b => `<option value="${b}">${b}</option>`).join('')}
+                    </select>
+                    <select id="employeeFilter" class="filter-select">
+                        <option value="">جميع الموظفين</option>
+                        ${employees.map(e => `<option value="${e}">${e}</option>`).join('')}
+                    </select>
+                    <button id="applyFilterBtn" class="btn-add" style="padding: 10px 20px;"><i class="fas fa-filter"></i> تصفية</button>
+                    <button id="resetFilterBtn" class="btn-header-action" style="background: #f1f5f9;"><i class="fas fa-undo"></i> إعادة تعيين</button>
+                </div>
+                ` : ''}
+                <div class="reports-list" id="reportsList">
+                    ${reportsHtml}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('appRoot').innerHTML = html;
+        
+        document.getElementById('backFromReportsBtn').addEventListener('click', () => {
+            if (currentEmployeeData && currentEmployeeShopId !== undefined) {
+                renderEmployeePage(currentEmployeeData, currentEmployeeShopId, currentEmployeeIndex);
+            } else {
+                renderHomePage();
+            }
+        });
+        
+        if (!filterEmployeeName) {
+            const applyBtn = document.getElementById('applyFilterBtn');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    const branchFilter = document.getElementById('branchFilter').value;
+                    const employeeFilter = document.getElementById('employeeFilter').value;
+                    renderReportsPage(employeeFilter || null, branchFilter || null);
+                });
+            }
+            
+            const resetBtn = document.getElementById('resetFilterBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    renderReportsPage(null, null);
+                });
+            }
+        }
     }
 
     function renderHomePage() {
@@ -1009,7 +1642,9 @@
 
         document.getElementById('addBranchBtn').addEventListener('click', () => { showAddBranchModal(() => renderHomePage()); });
         
-        document.getElementById('showAddEmployeeBtn').addEventListener('click', () => { 
+        // إصلاح تفاعل إظهار واستقرار فورم الموظف دون اختفاء فوري
+        document.getElementById('showAddEmployeeBtn').addEventListener('click', (e) => { 
+            e.stopPropagation(); // منع تمدد الإيفنت
             const form = document.getElementById('addEmployeeForm');
             const select = document.getElementById('newEmployeeShop');
             let freshOptions = '';
@@ -1020,7 +1655,8 @@
             form.classList.toggle('active'); 
         });
         
-        document.getElementById('confirmAddEmployeeBtn').addEventListener('click', async () => { 
+        document.getElementById('confirmAddEmployeeBtn').addEventListener('click', async (e) => { 
+            e.stopPropagation();
             const nameInput = document.getElementById('newEmployeeName'); 
             const shopSelect = document.getElementById('newEmployeeShop'); 
             const employeeName = nameInput.value.trim(); 
@@ -1161,13 +1797,11 @@
         const records = getEmployeeAttendanceRecords(employee.name, shop?.name || ''); 
         const grouped = groupAttendanceByDay(records); 
         
-        // حساب إجمالي الدقائق من grouped data (مجموع كل الأيام)
         let totalMinutes = 0;
         grouped.forEach(day => {
             totalMinutes += day.totalMinutes || 0;
         });
         
-        // تحديث totalMinutes في بيانات الموظف
         employee.totalMinutes = totalMinutes;
         saveDataToFirebase();
         
@@ -1177,7 +1811,6 @@
         grouped.forEach(day => { 
             let rows = ''; 
             
-            // عرض الأزواج فقط
             if (day.pairedRecords && day.pairedRecords.length > 0) {
                 day.pairedRecords.forEach(pair => {
                     const ci = pair.checkin;
@@ -1188,14 +1821,13 @@
                     <tr>
                         <td class="time-in">${new Date(ci.timestamp).toLocaleTimeString('ar-EG')}</td>
                         <td class="time-out">${new Date(co.timestamp).toLocaleTimeString('ar-EG')}</td>
-                        <td style="color:var(--primary)">${duration}</td>
+                        <td style="color:var(--primary)">${duration}<\/td>
                     </tr>`;
                 });
-                // إضافة صف مجموع اليوم
                 const dayTotalFormatted = formatMinutesToHoursAndMinutes(day.totalMinutes);
-                rows += `<tr style="background-color:#f0fdf4; border-top:2px solid #4cc9b0;"><td colspan="2" style="font-weight:800; text-align:left;">إجمالي اليوم</td><td style="font-weight:800; color:#10b981;">${dayTotalFormatted}</td></tr>`;
+                rows += `<tr style="background-color:#f0fdf4; border-top:2px solid #4cc9b0;"><td colspan="2" style="font-weight:800; text-align:left;">إجمالي اليوم<\/td><td style="font-weight:800; color:#10b981;">${dayTotalFormatted}<\/td></tr>`;
             } else {
-                rows = '<tr><td colspan="3">لا توجد سجلات كاملة (دخول وخروج)</td></tr>';
+                rows = '<tr><td colspan="3">لا توجد سجلات كاملة (دخول وخروج)<\/td></tr>';
             }
             
             daysHtml += `
@@ -1223,7 +1855,7 @@
                 <div class="brand-text" style="text-align:center; flex:1">
                     <h1>ملف الموظف</h1>
                 </div>
-                <div style="width:32px"></div>
+                <button id="showReportsBtn" class="btn-header-action" style="background: var(--warning); color: white;"><i class="fas fa-chart-line"></i> تقارير الجرد</button>
             </div>
             <div class="app-container">
                 <div class="profile-header">
@@ -1256,6 +1888,10 @@
         `;
 
         document.getElementById('globalBackBtn').addEventListener('click', () => renderShopPage(returnShopId));
+        
+        document.getElementById('showReportsBtn').addEventListener('click', () => {
+            renderReportsPage(employee.name, shop?.name);
+        });
 
         const sendBtn = document.getElementById('sendNoteBtn');
         const noteTextarea = document.getElementById('employeeNote');
@@ -1454,7 +2090,22 @@
                 attendanceRecords = records; 
                 await updateAllEmployeesWorkHours(); 
                 refreshView();
-            }); 
+            });
+            
+            window.firebaseOnValue(window.firebaseRef(window.firebaseDB, 'financialReports'), async (snap) => {
+                const reports = [];
+                if (snap.exists()) {
+                    const data = snap.val();
+                    for (const key in data) {
+                        reports.push({ id: key, ...data[key] });
+                    }
+                }
+                financialReports = reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (currentView === 'reports') {
+                    renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
+                }
+                refreshView();
+            });
         } 
     }
 
@@ -1462,6 +2113,7 @@
         if (currentView === 'home') renderHomePage(); 
         else if (currentView === 'shop') renderShopPage(currentShopId); 
         else if (currentView === 'employee') renderEmployeePage(currentEmployeeData, currentEmployeeShopId, currentEmployeeIndex);
+        else if (currentView === 'reports') renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
     }
     
     let appStarted = false; 
@@ -1476,7 +2128,10 @@
         });
 
         const savedAttendance = await loadAttendanceFromFirebase(); 
-        attendanceRecords = savedAttendance; 
+        attendanceRecords = savedAttendance;
+        
+        const savedReports = await loadFinancialReportsFromFirebase();
+        financialReports = savedReports;
 
         if (savedShops && savedShops.length > 0) { 
             shopsData = savedShops;
@@ -1494,3 +2149,4 @@
 </script>
 </body>
 </html>
+
