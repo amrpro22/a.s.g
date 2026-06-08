@@ -81,7 +81,6 @@
             text-size-adjust: 100%;
         }
 
-        /* Header Styling */
         .main-header {
             position: sticky;
             top: 0;
@@ -155,14 +154,12 @@
             color: white;
         }
 
-        /* App Container */
         .app-container {
             max-width: 800px;
             margin: 0 auto;
             padding: 16px;
         }
 
-        /* Top Action Cards */
         .actions-bar {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -199,7 +196,6 @@
             font-size: 0.85rem;
         }
 
-        /* Forms */
         .add-employee-form {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -269,16 +265,6 @@
 
         .btn-add:hover {
             background: var(--secondary);
-        }
-
-        /* Shops & Employee Cards */
-        .section-title {
-            font-weight: 800;
-            font-size: 1rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .shops-grid, .employees-grid {
@@ -358,7 +344,6 @@
             vertical-align: middle;
         }
 
-        /* Buttons within Cards */
         .card-actions {
             display: flex;
             gap: 4px;
@@ -389,7 +374,6 @@
             background: var(--danger);
         }
 
-        /* Employee Profile Page */
         .profile-header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: var(--radius);
@@ -431,7 +415,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
-        /* بطاقة التنبيهات المميزة */
         .alert-card {
             background: linear-gradient(135deg, #fff9e6, #fff3d1);
             border-right: 5px solid #ff9800;
@@ -503,20 +486,14 @@
             box-shadow: 0 6px 14px rgba(255,152,0,0.3);
         }
         
-        .alert-note-badge {
-            background: #ff9800;
-            color: white;
-            border-radius: 20px;
-            padding: 4px 10px;
+        .sent-confirm {
             font-size: 0.7rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
             margin-top: 8px;
+            text-align: center;
+            color: #10b981;
+            font-weight: 700;
         }
 
-        /* Attendance Table */
         .day-attendance-card {
             background: white;
             border-radius: var(--radius);
@@ -567,7 +544,6 @@
         .time-in { color: var(--success); }
         .time-out { color: var(--danger); }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -610,6 +586,33 @@
             height: 80vh;
             color: var(--primary);
         }
+        
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
 
         @media (max-width: 600px) {
             .app-container { padding: 12px; }
@@ -618,6 +621,7 @@
             .actions-bar { grid-template-columns: 1fr; gap: 10px; }
             .shop-card, .employee-card { padding: 12px; }
             .shop-icon, .employee-avatar { width: 44px; height: 44px; font-size: 1.15rem; }
+            .toast-message { white-space: normal; text-align: center; max-width: 85%; font-size: 0.8rem; bottom: 20px; }
         }
     </style>
 </head>
@@ -735,13 +739,57 @@
     async function loadAttendanceFromFirebase() { if(window.firebaseDB) try{ const snap=await window.firebaseGet(window.firebaseRef(window.firebaseDB,'attendanceRecords')); const records=[]; if(snap.exists()){ const data=snap.val(); for(const key in data) records.push({id:key,...data[key]}); } return records; }catch(e){} return []; }
     async function saveAttendanceToFirebase() { if(window.firebaseDB && attendanceRecords.length){ const recordsObj={}; attendanceRecords.forEach(r=>{if(r.id) recordsObj[r.id]=r;}); await window.firebaseSet(window.firebaseRef(window.firebaseDB,'attendanceRecords'), recordsObj);} }
     
+    // دالة إرسال ملاحظة للموظف (ربط مع واجهة الموظف)
+    async function sendNoteToEmployee(employeeName, branchName, noteContent) {
+        if (!window.firebaseDB) {
+            console.warn("Firebase not ready");
+            return false;
+        }
+        if (!noteContent || noteContent.trim() === "") return false;
+        
+        try {
+            const notesRef = window.firebaseRef(window.firebaseDB, 'employeeNotes');
+            const newNoteRef = window.firebasePush(notesRef);
+            const noteData = {
+                employeeName: employeeName,
+                branchName: branchName,
+                content: noteContent.trim(),
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            await window.firebaseSet(newNoteRef, noteData);
+            console.log(`✅ تم إرسال ملاحظة إلى ${employeeName} في ${branchName}`);
+            return true;
+        } catch (error) {
+            console.error("خطأ في إرسال الملاحظة:", error);
+            return false;
+        }
+    }
+    
+    function showToastMessage(message, isError = false) {
+        const existingToast = document.querySelector('.toast-message');
+        if (existingToast) existingToast.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.style.background = isError ? '#ef4444' : '#10b981';
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${message}`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
     function getDefaultShopsData() { 
         return [{ id:1,name:"متجر الأندلس",icon:"fas fa-crown",desc:"أفخر التشكيلات",employees:[]},
                 { id:2,name:"رواد الخليج",icon:"fas fa-ship",desc:"ريادة في البحر",employees:[]}]; 
     }
     
-    function deleteShopById(shopId) { const shopIndex = shopsData.findIndex(s=>s && String(s.id)===String(shopId)); if(shopIndex!==-1){ shopsData.splice(shopIndex,1); saveDataToFirebase(); renderHomePage(); alert(`تم حذف المحل بنجاح`); } }
-    function deleteEmployeeFromShop(shopId, employeeIndex) { const shop=shopsData.find(s=>s && String(s.id)===String(shopId)); if(shop && shop.employees && shop.employees[employeeIndex]){ shop.employees.splice(employeeIndex,1); saveDataToFirebase(); renderShopPage(shopId); alert(`تم حذف الموظف بنجاح`); } }
+    function deleteShopById(shopId) { const shopIndex = shopsData.findIndex(s=>s && String(s.id)===String(shopId)); if(shopIndex!==-1){ shopsData.splice(shopIndex,1); saveDataToFirebase(); renderHomePage(); showToastMessage("تم حذف المحل بنجاح"); } }
+    function deleteEmployeeFromShop(shopId, employeeIndex) { const shop=shopsData.find(s=>s && String(s.id)===String(shopId)); if(shop && shop.employees && shop.employees[employeeIndex]){ shop.employees.splice(employeeIndex,1); saveDataToFirebase(); renderShopPage(shopId); showToastMessage("تم حذف الموظف بنجاح"); } }
 
     function renderHomePage() {
         currentView='home'; if(!shopsData.length) return; const root=document.getElementById('appRoot');
@@ -832,8 +880,8 @@
             const employeeName=nameInput.value.trim(); 
             const shopId=parseInt(shopSelect.value); 
             
-            if(!employeeName) return alert('الرجاء إدخال الاسم'); 
-            if(isNaN(shopId)) return alert('الرجاء تحديد فرع صحيح أولاً');
+            if(!employeeName) return showToastMessage("الرجاء إدخال الاسم", true); 
+            if(isNaN(shopId)) return showToastMessage("الرجاء تحديد فرع صحيح أولاً", true);
 
             const shop=shopsData.find(s=>s && String(s.id)===String(shopId)); 
             if(shop){ 
@@ -846,9 +894,9 @@
                 nameInput.value=''; 
                 document.getElementById('addEmployeeForm').classList.remove('active'); 
                 renderHomePage(); 
-                alert(`تم إضافة الموظف بنجاح\nالرقم السري: ${newPin}`); 
+                showToastMessage(`تم إضافة الموظف بنجاح\nالرقم السري: ${newPin}`); 
             } else {
-                alert('الفرع المحدد غير موجود');
+                showToastMessage("الفرع المحدد غير موجود", true);
             }
         });
 
@@ -867,8 +915,8 @@
         document.querySelectorAll('.edit-shop-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const shopId=parseInt(btn.getAttribute('data-shop-id')); const shop=shopsData.find(s=>s && String(s.id)===String(shopId)); if(shop) showEditShopModal(shop,()=>renderHomePage()); }); });
         document.querySelectorAll('.delete-shop-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const shopId=parseInt(btn.getAttribute('data-shop-id')); if(confirm('حذف المحل؟')) deleteShopById(shopId); }); });
         
-        document.getElementById('globalDeleteEmployeeBtn').onclick = () => { alert('اختر موظفاً من قائمة الفروع لحذفه'); };
-        document.getElementById('globalDeleteBranchBtn').onclick = () => { alert('اختر فرعاً من القائمة لحذفه'); };
+        document.getElementById('globalDeleteEmployeeBtn').onclick = () => { showToastMessage("اختر موظفاً من قائمة الفروع لحذفه"); };
+        document.getElementById('globalDeleteBranchBtn').onclick = () => { showToastMessage("اختر فرعاً من القائمة لحذفه"); };
     }
 
     function renderShopPage(shopId) { 
@@ -921,7 +969,7 @@
         document.querySelectorAll('.delete-employee-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const empIdx=parseInt(btn.getAttribute('data-emp-index')); if(confirm('حذف الموظف؟')) deleteEmployeeFromShop(shopId,empIdx); }); });
     }
 
-    // دالة عرض صفحة الموظف مع حقل التنبيه والبطاقة المميزة وزر الإرسال
+    // صفحة تفاصيل الموظف مع حقل إرسال الملاحظات (مرتبط مع واجهة الموظف)
     function renderEmployeePage(employee, returnShopId, employeeIndex) { 
         currentView='employee'; currentEmployeeData=employee; currentEmployeeShopId=returnShopId; currentEmployeeIndex=employeeIndex; 
         const totalMinutes=Object.values(employee.workMinutes||{}).reduce((a,b)=>a+b,0); const shop=shopsData.find(s=>s && String(s.id)===String(returnShopId)); 
@@ -938,7 +986,7 @@
                 const ci=checkins[i]; const co=checkouts[i]; 
                 let duration='—'; 
                 if(ci&&co) duration=formatMinutesToHoursAndMinutes(calculateTimeDifferenceInMinutes(ci.timestamp,co.timestamp)); 
-                rows+=`</td>
+                rows+=`<tr>
                     <td class="time-in">${ci?new Date(ci.timestamp).toLocaleTimeString('ar-EG'):'—'}</td>
                     <td class="time-out">${co?new Date(co.timestamp).toLocaleTimeString('ar-EG'):'—'}</td>
                     <td style="color:var(--primary)">${duration}</td>
@@ -981,17 +1029,17 @@
                     </div>
                 </div>
                 
-                <!-- البطاقة المميزة: حقل التنبيه أو الملاحظة وزر الإرسال (تم إضافته أسفل اسم الموظف مباشرة) -->
+                <!-- البطاقة المميزة: حقل إرسال التنبيه أو الملاحظة للموظف (مرتبط مع واجهة الموظف) -->
                 <div class="alert-card">
                     <div class="alert-card-header">
                         <i class="fas fa-bell"></i>
-                        <span>تنبيه / ملاحظة للموظف</span>
+                        <span>إرسال تنبيه / ملاحظة للموظف</span>
                     </div>
-                    <textarea id="employeeNote" class="alert-textarea" placeholder="اكتب هنا أي تنبيه أو ملاحظة تريد إرسالها للموظف..."></textarea>
+                    <textarea id="employeeNote" class="alert-textarea" placeholder="اكتب هنا أي تنبيه أو ملاحظة... ستصل فوراً إلى حساب الموظف"></textarea>
                     <button id="sendNoteBtn" class="btn-send-alert">
                         <i class="fas fa-paper-plane"></i> إرسال التنبيه
                     </button>
-                    <div id="noteFeedback" style="font-size:0.7rem; margin-top:8px; color:#e67e22; font-weight:600; text-align:center;"></div>
+                    <div id="noteFeedback" style="font-size:0.7rem; margin-top:8px; text-align:center;"></div>
                 </div>
                 
                 <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -1002,10 +1050,9 @@
             </div>
         `;
 
-        // ربط زر العودة
         document.getElementById('globalBackBtn').addEventListener('click',()=>renderShopPage(returnShopId));
 
-        // ربط زر إرسال التنبيه
+        // ربط زر إرسال التنبيه مع Firebase (لإيصال الرسالة إلى الموظف)
         const sendBtn = document.getElementById('sendNoteBtn');
         const noteTextarea = document.getElementById('employeeNote');
         const noteFeedback = document.getElementById('noteFeedback');
@@ -1014,30 +1061,25 @@
             sendBtn.addEventListener('click', async () => {
                 const noteContent = noteTextarea.value.trim();
                 if (!noteContent) {
-                    noteFeedback.innerHTML = '<i class="fas fa-exclamation-triangle"></i> الرجاء كتابة نص التنبيه أولاً';
+                    noteFeedback.innerHTML = '<span style="color:#f72585;"><i class="fas fa-exclamation-triangle"></i> الرجاء كتابة نص التنبيه أولاً</span>';
                     setTimeout(() => { noteFeedback.innerHTML = ''; }, 3000);
                     return;
                 }
                 
-                // هنا يمكنك إرسال البيانات إلى أي نظام أو تخزينها في Firebase أو عرض رسالة نجاح
-                // سيتم إظهار رسالة نجاح وتفريغ الحقل بعد الإرسال
-                noteFeedback.innerHTML = '<i class="fas fa-check-circle"></i> تم إرسال التنبيه بنجاح إلى ' + employee.name;
-                noteFeedback.style.color = '#4cc9b0';
+                // إرسال الملاحظة إلى Firebase (ستصل إلى واجهة الموظف)
+                const success = await sendNoteToEmployee(employee.name, shop?.name || '', noteContent);
                 
-                // اختياري: حفظ التنبيه في وحدة التخزين (يمكن إضافة مسار خاص في Firebase إذا أردت)
-                // مثلاً: يمكن حفظها في employee.notes أو في عقدة منفصلة
-                console.log(`تم إرسال تنبيه للموظف ${employee.name} (${employee.accessCode}) في فرع ${shop?.name || ''}: ${noteContent}`);
-                
-                // تفريغ الحقل بعد الإرسال
-                noteTextarea.value = '';
-                
-                // إعادة تعيين رسالة التأكيد بعد 3 ثوانٍ
-                setTimeout(() => {
-                    if (noteFeedback) {
-                        noteFeedback.innerHTML = '';
-                        noteFeedback.style.color = '#e67e22';
-                    }
-                }, 3000);
+                if (success) {
+                    noteFeedback.innerHTML = '<span style="color:#10b981;"><i class="fas fa-check-circle"></i> تم إرسال التنبيه بنجاح إلى ' + employee.name + ' (سيظهر فوراً في حساب الموظف)</span>';
+                    noteTextarea.value = '';
+                    
+                    setTimeout(() => {
+                        if (noteFeedback) noteFeedback.innerHTML = '';
+                    }, 4000);
+                } else {
+                    noteFeedback.innerHTML = '<span style="color:#f72585;"><i class="fas fa-exclamation-triangle"></i> حدث خطأ في الإرسال، تأكد من الاتصال</span>';
+                    setTimeout(() => { noteFeedback.innerHTML = ''; }, 3000);
+                }
             });
         }
         
@@ -1049,7 +1091,7 @@
                     await saveAttendanceToFirebase();
                     await updateAllEmployeesWorkHours();
                     renderEmployeePage(employee, returnShopId, employeeIndex);
-                    alert('تم حذف جميع السجلات بنجاح');
+                    showToastMessage("تم حذف جميع السجلات بنجاح");
                 }
             });
         }
@@ -1094,6 +1136,7 @@
                 await saveDataToFirebase();
                 callback();
                 modal.remove();
+                showToastMessage("تم تحديث بيانات الفرع");
             }
         };
         modal.querySelector('.modal-cancel').onclick = () => modal.remove();
@@ -1143,8 +1186,9 @@
                 await saveDataToFirebase(); 
                 callback();
                 modal.remove();
+                showToastMessage("تم إضافة الفرع بنجاح");
             } else {
-                alert('الرجاء إدخال اسم الفرع');
+                showToastMessage("الرجاء إدخال اسم الفرع", true);
             }
         };
         modal.querySelector('.modal-cancel').onclick = () => modal.remove();
@@ -1186,8 +1230,9 @@
                 await saveAttendanceToFirebase();
                 callback();
                 modal.remove();
+                showToastMessage("تم تحديث بيانات الموظف");
             } else {
-                alert('الرجاء التأكد من تعبئة حقل الاسم وكلمة المرور');
+                showToastMessage("الرجاء التأكد من تعبئة حقل الاسم وكلمة المرور", true);
             }
         };
         modal.querySelector('.modal-cancel').onclick = () => modal.remove();
