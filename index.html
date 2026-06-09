@@ -988,6 +988,13 @@
         if (diffMinutes > 1440) return 0;
         return diffMinutes;
     }
+
+    function normalizeAttendanceType(type) {
+        const value = String(type || '').trim().toLowerCase();
+        if (value === 'دخول' || value === 'check in' || value === 'checkin' || value === 'in') return 'دخول';
+        if (value === 'خروج' || value === 'check out' || value === 'checkout' || value === 'out') return 'خروج';
+        return type;
+    }
     
     function formatMinutesToHoursAndMinutes(minutes) { 
         if (minutes <= 0) return '0 دقيقة'; 
@@ -1006,9 +1013,9 @@
         let totalMinutes = 0;
         let i = 0;
         while (i < records.length) {
-            if (records[i].type === 'دخول') {
+            if (normalizeAttendanceType(records[i].type) === 'دخول') {
                 for (let j = i + 1; j < records.length; j++) {
-                    if (records[j].type === 'خروج') {
+                    if (normalizeAttendanceType(records[j].type) === 'خروج') {
                         const minutes = calculateTimeDifferenceInMinutes(records[i].timestamp, records[j].timestamp);
                         if (minutes > 0 && minutes < 1440) {
                             totalMinutes += minutes;
@@ -1063,24 +1070,30 @@
         result.forEach(day => {
             day.records.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             const pairedRecords = [];
-            for (let i = 0; i < day.records.length; i++) {
-                if (day.records[i].type === 'دخول') {
-                    let checkout = null;
-                    for (let j = i + 1; j < day.records.length; j++) {
-                        if (day.records[j].type === 'خروج') {
-                            checkout = day.records[j];
-                            break;
-                        }
-                    }
-                    if (checkout) {
-                        pairedRecords.push({
-                            checkin: day.records[i],
-                            checkout: checkout
-                        });
-                    }
+            const openRecords = [];
+            const orphanCheckoutRecords = [];
+            let openCheckin = null;
+
+            day.records.forEach(record => {
+                const recordType = normalizeAttendanceType(record.type);
+                if (recordType === 'دخول') {
+                    if (openCheckin) openRecords.push(openCheckin);
+                    openCheckin = record;
+                } else if (recordType === 'خروج' && openCheckin) {
+                    pairedRecords.push({
+                        checkin: openCheckin,
+                        checkout: record
+                    });
+                    openCheckin = null;
+                } else if (recordType === 'خروج') {
+                    orphanCheckoutRecords.push(record);
                 }
-            }
+            });
+
+            if (openCheckin) openRecords.push(openCheckin);
             day.pairedRecords = pairedRecords;
+            day.openRecords = openRecords;
+            day.orphanCheckoutRecords = orphanCheckoutRecords;
             day.totalMinutes = pairedRecords.reduce((sum, pair) => {
                 return sum + calculateTimeDifferenceInMinutes(pair.checkin.timestamp, pair.checkout.timestamp);
             }, 0);
@@ -1156,11 +1169,46 @@
     }
     
     async function saveAttendanceToFirebase() { 
-        if (window.firebaseDB && attendanceRecords.length) { 
-            const recordsObj = {}; 
-            attendanceRecords.forEach(r => { if (r.id) recordsObj[r.id] = r; }); 
+        if (window.firebaseDB) {
             try {
+                if (!attendanceRecords.length) {
+                    await window.firebaseRemove(window.firebaseRef(window.firebaseDB, 'attendanceRecords'));
+                    return;
+                }
+
+                const recordsObj = {}; 
+                attendanceRecords.forEach(r => { if (r.id) recordsObj[r.id] = r; }); 
                 await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'attendanceRecords'), recordsObj);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    async function saveEmployeeNotesToFirebase() {
+        if (window.firebaseDB) {
+            try {
+                if (!employeeNotes.length) {
+                    await window.firebaseRemove(window.firebaseRef(window.firebaseDB, 'employeeNotes'));
+                    return;
+                }
+
+                const notesObj = {};
+                employeeNotes.forEach(note => { if (note.id) notesObj[note.id] = note; });
+                await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'employeeNotes'), notesObj);
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    async function saveFinancialReportsToFirebase() {
+        if (window.firebaseDB) {
+            try {
+                if (!financialReports.length) {
+                    await window.firebaseRemove(window.firebaseRef(window.firebaseDB, 'financialReports'));
+                    return;
+                }
+
+                const reportsObj = {};
+                financialReports.forEach(report => { if (report.id) reportsObj[report.id] = report; });
+                await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'financialReports'), reportsObj);
             } catch(e) { console.warn(e); }
         }
     }
@@ -1563,6 +1611,9 @@
 
         document.getElementById('backFromReportDetailsBtn').addEventListener('click', goBackToReports);
         document.getElementById('closeReportDetailsBtn').addEventListener('click', goBackToReports);
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        });
     }
 
     // دوال عامة يمكن استدعاؤها من onClick
@@ -2027,6 +2078,9 @@
         `;
         
         document.getElementById('appRoot').innerHTML = html;
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        });
         
         document.getElementById('backFromReportsBtn').addEventListener('click', () => {
             if (currentEmployeeData && currentEmployeeShopId !== undefined) {
@@ -2362,8 +2416,33 @@
                         <td style="color:var(--primary)">${duration}<\/td>
                     </tr>`;
                 });
+            }
+
+            if (day.openRecords && day.openRecords.length > 0) {
+                day.openRecords.forEach(record => {
+                    rows += `
+                    <tr style="background-color:#fffbeb;">
+                        <td class="time-in">${new Date(record.timestamp).toLocaleTimeString('ar-EG')}</td>
+                        <td style="color:#d97706; font-weight:800;">لم يسجل خروج بعد</td>
+                        <td style="color:#d97706; font-weight:800;">مفتوح</td>
+                    </tr>`;
+                });
+            }
+
+            if (day.orphanCheckoutRecords && day.orphanCheckoutRecords.length > 0) {
+                day.orphanCheckoutRecords.forEach(record => {
+                    rows += `
+                    <tr style="background-color:#fef2f2;">
+                        <td style="color:#dc2626; font-weight:800;">لا يوجد دخول</td>
+                        <td class="time-out">${new Date(record.timestamp).toLocaleTimeString('ar-EG')}</td>
+                        <td style="color:#dc2626; font-weight:800;">غير مكتمل</td>
+                    </tr>`;
+                });
+            }
+
+            if (rows) {
                 const dayTotalFormatted = formatMinutesToHoursAndMinutes(day.totalMinutes);
-                rows += `<tr style="background-color:#f0fdf4; border-top:2px solid #4cc9b0;"><td colspan="2" style="font-weight:800; text-align:left;">إجمالي اليوم<\/td><td style="font-weight:800; color:#10b981;">${dayTotalFormatted}<\/td></tr>`;
+                rows += `<tr style="background-color:#f0fdf4; border-top:2px solid #4cc9b0;"><td colspan="2" style="font-weight:800; text-align:left;">إجمالي اليوم المكتمل<\/td><td style="font-weight:800; color:#10b981;">${dayTotalFormatted}<\/td></tr>`;
             } else {
                 rows = '<tr><td colspan="3">لا توجد سجلات كاملة (دخول وخروج)<\/td></tr>';
             }
@@ -2516,9 +2595,24 @@
             const newName = modal.querySelector('#editShopName').value.trim();
             const newIcon = modal.querySelector('#editShopIcon').value;
             if (newName) {
+                const oldName = shop.name;
                 shop.name = newName;
                 shop.icon = newIcon;
+                if (oldName !== newName) {
+                    attendanceRecords.forEach(r => {
+                        if (r.branchName === oldName) r.branchName = newName;
+                    });
+                    employeeNotes.forEach(note => {
+                        if (note.branchName === oldName) note.branchName = newName;
+                    });
+                    financialReports.forEach(report => {
+                        if (report.branchName === oldName) report.branchName = newName;
+                    });
+                }
                 await saveDataToFirebase();
+                await saveAttendanceToFirebase();
+                await saveEmployeeNotesToFirebase();
+                await saveFinancialReportsToFirebase();
                 callback();
                 modal.remove();
                 showToastMessage("تم تحديث بيانات الفرع");
