@@ -201,6 +201,151 @@
             font-size: 0.85rem;
         }
 
+        .home-hero {
+            background: #ffffff;
+            border: 1px solid rgba(67, 97, 238, 0.10);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .home-hero-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .home-hero-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .home-hero-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: #eef2ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        .home-hero-title h2 {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            line-height: 1.25;
+            font-weight: 800;
+        }
+
+        .home-hero-title p {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .home-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .home-tool-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .home-tool-btn:hover {
+            background: #fee2e2;
+            color: var(--danger);
+            border-color: #fecdd3;
+        }
+
+        .home-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .home-stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px;
+            min-width: 0;
+        }
+
+        .home-stat-card strong {
+            display: block;
+            font-size: 1.15rem;
+            line-height: 1;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .home-stat-card span {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .home-action-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .home-action-panel .action-card-btn {
+            min-height: 86px;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .home-action-panel .action-card-btn i {
+            background: #eef2ff;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .home-action-panel .action-card-btn small {
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.68rem;
+        }
+
         .add-employee-form {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -888,6 +1033,10 @@
             .toast-message { white-space: normal; text-align: center; max-width: 85%; font-size: 0.8rem; bottom: 20px; }
             .filter-bar { flex-direction: column; }
             .filter-select { width: 100%; }
+            .home-hero-top { align-items: flex-start; }
+            .home-stats-grid { grid-template-columns: 1fr 1fr; }
+            .home-action-panel { grid-template-columns: 1fr; }
+            .home-hero-title h2 { font-size: 1rem; }
             .report-actions { margin-top: 10px; width: 100%; justify-content: center; }
             .report-card { flex-direction: column; text-align: center; }
             .report-info { text-align: center; }
@@ -1051,53 +1200,64 @@
     }
     
     function groupAttendanceByDay(records) { 
-        const grouped = {}; 
-        records.forEach(rec => { 
-            const dateKey = formatDate(new Date(rec.timestamp)); 
+        const grouped = {};
+        const sortedRecords = records
+            .slice()
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        const getDayEntry = (timestamp) => {
+            const dateObj = new Date(timestamp);
+            const dateKey = formatDate(dateObj);
             if (!grouped[dateKey]) {
                 grouped[dateKey] = {
                     date: dateKey,
-                    dateObj: new Date(rec.timestamp),
-                    dayName: getArabicDayName(new Date(rec.timestamp)),
-                    records: []
+                    dateObj: dateObj,
+                    dayName: getArabicDayName(dateObj),
+                    records: [],
+                    pairedRecords: [],
+                    openRecords: [],
+                    orphanCheckoutRecords: [],
+                    totalMinutes: 0
                 };
             }
-            grouped[dateKey].records.push(rec); 
-        });
-        
-        const result = Object.values(grouped).sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        result.forEach(day => {
-            day.records.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            const pairedRecords = [];
-            const openRecords = [];
-            const orphanCheckoutRecords = [];
-            let openCheckin = null;
+            return grouped[dateKey];
+        };
 
-            day.records.forEach(record => {
-                const recordType = normalizeAttendanceType(record.type);
-                if (recordType === 'دخول') {
-                    if (openCheckin) openRecords.push(openCheckin);
-                    openCheckin = record;
-                } else if (recordType === 'خروج' && openCheckin) {
-                    pairedRecords.push({
+        let openCheckin = null;
+
+        sortedRecords.forEach(record => {
+            getDayEntry(record.timestamp).records.push(record);
+            const recordType = normalizeAttendanceType(record.type);
+
+            if (recordType === 'دخول') {
+                if (openCheckin) {
+                    getDayEntry(openCheckin.timestamp).openRecords.push(openCheckin);
+                }
+                openCheckin = record;
+            } else if (recordType === 'خروج') {
+                if (openCheckin) {
+                    getDayEntry(openCheckin.timestamp).pairedRecords.push({
                         checkin: openCheckin,
                         checkout: record
                     });
                     openCheckin = null;
-                } else if (recordType === 'خروج') {
-                    orphanCheckoutRecords.push(record);
+                } else {
+                    getDayEntry(record.timestamp).orphanCheckoutRecords.push(record);
                 }
-            });
+            }
+        });
 
-            if (openCheckin) openRecords.push(openCheckin);
-            day.pairedRecords = pairedRecords;
-            day.openRecords = openRecords;
-            day.orphanCheckoutRecords = orphanCheckoutRecords;
-            day.totalMinutes = pairedRecords.reduce((sum, pair) => {
+        if (openCheckin) {
+            getDayEntry(openCheckin.timestamp).openRecords.push(openCheckin);
+        }
+
+        const result = Object.values(grouped).sort((a, b) => b.dateObj - a.dateObj);
+        result.forEach(day => {
+            day.totalMinutes = day.pairedRecords.reduce((sum, pair) => {
                 return sum + calculateTimeDifferenceInMinutes(pair.checkin.timestamp, pair.checkout.timestamp);
             }, 0);
         });
+
         return result;
     }
     
@@ -2119,6 +2279,21 @@
                 shopOptions += `<option value="${shop.id}">${shop.name}</option>`;
             }
         });
+
+        const totalBranches = shopsData.filter(Boolean).length;
+        const totalEmployees = shopsData.reduce((sum, shop) => sum + (ensureArray(shop?.employees).length || 0), 0);
+        const totalReports = financialReports.length;
+        const openAttendanceMap = {};
+        attendanceRecords
+            .slice()
+            .sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0))
+            .forEach(record => {
+                const key = `${record.employeeName || ''}__${record.branchName || ''}`;
+                const type = normalizeAttendanceType(record.type);
+                if (type === 'دخول') openAttendanceMap[key] = true;
+                if (type === 'خروج') delete openAttendanceMap[key];
+            });
+        const openAttendanceCount = Object.keys(openAttendanceMap).length;
         
         let shopsHtml = ''; 
         shopsData.forEach(shop => { 
@@ -2149,21 +2324,42 @@
                         <p>نظام الإدارة المتكامل</p>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <button class="btn-header-action" id="globalDeleteBranchBtn"><i class="fas fa-store-slash"></i></button>
-                    <button class="btn-header-action" id="globalDeleteEmployeeBtn"><i class="fas fa-user-minus"></i></button>
-                </div>
             </div>
 
             <div class="app-container">
-                <div class="actions-bar">
+                <div class="home-hero">
+                    <div class="home-hero-top">
+                        <div class="home-hero-title">
+                            <div class="home-hero-icon"><i class="fas fa-chart-simple"></i></div>
+                            <div>
+                                <h2>لوحة الإدارة الرئيسية</h2>
+                                <p>متابعة الفروع والموظفين والحضور والتقارير</p>
+                            </div>
+                        </div>
+                        <div class="home-tools">
+                            <button class="home-tool-btn" id="globalDeleteBranchBtn" title="حذف فرع"><i class="fas fa-store-slash"></i></button>
+                            <button class="home-tool-btn" id="globalDeleteEmployeeBtn" title="حذف موظف"><i class="fas fa-user-minus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="home-stats-grid">
+                        <div class="home-stat-card"><strong>${totalBranches}</strong><span>الفروع</span></div>
+                        <div class="home-stat-card"><strong>${totalEmployees}</strong><span>الموظفون</span></div>
+                        <div class="home-stat-card"><strong>${totalReports}</strong><span>تقارير الجرد</span></div>
+                        <div class="home-stat-card"><strong>${openAttendanceCount}</strong><span>دوام مفتوح</span></div>
+                    </div>
+                </div>
+
+                <div class="home-action-panel">
                     <div class="action-card-btn" id="addBranchBtn">
                         <i class="fas fa-plus-circle"></i>
                         <span>إضافة فرع</span>
+                        <small>إنشاء فرع جديد وربطه بالموظفين</small>
                     </div>
                     <div class="action-card-btn" id="showAddEmployeeBtn">
                         <i class="fas fa-user-plus"></i>
                         <span>إضافة موظف</span>
+                        <small>إضافة موظف وكود الدخول الخاص به</small>
                     </div>
                 </div>
 
@@ -2409,10 +2605,15 @@
                     const co = pair.checkout;
                     const minutes = calculateTimeDifferenceInMinutes(ci.timestamp, co.timestamp);
                     const duration = formatMinutesToHoursAndMinutes(minutes);
+                    const checkinDate = formatDate(new Date(ci.timestamp));
+                    const checkoutDate = formatDate(new Date(co.timestamp));
+                    const checkoutDisplay = checkinDate === checkoutDate
+                        ? new Date(co.timestamp).toLocaleTimeString('ar-EG')
+                        : `${new Date(co.timestamp).toLocaleTimeString('ar-EG')} <span style="display:block; font-size:0.65rem; color:#64748b;">${checkoutDate}</span>`;
                     rows += `
                     <tr>
                         <td class="time-in">${new Date(ci.timestamp).toLocaleTimeString('ar-EG')}</td>
-                        <td class="time-out">${new Date(co.timestamp).toLocaleTimeString('ar-EG')}</td>
+                        <td class="time-out">${checkoutDisplay}</td>
                         <td style="color:var(--primary)">${duration}<\/td>
                     </tr>`;
                 });
