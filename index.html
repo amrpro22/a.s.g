@@ -1017,7 +1017,7 @@
                 if (snap.exists()) {
                     const data = snap.val();
                     for (const key in data) {
-                        reports.push({ id: key, ...data[key] });
+                        reports.push(normalizeFinancialReport({ id: key, ...data[key] }));
                     }
                 }
                 return reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -1121,8 +1121,115 @@
         } 
     }
     
+    function pickFirstValue(...values) {
+        for (const value of values) {
+            if (value !== undefined && value !== null && value !== '') return value;
+        }
+        return '';
+    }
+
+    function normalizeFinancialReport(report) {
+        const normalized = { ...(report || {}) };
+        const containers = ['reportData', 'formData', 'data', 'details', 'values', 'fields'];
+
+        containers.forEach(containerName => {
+            const container = report && report[containerName];
+            if (container && typeof container === 'object' && !Array.isArray(container)) {
+                Object.keys(container).forEach(key => {
+                    if (normalized[key] === undefined || normalized[key] === null || normalized[key] === '') {
+                        normalized[key] = container[key];
+                    }
+                });
+            }
+        });
+
+        const beginning = normalized.beginning || normalized.beginningDrawer || normalized.beginningCash || normalized.start || normalized.startDrawer || {};
+        const ending = normalized.ending || normalized.endingDrawer || normalized.endingCash || normalized.end || normalized.endDrawer || {};
+        const cig = normalized.cig || normalized.cigarettes || normalized.cigCount || normalized.cigaretteCount || {};
+        const initial = normalized.initial || normalized.initialBalance || {};
+        const secondDrawer = normalized.secondDrawer || normalized.second || normalized.drawer2 || {};
+        const secondBeginning = normalized.secondBeginning || normalized.secBeginning || secondDrawer.beginning || secondDrawer.start || {};
+        const secondEnding = normalized.secondEnding || normalized.secEnding || secondDrawer.ending || secondDrawer.end || {};
+        const stax = normalized.stax || normalized.sevenStax || normalized['7stax'] || {};
+
+        const assign = (targetKey, ...values) => {
+            normalized[targetKey] = pickFirstValue(normalized[targetKey], ...values);
+            if (normalized[targetKey] === 0) normalized[targetKey] = '0';
+        };
+
+        [
+            ['beg100', beginning.beg100, beginning['100'], beginning.hundred, beginning.hundreds],
+            ['beg50', beginning.beg50, beginning['50'], beginning.fifty, beginning.fifties],
+            ['beg20', beginning.beg20, beginning['20'], beginning.twenty, beginning.twenties],
+            ['beg10', beginning.beg10, beginning['10'], beginning.ten, beginning.tens],
+            ['beg5', beginning.beg5, beginning['5'], beginning.five, beginning.fives],
+            ['beg1', beginning.beg1, beginning['1'], beginning.one, beginning.ones],
+            ['begQ', beginning.begQ, beginning.q, beginning.Q, beginning.quarter, beginning.quarters],
+            ['begD', beginning.begD, beginning.d, beginning.D, beginning.dime, beginning.dimes],
+            ['begN', beginning.begN, beginning.n, beginning.N, beginning.nickel, beginning.nickels],
+            ['begP', beginning.begP, beginning.p, beginning.P, beginning.penny, beginning.pennies],
+            ['beginningTotal', beginning.beginningTotal, beginning.total, beginning.drawerTotal],
+
+            ['end100', ending.end100, ending['100'], ending.hundred, ending.hundreds],
+            ['end50', ending.end50, ending['50'], ending.fifty, ending.fifties],
+            ['end20', ending.end20, ending['20'], ending.twenty, ending.twenties],
+            ['end10', ending.end10, ending['10'], ending.ten, ending.tens],
+            ['end5', ending.end5, ending['5'], ending.five, ending.fives],
+            ['end1', ending.end1, ending['1'], ending.one, ending.ones],
+            ['endQ', ending.endQ, ending.q, ending.Q, ending.quarter, ending.quarters],
+            ['endD', ending.endD, ending.d, ending.D, ending.dime, ending.dimes],
+            ['endN', ending.endN, ending.n, ending.N, ending.nickel, ending.nickels],
+            ['endP', ending.endP, ending.p, ending.P, ending.penny, ending.pennies],
+            ['endingTotal', ending.endingTotal, ending.total, ending.drawerTotal],
+
+            ['cigBeginning', cig.cigBeginning, cig.beginning, cig.start],
+            ['cig1', cig.cig1, cig.one, cig['1']],
+            ['cigEnd', cig.cigEnd, cig.end, cig.ending],
+            ['cig2', cig.cig2, cig.two, cig['2']],
+            ['cigCash', cig.cigCash, cig.cash],
+            ['cigDebit', cig.cigDebit, cig.debit],
+            ['cigTotal', cig.cigTotal, cig.total],
+
+            ['initBeg', initial.initBeg, initial.beginning, initial.start],
+            ['initEnd', initial.initEnd, initial.end, initial.ending],
+
+            ['secBeg1', secondBeginning.secBeg1, secondBeginning['1'], secondBeginning.one, secondBeginning.ones],
+            ['secBeg5', secondBeginning.secBeg5, secondBeginning['5'], secondBeginning.five, secondBeginning.fives],
+            ['secBeg10', secondBeginning.secBeg10, secondBeginning['10'], secondBeginning.ten, secondBeginning.tens],
+            ['secBeg20', secondBeginning.secBeg20, secondBeginning['20'], secondBeginning.twenty, secondBeginning.twenties],
+            ['secBegQ', secondBeginning.secBegQ, secondBeginning.q, secondBeginning.Q, secondBeginning.quarters],
+            ['secBegD', secondBeginning.secBegD, secondBeginning.d, secondBeginning.D, secondBeginning.dimes],
+            ['secBegN', secondBeginning.secBegN, secondBeginning.n, secondBeginning.N, secondBeginning.nickels],
+            ['secBegP', secondBeginning.secBegP, secondBeginning.p, secondBeginning.P, secondBeginning.pennies],
+            ['secBegTotal', secondBeginning.secBegTotal, secondBeginning.total],
+
+            ['secEnd1', secondEnding.secEnd1, secondEnding['1'], secondEnding.one, secondEnding.ones],
+            ['secEnd5', secondEnding.secEnd5, secondEnding['5'], secondEnding.five, secondEnding.fives],
+            ['secEnd10', secondEnding.secEnd10, secondEnding['10'], secondEnding.ten, secondEnding.tens],
+            ['secEnd20', secondEnding.secEnd20, secondEnding['20'], secondEnding.twenty, secondEnding.twenties],
+            ['secEndQ', secondEnding.secEndQ, secondEnding.q, secondEnding.Q, secondEnding.quarters],
+            ['secEndD', secondEnding.secEndD, secondEnding.d, secondEnding.D, secondEnding.dimes],
+            ['secEndN', secondEnding.secEndN, secondEnding.n, secondEnding.N, secondEnding.nickels],
+            ['secEndP', secondEnding.secEndP, secondEnding.p, secondEnding.P, secondEnding.pennies],
+            ['secEndTotal', secondEnding.secEndTotal, secondEnding.total],
+
+            ['stax100', stax.stax100, stax['100']],
+            ['stax80', stax.stax80, stax['80']],
+            ['stax60', stax.stax60, stax['60']],
+            ['stax5pk100', stax.stax5pk100, stax['5pk100']],
+            ['stax5pk80', stax.stax5pk80, stax['5pk80']],
+            ['stax5pk5', stax.stax5pk5, stax['5pk5']],
+            ['staxBot100', stax.staxBot100, stax.bot100, stax.bottom100],
+            ['staxBot80', stax.staxBot80, stax.bot80, stax.bottom80],
+            ['staxBot60', stax.staxBot60, stax.bot60, stax.bottom60]
+        ].forEach(([key, ...values]) => assign(key, ...values));
+
+        return normalized;
+    }
+
     // ============ دوال التقارير العامة المتوافقة كلياً مع شكل الموظف ============
     function generateReportHTML(report, forPDF = false) {
+        report = normalizeFinancialReport(report);
         // تم استبدال الكود السابق ليكون مطابقاً تماماً لكود الموظف بكل مخرجاته وتفاصيله (للعرض والـ PDF معاً)
         return `
 <div class="container" style="max-width:800px; width: 100%; margin:0 auto; background:white; border-radius:${forPDF ? '0' : '20px'}; padding:20px; box-shadow:${forPDF ? 'none' : '0 4px 12px rgba(0,0,0,0.05)'}; font-family: 'Inter', 'Cairo', sans-serif; direction: ltr; text-align: left; box-sizing: border-box;">
@@ -1336,45 +1443,286 @@
             printWindow.document.close();
         }
     };
+
+    function escapeReportValue(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function generateReportPDFHTML(report) {
+        report = normalizeFinancialReport(report);
+        const v = (key, fallback = '') => escapeReportValue(report[key] || fallback);
+        const row = (label, value) => `<tr><td>${escapeReportValue(label)}</td><td>${escapeReportValue(value || '')}</td></tr>`;
+        const moneyRows = (labels, keys) => labels.map((label, index) => row(label, report[keys[index]])).join('');
+
+        return `
+            <div class="pdf-sheet">
+                <div class="pdf-title">
+                    <h1>Cash Drawer Count Sheet</h1>
+                    <p>Generated by Alshugaa Group Dashboard</p>
+                </div>
+
+                <table class="info-table">
+                    <tr>
+                        <th>Name</th>
+                        <th>Branch</th>
+                        <th>Date</th>
+                        <th>Shift</th>
+                    </tr>
+                    <tr>
+                        <td>${v('employeeName', report.name)}</td>
+                        <td>${v('branchName')}</td>
+                        <td>${v('date')}</td>
+                        <td>${v('shift')}</td>
+                    </tr>
+                </table>
+
+                <div class="two-col avoid-break">
+                    <section>
+                        <h2>BEGINNING</h2>
+                        <table>
+                            ${moneyRows(['100s','50s','20s','10s','5s','1s','Quarters','Dimes','Nickels','Pennies'], ['beg100','beg50','beg20','beg10','beg5','beg1','begQ','begD','begN','begP'])}
+                            <tr class="total"><td>Total Drawer</td><td>${v('beginningTotal', '0.00')}</td></tr>
+                        </table>
+                    </section>
+
+                    <section>
+                        <h2>END</h2>
+                        <table>
+                            ${moneyRows(['100s','50s','20s','10s','5s','1s','Quarters','Dimes','Nickels','Pennies'], ['end100','end50','end20','end10','end5','end1','endQ','endD','endN','endP'])}
+                            <tr class="total"><td>Total Drawer</td><td>${v('endingTotal', '0.00')}</td></tr>
+                        </table>
+                    </section>
+                </div>
+
+                <section class="avoid-break">
+                    <h2>CIG COUNT</h2>
+                    <table class="wide-table">
+                        ${row('Beginning of shift', report.cigBeginning)}
+                        ${row('1', report.cig1)}
+                        ${row('End of shift', report.cigEnd)}
+                        ${row('2', report.cig2)}
+                        ${row('Cash', report.cigCash)}
+                        ${row('Debit', report.cigDebit)}
+                        <tr class="total"><td>Total</td><td>${v('cigTotal')}</td></tr>
+                    </table>
+                </section>
+
+                <section class="avoid-break">
+                    <h2>INITIAL</h2>
+                    <table class="wide-table">
+                        ${row('Beginning of Shift Balance', report.initBeg)}
+                        ${row('End of Shift', report.initEnd)}
+                    </table>
+                </section>
+
+                <div class="two-col avoid-break">
+                    <section>
+                        <h2>SECOND DRAWER - BEGINNING</h2>
+                        <table>
+                            ${moneyRows(['1s','5s','10s','20s','Q','D','N','P'], ['secBeg1','secBeg5','secBeg10','secBeg20','secBegQ','secBegD','secBegN','secBegP'])}
+                            <tr class="total"><td>Total</td><td>${v('secBegTotal')}</td></tr>
+                        </table>
+                    </section>
+
+                    <section>
+                        <h2>SECOND DRAWER - END</h2>
+                        <table>
+                            ${moneyRows(['1s','5s','10s','20s','Q','D','N','P'], ['secEnd1','secEnd5','secEnd10','secEnd20','secEndQ','secEndD','secEndN','secEndP'])}
+                            <tr class="total"><td>Total</td><td>${v('secEndTotal')}</td></tr>
+                        </table>
+                    </section>
+                </div>
+
+                <section class="avoid-break">
+                    <h2>7STAX</h2>
+                    <table class="wide-table">
+                        ${moneyRows(['1-100s','2-80s','3-60s','4-5pk100','5-5pak80s','5pk5','Bottom 100s','Bottom 80s','Bottom 60s'], ['stax100','stax80','stax60','stax5pk100','stax5pk80','stax5pk5','staxBot100','staxBot80','staxBot60'])}
+                    </table>
+                </section>
+            </div>
+        `;
+    }
+
+    function getReportPdfStyles() {
+        return `
+            <style>
+                .pdf-report-wrapper,
+                .pdf-report-wrapper * {
+                    box-sizing: border-box;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                .pdf-report-wrapper {
+                    width: 760px;
+                    background: #ffffff;
+                    color: #111827;
+                    font-family: Arial, 'Cairo', sans-serif;
+                    direction: ltr;
+                    text-align: left;
+                }
+
+                .pdf-sheet {
+                    width: 760px;
+                    padding: 14px;
+                    background: #ffffff;
+                }
+
+                .pdf-title {
+                    text-align: center;
+                    border-bottom: 2px solid #111827;
+                    padding-bottom: 8px;
+                    margin-bottom: 10px;
+                }
+
+                .pdf-title h1 {
+                    margin: 0;
+                    font-size: 20px;
+                    line-height: 1.2;
+                }
+
+                .pdf-title p {
+                    margin: 3px 0 0;
+                    color: #64748b;
+                    font-size: 10px;
+                }
+
+                .info-table,
+                .pdf-sheet table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                }
+
+                .pdf-sheet th,
+                .pdf-sheet td {
+                    border: 1px solid #cbd5e1;
+                    padding: 5px 7px;
+                    font-size: 11px;
+                    line-height: 1.25;
+                    vertical-align: middle;
+                    word-break: break-word;
+                }
+
+                .pdf-sheet th {
+                    background: #e2e8f0;
+                    color: #0f172a;
+                    font-weight: 800;
+                }
+
+                .pdf-sheet h2 {
+                    margin: 0;
+                    padding: 6px 8px;
+                    background: #0f172a;
+                    color: #ffffff;
+                    font-size: 12px;
+                    line-height: 1.2;
+                    border-radius: 6px 6px 0 0;
+                }
+
+                .two-col {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                    margin-top: 10px;
+                }
+
+                .pdf-sheet section {
+                    margin-top: 10px;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 7px;
+                    overflow: hidden;
+                    background: #ffffff;
+                }
+
+                .two-col section {
+                    margin-top: 0;
+                }
+
+                .total td {
+                    background: #f1f5f9;
+                    font-weight: 800;
+                    color: #0f172a;
+                }
+
+                .avoid-break {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+            </style>
+        `;
+    }
     
     window.printReportAsPDF = async function(reportId) {
         const report = financialReports.find(r => r.id === reportId);
         if (!report) return;
-        
-        // تجهيز عنصر مؤقت ومنسق خصيصاً للـ PDF لعدم التداخل
-        const element = document.createElement('div');
-        element.style.padding = '20px';
-        element.style.backgroundColor = 'white';
-        element.style.width = '800px'; 
-        element.style.margin = '0';
-        element.innerHTML = generateReportHTML(report, true);
-        
-        const opt = {
-            margin: [15, 10, 15, 10], 
-            filename: `تقرير_الجرد_${report.employeeName || 'موظف'}_${report.date?.replace(/\//g, '-') || 'غير_محدد'}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2, 
-                useCORS: true, 
-                letterRendering: false, 
-                allowTaint: true,
-                logging: false
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        
-        showToastMessage("جاري تحضير ملف PDF التقرير المرتب...");
-        
-        setTimeout(() => {
-            html2pdf().set(opt).from(element).save()
-            .then(() => {
-                showToastMessage("تم تنزيل تقرير الـ PDF بنجاح!");
-            })
-            .catch((err) => {
-                console.error("خطأ في تصدير PDF:", err);
-                showToastMessage("حدث خطأ أثناء محاولة حفظ ملف الـ PDF", true);
-            });
-        }, 500);
+
+        const safeName = escapeReportValue(report.employeeName || report.name || 'موظف');
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            showToastMessage("المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة ثم حاول مرة أخرى", true);
+            return;
+        }
+
+        printWindow.document.open();
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="en" dir="ltr">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>تقرير الجرد - ${safeName}</title>
+                ${getReportPdfStyles()}
+                <style>
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                        background: #ffffff;
+                    }
+                    body {
+                        width: 760px;
+                        margin: 0 auto;
+                    }
+                    @page {
+                        size: A4;
+                        margin: 8mm;
+                    }
+                    @media print {
+                        body {
+                            width: auto;
+                            margin: 0;
+                        }
+                        .pdf-report-wrapper {
+                            width: 100% !important;
+                        }
+                        .pdf-sheet {
+                            width: 100% !important;
+                            padding: 0 !important;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="pdf-report-wrapper">
+                    ${generateReportPDFHTML(report)}
+                </div>
+                <script>
+                    window.addEventListener('load', function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 250);
+                    });
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        showToastMessage("تم فتح التقرير. من نافذة الطباعة اختر Save as PDF");
     };
     
     window.deleteReport = async function(reportId) {
@@ -2066,7 +2414,7 @@
                 if (snap.exists()) {
                     const data = snap.val();
                     for (const key in data) {
-                        reports.push({ id: key, ...data[key] });
+                        reports.push(normalizeFinancialReport({ id: key, ...data[key] }));
                     }
                 }
                 financialReports = reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -2118,5 +2466,3 @@
 </script>
 </body>
 </html>
-
-
