@@ -556,6 +556,101 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 14px rgba(255,152,0,0.3);
         }
+
+        .notes-history {
+            margin-top: 14px;
+            border-top: 1px solid rgba(217,119,6,0.25);
+            padding-top: 12px;
+        }
+
+        .notes-history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-weight: 800;
+            color: #92400e;
+            font-size: 0.82rem;
+        }
+
+        .notes-count-badge {
+            background: #fff;
+            color: #d97706;
+            border: 1px solid #fed7aa;
+            border-radius: 999px;
+            padding: 3px 9px;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .notes-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 260px;
+            overflow-y: auto;
+            padding-left: 2px;
+        }
+
+        .note-history-item {
+            background: #ffffff;
+            border: 1px solid #fed7aa;
+            border-radius: 12px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: start;
+        }
+
+        .note-history-content {
+            color: #1e293b;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .note-history-meta {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 0.68rem;
+            font-weight: 700;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-delete-note {
+            background: rgba(247, 37, 133, 0.08);
+            color: var(--danger);
+            border: 1px solid rgba(247, 37, 133, 0.18);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete-note:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .empty-notes-history {
+            background: rgba(255,255,255,0.65);
+            border: 1px dashed #f59e0b;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            color: #92400e;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
         
         .sent-confirm {
             font-size: 0.7rem;
@@ -798,6 +893,7 @@
     let shopsData = [];
     let attendanceRecords = [];
     let financialReports = [];
+    let employeeNotes = [];
     let currentView = 'home';
     let currentShopId = null;
     let currentEmployeeData = null;
@@ -1025,6 +1121,23 @@
         }
         return [];
     }
+
+    async function loadEmployeeNotesFromFirebase() {
+        if (window.firebaseDB) {
+            try {
+                const snap = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'employeeNotes'));
+                const notes = [];
+                if (snap.exists()) {
+                    const data = snap.val();
+                    for (const key in data) {
+                        notes.push({ id: key, ...data[key] });
+                    }
+                }
+                return notes.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            } catch(e) { console.warn(e); }
+        }
+        return [];
+    }
     
     async function saveAttendanceToFirebase() { 
         if (window.firebaseDB && attendanceRecords.length) { 
@@ -1073,6 +1186,21 @@
             return true;
         } catch (error) {
             console.error("خطأ في إرسال الملاحظة:", error);
+            return false;
+        }
+    }
+
+    async function deleteEmployeeNote(noteId) {
+        if (!window.firebaseDB || !noteId) return false;
+        try {
+            await window.firebaseRemove(window.firebaseRef(window.firebaseDB, `employeeNotes/${noteId}`));
+            employeeNotes = employeeNotes.filter(note => note.id !== noteId);
+            showToastMessage("تم حذف التنبيه من السجل");
+            refreshView();
+            return true;
+        } catch (error) {
+            console.error("خطأ في حذف التنبيه:", error);
+            showToastMessage("حدث خطأ في حذف التنبيه", true);
             return false;
         }
     }
@@ -2104,6 +2232,57 @@
         });
     }
 
+    function getEmployeeNotesHistoryHTML(employeeName, branchName) {
+        const notes = employeeNotes
+            .filter(note => note.employeeName === employeeName && note.branchName === branchName)
+            .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+        if (!notes.length) {
+            return `
+                <div class="notes-history">
+                    <div class="notes-history-header">
+                        <span><i class="fas fa-clock-rotate-left"></i> سجل التنبيهات</span>
+                        <span class="notes-count-badge">0</span>
+                    </div>
+                    <div class="empty-notes-history">
+                        لا توجد تنبيهات محفوظة لهذا الموظف
+                    </div>
+                </div>
+            `;
+        }
+
+        const notesHtml = notes.map(note => {
+            const noteDate = note.timestamp ? new Date(note.timestamp).toLocaleString('ar-EG') : 'تاريخ غير معروف';
+            const readStatus = note.read ? 'مقروء' : 'غير مقروء';
+            return `
+                <div class="note-history-item" data-note-id="${note.id}">
+                    <div>
+                        <div class="note-history-content">${escapeReportValue(note.content || '')}</div>
+                        <div class="note-history-meta">
+                            <span><i class="fas fa-calendar"></i> ${noteDate}</span>
+                            <span><i class="fas ${note.read ? 'fa-check-circle' : 'fa-circle'}"></i> ${readStatus}</span>
+                        </div>
+                    </div>
+                    <button class="btn-delete-note" data-note-id="${note.id}" title="حذف التنبيه">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="notes-history">
+                <div class="notes-history-header">
+                    <span><i class="fas fa-clock-rotate-left"></i> سجل التنبيهات</span>
+                    <span class="notes-count-badge">${notes.length}</span>
+                </div>
+                <div class="notes-history-list">
+                    ${notesHtml}
+                </div>
+            </div>
+        `;
+    }
+
     function renderEmployeePage(employee, returnShopId, employeeIndex) { 
         currentView = 'employee'; 
         currentEmployeeData = employee; 
@@ -2165,6 +2344,7 @@
         const deleteRecordsBtnHtml = records.length > 0 
             ? `<button id="clearEmployeeRecordsBtn" class="btn-header-action" style="background: rgba(247, 37, 133, 0.1); color: var(--danger); border: 1px solid rgba(247, 37, 133, 0.2);"><i class="fas fa-trash-can"></i> حذف السجلات</button>` 
             : '';
+        const notesHistoryHtml = getEmployeeNotesHistoryHTML(employee.name, shop?.name || '');
 
         document.getElementById('appRoot').innerHTML = `
             <div class="main-header">
@@ -2194,6 +2374,7 @@
                         <i class="fas fa-paper-plane"></i> إرسال التنبيه
                     </button>
                     <div id="noteFeedback" style="font-size:0.7rem; margin-top:8px; text-align:center;"></div>
+                    ${notesHistoryHtml}
                 </div>
                 
                 <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -2228,6 +2409,8 @@
                 if (success) {
                     noteFeedback.innerHTML = '<span style="color:#10b981;"><i class="fas fa-check-circle"></i> تم إرسال التنبيه بنجاح إلى ' + employee.name + ' (سيظهر فوراً في حساب الموظف)</span>';
                     noteTextarea.value = '';
+                    employeeNotes = await loadEmployeeNotesFromFirebase();
+                    renderEmployeePage(employee, returnShopId, employeeIndex);
                     setTimeout(() => { if (noteFeedback) noteFeedback.innerHTML = ''; }, 4000);
                 } else {
                     noteFeedback.innerHTML = '<span style="color:#f72585;"><i class="fas fa-exclamation-triangle"></i> حدث خطأ في الإرسال، تأكد من الاتصال</span>';
@@ -2235,6 +2418,16 @@
                 }
             });
         }
+
+        document.querySelectorAll('.btn-delete-note').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const noteId = btn.getAttribute('data-note-id');
+                if (confirm('هل تريد حذف هذا التنبيه من سجل الموظف؟')) {
+                    await deleteEmployeeNote(noteId);
+                }
+            });
+        });
         
         const clearBtn = document.getElementById('clearEmployeeRecordsBtn');
         if (clearBtn) {
@@ -2423,6 +2616,20 @@
                 }
                 refreshView();
             });
+
+            window.firebaseOnValue(window.firebaseRef(window.firebaseDB, 'employeeNotes'), async (snap) => {
+                const notes = [];
+                if (snap.exists()) {
+                    const data = snap.val();
+                    for (const key in data) {
+                        notes.push({ id: key, ...data[key] });
+                    }
+                }
+                employeeNotes = notes.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                if (currentView === 'employee') {
+                    refreshView();
+                }
+            });
         } 
     }
 
@@ -2449,6 +2656,9 @@
         
         const savedReports = await loadFinancialReportsFromFirebase();
         financialReports = savedReports;
+
+        const savedNotes = await loadEmployeeNotesFromFirebase();
+        employeeNotes = savedNotes;
 
         if (savedShops && savedShops.length > 0) { 
             shopsData = savedShops;
