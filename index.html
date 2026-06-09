@@ -862,6 +862,21 @@
         .report-view-content {
             padding: 20px;
         }
+
+        .report-details-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .report-details-page .report-view-modal {
+            max-width: 100%;
+            width: 100%;
+            max-height: none;
+            overflow: visible;
+            margin: 0 auto;
+            box-shadow: var(--shadow);
+        }
         
         @media (max-width: 600px) {
             .app-container { padding: 12px; }
@@ -899,6 +914,7 @@
     let currentEmployeeData = null;
     let currentEmployeeShopId = null;
     let currentEmployeeIndex = null;
+    let currentReportDetailsId = null;
     
     let currentReportsFilter = {
         employeeName: null,
@@ -1492,40 +1508,66 @@
 </div>`;
     }
     
-    // دوال عامة يمكن استدعاؤها من onClick
-    window.viewReportDetails = function(reportId) {
+    function renderReportDetailsPage(reportId) {
+        currentView = 'reportDetails';
+        currentReportDetailsId = reportId;
+
         const report = financialReports.find(r => r.id === reportId);
-        if (!report) return;
-        
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
+        if (!report) {
+            showToastMessage("لم يتم العثور على التقرير", true);
+            renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
+            return;
+        }
         
         const reportDate = report.timestamp ? new Date(report.timestamp).toLocaleString('ar-EG') : 'تاريخ غير معروف';
-        
-        modal.innerHTML = `
-            <div class="report-view-modal">
-                <div class="report-view-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+
+        document.getElementById('appRoot').innerHTML = `
+            <div class="main-header">
+                <div class="header-brand">
+                    <button class="btn-icon" id="backFromReportDetailsBtn" style="margin-left:10px;"><i class="fas fa-arrow-right"></i></button>
+                    <div class="brand-text">
+                        <h1>تفاصيل تقرير الجرد</h1>
+                        <p>${report.employeeName || 'غير معروف'} | ${report.branchName || 'غير معروف'}</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button onclick="window.printSpecificReport('${reportId}')" class="btn-header-action" style="background: var(--warning); color: white;"><i class="fas fa-print"></i> طباعة</button>
+                    <button onclick="window.printReportAsPDF('${reportId}')" class="btn-header-action" style="background: var(--danger); color: white;"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+            </div>
+
+            <div class="report-details-page">
+                <div class="report-view-modal">
+                    <div class="report-view-header">
                         <h3><i class="fas fa-file-invoice"></i> تقرير الجرد</h3>
-                        <button onclick="this.closest('.modal-overlay').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                        <p><i class="fas fa-user"></i> ${report.employeeName || 'غير معروف'} | <i class="fas fa-store"></i> ${report.branchName || 'غير معروف'}</p>
+                        <p><i class="fas fa-calendar"></i> ${reportDate}</p>
                     </div>
-                    <p><i class="fas fa-user"></i> ${report.employeeName || 'غير معروف'} | <i class="fas fa-store"></i> ${report.branchName || 'غير معروف'}</p>
-                    <p><i class="fas fa-calendar"></i> ${reportDate}</p>
-                </div>
-                <div class="report-view-content" id="reportFullContent">
-                    <div style="background: white; border-radius: 16px; padding: 20px;">
-                        ${generateReportHTML(report, false)}
+                    <div class="report-view-content" id="reportFullContent">
+                        <div style="background: white; border-radius: 16px; padding: 20px;">
+                            ${generateReportHTML(report, false)}
+                        </div>
                     </div>
-                </div>
-                <div style="padding: 15px 20px; background: white; border-radius: 0 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end;">
-                    <button onclick="window.printSpecificReport('${reportId}')" class="btn-report btn-pdf" style="padding: 10px 20px;"><i class="fas fa-print"></i> طباعة</button>
-                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-header-action">إغلاق</button>
+                    <div style="padding: 15px 20px; background: white; border-radius: 0 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+                        <button onclick="window.printSpecificReport('${reportId}')" class="btn-report btn-pdf" style="padding: 10px 20px;"><i class="fas fa-print"></i> طباعة</button>
+                        <button onclick="window.printReportAsPDF('${reportId}')" class="btn-report btn-pdf" style="padding: 10px 20px; background: var(--danger);"><i class="fas fa-file-pdf"></i> حفظ PDF</button>
+                        <button id="closeReportDetailsBtn" class="btn-header-action">رجوع</button>
+                    </div>
                 </div>
             </div>
         `;
-        
-        document.body.appendChild(modal);
-        setTimeout(() => modal.style.opacity = '1', 10);
+
+        const goBackToReports = () => {
+            renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
+        };
+
+        document.getElementById('backFromReportDetailsBtn').addEventListener('click', goBackToReports);
+        document.getElementById('closeReportDetailsBtn').addEventListener('click', goBackToReports);
+    }
+
+    // دوال عامة يمكن استدعاؤها من onClick
+    window.viewReportDetails = function(reportId) {
+        renderReportDetailsPage(reportId);
     };
     
     window.printSpecificReport = function(reportId) {
@@ -2611,9 +2653,6 @@
                     }
                 }
                 financialReports = reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                if (currentView === 'reports') {
-                    renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
-                }
                 refreshView();
             });
 
@@ -2638,6 +2677,7 @@
         else if (currentView === 'shop') renderShopPage(currentShopId); 
         else if (currentView === 'employee') renderEmployeePage(currentEmployeeData, currentEmployeeShopId, currentEmployeeIndex);
         else if (currentView === 'reports') renderReportsPage(currentReportsFilter.employeeName, currentReportsFilter.branchName);
+        else if (currentView === 'reportDetails') renderReportDetailsPage(currentReportDetailsId);
     }
     
     let appStarted = false; 
