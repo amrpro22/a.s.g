@@ -21,6 +21,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyDrdXTVxCS5H_W22viYPijFyTuUb1M1uiY",
@@ -35,8 +36,10 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app);
         
         window.firebaseDB = database;
+        window.firebaseAuth = auth;
         window.firebaseRef = ref;
         window.firebaseSet = set;
         window.firebaseGet = get;
@@ -44,6 +47,9 @@
         window.firebasePush = push;
         window.firebaseRemove = remove;
         window.firebaseOnValue = onValue;
+        window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.firebaseSignOut = signOut;
+        window.firebaseOnAuthStateChanged = onAuthStateChanged;
         
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
@@ -897,6 +903,104 @@
             height: 80vh;
             color: var(--primary);
         }
+
+        .admin-login-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(67, 97, 238, 0.10);
+        }
+
+        .admin-login-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: #eef2ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 14px;
+        }
+
+        .admin-login-card h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .admin-login-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .admin-login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .admin-login-form label {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 800;
+        }
+
+        .admin-login-form input {
+            width: 100%;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .admin-login-form input:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+
+        .admin-login-error {
+            min-height: 18px;
+            color: var(--danger);
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .btn-admin-login {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .btn-admin-login:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
         
         .toast-message {
             position: fixed;
@@ -1064,6 +1168,8 @@
     let currentEmployeeShopId = null;
     let currentEmployeeIndex = null;
     let currentReportDetailsId = null;
+    let currentAdminUser = null;
+    let authObserverStarted = false;
     
     let currentReportsFilter = {
         employeeName: null,
@@ -1444,6 +1550,72 @@
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+
+    function getFriendlyAuthError(error) {
+        const code = error?.code || '';
+        if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+            return 'بيانات الدخول غير صحيحة';
+        }
+        if (code.includes('too-many-requests')) {
+            return 'محاولات كثيرة، حاول لاحقاً';
+        }
+        if (code.includes('network-request-failed')) {
+            return 'تعذر الاتصال، تحقق من الإنترنت';
+        }
+        return 'تعذر تسجيل الدخول';
+    }
+
+    function showAdminLoginPage() {
+        currentView = 'login';
+        document.getElementById('appRoot').innerHTML = `
+            <div class="admin-login-shell">
+                <div class="admin-login-card">
+                    <div class="admin-login-icon"><i class="fas fa-lock"></i></div>
+                    <h2>دخول لوحة التحكم</h2>
+                    <p>استخدم إيميل المدير المسجل في Firebase Authentication</p>
+                    <form class="admin-login-form" id="adminLoginForm">
+                        <div>
+                            <label for="adminEmail">الإيميل</label>
+                            <input type="email" id="adminEmail" autocomplete="username" placeholder="admin@example.com" required>
+                        </div>
+                        <div>
+                            <label for="adminPassword">كلمة المرور</label>
+                            <input type="password" id="adminPassword" autocomplete="current-password" placeholder="••••••••" required>
+                        </div>
+                        <div class="admin-login-error" id="adminLoginError"></div>
+                        <button type="submit" class="btn-admin-login" id="adminLoginBtn">
+                            <i class="fas fa-right-to-bracket"></i> دخول
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const errorBox = document.getElementById('adminLoginError');
+            const loginBtn = document.getElementById('adminLoginBtn');
+
+            errorBox.textContent = '';
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الدخول...';
+
+            try {
+                await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
+            } catch (error) {
+                errorBox.textContent = getFriendlyAuthError(error);
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-right-to-bracket"></i> دخول';
+            }
+        });
+    }
+
+    async function logoutAdmin() {
+        if (!window.firebaseAuth) return;
+        await window.firebaseSignOut(window.firebaseAuth);
     }
     
     function getDefaultShopsData() { 
@@ -2339,6 +2511,7 @@
                         <div class="home-tools">
                             <button class="home-tool-btn" id="globalDeleteBranchBtn" title="حذف فرع"><i class="fas fa-store-slash"></i></button>
                             <button class="home-tool-btn" id="globalDeleteEmployeeBtn" title="حذف موظف"><i class="fas fa-user-minus"></i></button>
+                            <button class="home-tool-btn" id="adminLogoutBtn" title="تسجيل خروج"><i class="fas fa-right-from-bracket"></i></button>
                         </div>
                     </div>
 
@@ -2378,6 +2551,8 @@
         `;
 
         document.getElementById('addBranchBtn').addEventListener('click', () => { showAddBranchModal(() => renderHomePage()); });
+        const logoutBtn = document.getElementById('adminLogoutBtn');
+        if (logoutBtn) logoutBtn.addEventListener('click', logoutAdmin);
         
         // إصلاح تفاعل إظهار واستقرار فورم الموظف دون اختفاء فوري
         document.getElementById('showAddEmployeeBtn').addEventListener('click', (e) => { 
@@ -2978,6 +3153,10 @@
     let appStarted = false; 
     const startApplication = async () => { 
         if (appStarted) return; 
+        if (!currentAdminUser) {
+            showAdminLoginPage();
+            return;
+        }
         appStarted = true; 
         
         const rawShops = await loadDataFromFirebase(); 
@@ -3006,8 +3185,41 @@
         renderHomePage(); 
     };
 
-    window.addEventListener('firebaseReady', startApplication); 
-    setTimeout(() => { if (!appStarted) startApplication(); }, 3000);
+    function initializeAuthGate() {
+        if (authObserverStarted) return;
+        if (!window.firebaseAuth || !window.firebaseOnAuthStateChanged) {
+            document.getElementById('appRoot').innerHTML = `
+                <div class="loading-screen">
+                    <i class="fas fa-spinner fa-spin fa-3x"></i>
+                    <p style="margin-top: 15px; font-weight: 700;">جاري تجهيز تسجيل الدخول...</p>
+                </div>
+            `;
+            return;
+        }
+
+        authObserverStarted = true;
+        window.firebaseOnAuthStateChanged(window.firebaseAuth, async (user) => {
+            currentAdminUser = user;
+            if (user) {
+                await startApplication();
+            } else {
+                appStarted = false;
+                shopsData = [];
+                attendanceRecords = [];
+                financialReports = [];
+                employeeNotes = [];
+                currentShopId = null;
+                currentEmployeeData = null;
+                currentEmployeeShopId = null;
+                currentEmployeeIndex = null;
+                currentReportDetailsId = null;
+                showAdminLoginPage();
+            }
+        });
+    }
+
+    window.addEventListener('firebaseReady', initializeAuthGate); 
+    setTimeout(() => { if (!authObserverStarted) initializeAuthGate(); }, 3000);
 </script>
 </body>
 </html>
