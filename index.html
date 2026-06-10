@@ -1730,13 +1730,30 @@
         if (!snap.exists()) return 0;
 
         const data = snap.val() || {};
-        const keysToDelete = Object.keys(data).filter(key => matcher(normalizer(data[key] || {}, key)));
+        const keptData = {};
+        let deletedCount = 0;
 
-        await Promise.all(keysToDelete.map(key => 
-            window.firebaseRemove(window.firebaseRef(window.firebaseDB, `${collectionName}/${key}`))
-        ));
+        Object.keys(data).forEach(key => {
+            const rawValue = data[key] || {};
+            const normalizedValue = normalizer(rawValue, key);
 
-        return keysToDelete.length;
+            if (matcher(normalizedValue)) {
+                deletedCount++;
+                return;
+            }
+
+            keptData[key] = rawValue;
+        });
+
+        if (deletedCount === 0) return 0;
+
+        if (Object.keys(keptData).length === 0) {
+            await window.firebaseRemove(collectionRef);
+        } else {
+            await window.firebaseSet(collectionRef, keptData);
+        }
+
+        return deletedCount;
     }
 
     async function countMatchingAttendanceInFirebase(employeeName = null, branchName = null) {
@@ -1891,6 +1908,21 @@
         }, 3000);
     }
 
+    function getFirebaseFriendlyError(error) {
+        const code = error?.code || '';
+        const message = error?.message || '';
+
+        if (code.includes('permission_denied') || message.includes('Permission denied')) {
+            return 'لا توجد صلاحية كافية للحذف من Firebase. راجع قواعد Realtime Database.';
+        }
+
+        if (code.includes('network') || message.includes('network') || message.includes('Network')) {
+            return 'تعذر الاتصال بقاعدة البيانات. تحقق من الإنترنت ثم حاول مرة أخرى.';
+        }
+
+        return 'حدث خطأ أثناء محاولة الحذف. افتح وحدة التحكم لمعرفة التفاصيل.';
+    }
+
     function getFriendlyAuthError(error) {
         const code = error?.code || '';
         if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
@@ -1978,7 +2010,7 @@
                 showToastMessage("تم حذف الفرع وكل السجلات المرتبطة به نهائياً"); 
             } catch (error) {
                 console.error("خطأ في حذف الفرع وسجلاته:", error);
-                showToastMessage("فشل حذف الفرع أو بعض سجلاته من قاعدة البيانات", true);
+                showToastMessage(getFirebaseFriendlyError(error), true);
             }
         } 
     }
@@ -1998,7 +2030,7 @@
                 showToastMessage(`تم حذف الموظف نهائياً مع ${attendanceDeleted} سجل حضور، ${notesDeleted} تنبيه، ${reportsDeleted} تقرير`); 
             } catch (error) {
                 console.error("خطأ في حذف الموظف وسجلاته:", error);
-                showToastMessage("فشل حذف الموظف أو بعض سجلاته من قاعدة البيانات", true);
+                showToastMessage(getFirebaseFriendlyError(error), true);
             }
         } 
     }
@@ -3367,6 +3399,7 @@
                     clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
                     try {
                         const deletedCount = await deleteAttendanceRecordsForEmployee(employee.name, shop?.name || '');
+                        attendanceRecords = await loadAttendanceFromFirebase();
                         const remainingInFirebase = await countMatchingAttendanceInFirebase(employee.name, null);
                         await updateAllEmployeesWorkHours();
                         
@@ -3379,7 +3412,7 @@
                         renderEmployeePage(employee, returnShopId, employeeIndex);
                     } catch (err) {
                         console.error(err);
-                        showToastMessage("حدث خطأ أثناء محاولة الحذف", true);
+                        showToastMessage(getFirebaseFriendlyError(err), true);
                         renderEmployeePage(employee, returnShopId, employeeIndex);
                     } finally {
                         clearBtn.disabled = false;
