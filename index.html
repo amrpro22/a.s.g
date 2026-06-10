@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -20,7 +19,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+        import { getDatabase, ref, set, get, child, push, remove, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
         
         const firebaseConfig = {
@@ -1228,7 +1227,6 @@
             transform: translateX(-50%) scale(1);
         }
         
-        /* Reports page styles */
         .reports-header {
             background: linear-gradient(135deg, var(--warning), #e67e22);
             border-radius: var(--radius);
@@ -1287,7 +1285,6 @@
             border-radius: var(--radius);
         }
         
-        /* Report view modal styles */
         .report-view-modal {
             max-width: 95%;
             width: 850px;
@@ -2015,12 +2012,11 @@
             const branchName = shop.name;
             shop.employees.splice(employeeIndex, 1); 
             await deleteAttendanceRecordsForEmployee(employeeName, branchName);
-            const remainingAttendance = await countMatchingAttendanceInFirebase(employeeName, null);
             await deleteEmployeeNotesFor(employeeName, branchName);
             await deleteFinancialReportsFor(employeeName, branchName);
             await saveDataToFirebase(); 
             renderShopPage(shopId); 
-            showToastMessage(remainingAttendance > 0 ? `تم حذف الموظف لكن بقي ${remainingAttendance} سجل حضور في Firebase` : "تم حذف الموظف وسجلاته من Firebase", remainingAttendance > 0); 
+            showToastMessage("تم حذف الموظف وسجلاته"); 
         } 
     }
     
@@ -2130,10 +2126,8 @@
         return normalized;
     }
 
-    // ============ دوال التقارير العامة المتوافقة كلياً مع شكل الموظف ============
     function generateReportHTML(report, forPDF = false) {
         report = normalizeFinancialReport(report);
-        // تم استبدال الكود السابق ليكون مطابقاً تماماً لكود الموظف بكل مخرجاته وتفاصيله (للعرض والـ PDF معاً)
         return `
 <div class="container" style="max-width:800px; width: 100%; margin:0 auto; background:white; border-radius:${forPDF ? '0' : '20px'}; padding:20px; box-shadow:${forPDF ? 'none' : '0 4px 12px rgba(0,0,0,0.05)'}; font-family: 'Inter', 'Cairo', sans-serif; direction: ltr; text-align: left; box-sizing: border-box;">
     <div class="header" style="text-align:center; margin-bottom:20px; padding-bottom:15px; border-bottom:2px solid #e2e8f0;">
@@ -2327,7 +2321,6 @@
         });
     }
 
-    // دوال عامة يمكن استدعاؤها من onClick
     window.viewReportDetails = function(reportId) {
         renderReportDetailsPage(reportId);
     };
@@ -2399,18 +2392,8 @@
                 </div>
 
                 <table class="info-table">
-                    <tr>
-                        <th>Name</th>
-                        <th>Branch</th>
-                        <th>Date</th>
-                        <th>Shift</th>
-                    </tr>
-                    <tr>
-                        <td>${v('employeeName', report.name)}</td>
-                        <td>${v('branchName')}</td>
-                        <td>${v('date')}</td>
-                        <td>${v('shift')}</td>
-                    </tr>
+                    <tr><th>Name</th><th>Branch</th><th>Date</th><th>Shift</th></tr>
+                    <tr><td>${v('employeeName', report.name)}</td><td>${v('branchName')}</td><td>${v('date')}</td><td>${v('shift')}</td></tr>
                 </table>
 
                 <div class="two-col avoid-break">
@@ -2700,7 +2683,6 @@
         reportsList.innerHTML = reportsHtml;
     }
     
-    // دالة عرض التقارير مع إمكانية التصفية حسب الموظف والفرع
     function renderReportsPage(filterEmployeeName = null, filterBranchName = null) {
         currentView = 'reports';
         
@@ -3286,9 +3268,9 @@
 
             if (rows) {
                 const dayTotalFormatted = formatMinutesToHoursAndMinutes(day.totalMinutes);
-                rows += `<tr style="background-color:#f0fdf4; border-top:2px solid #4cc9b0;"><td colspan="2" style="font-weight:800; text-align:left;">إجمالي اليوم المكتمل<\/td><td style="font-weight:800; color:#10b981;">${dayTotalFormatted}<\/td></tr>`;
+                rows += `<tr style="background-color:#f0fdf4; border-top:2px solid #4cc9b0;"><td colspan="2" style="font-weight:800; text-align:left;">إجمالي اليوم المكتمل</td><td style="font-weight:800; color:#10b981;">${dayTotalFormatted}</td></tr>`;
             } else {
-                rows = '<tr><td colspan="3">لا توجد سجلات كاملة (دخول وخروج)<\/td></tr>';
+                rows = '<tr><td colspan="3">لا توجد سجلات كاملة (دخول وخروج)</td></tr>';
             }
             
             daysHtml += `
@@ -3397,18 +3379,28 @@
         const clearBtn = document.getElementById('clearEmployeeRecordsBtn');
         if (clearBtn) {
             clearBtn.addEventListener('click', async () => {
-                if (confirm(`هل أنت متأكد من حذف جميع سجلات الحضور الخاصة بالموظف (${employee.name}) في فرع (${shop?.name || ''}) نهائياً؟`)) {
+                if (confirm(`هل أنت متأكد من حذف جميع سجلات الحضور الخاصة بالموظف (${employee.name}) في فرع (${shop?.name || ''}) نهائياً؟ هذه العملية لا يمكن التراجع عنها.`)) {
                     clearBtn.disabled = true;
                     clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
-                    const deletedCount = await deleteAttendanceRecordsForEmployee(employee.name, shop?.name || '');
-                    const remainingInFirebase = await countMatchingAttendanceInFirebase(employee.name, null);
-                    await updateAllEmployeesWorkHours();
-                    employee.totalMinutes = 0;
-                    renderEmployeePage(employee, returnShopId, employeeIndex);
-                    if (remainingInFirebase > 0) {
-                        showToastMessage(`لم يكتمل الحذف من Firebase، بقي ${remainingInFirebase} سجل`, true);
-                    } else {
-                        showToastMessage(deletedCount > 0 ? `تم حذف ${deletedCount} سجل من Firebase` : "لا توجد سجلات في Firebase لهذا الموظف");
+                    try {
+                        const deletedCount = await deleteAttendanceRecordsForEmployee(employee.name, shop?.name || '');
+                        const remainingInFirebase = await countMatchingAttendanceInFirebase(employee.name, null);
+                        await updateAllEmployeesWorkHours();
+                        
+                        if (remainingInFirebase === 0) {
+                            showToastMessage(`تم حذف ${deletedCount} سجل حضور نهائياً من قاعدة البيانات.`);
+                        } else {
+                            showToastMessage(`تم حذف ${deletedCount} سجل، لكن بقي ${remainingInFirebase} سجل غير مرتبط.`, true);
+                        }
+                        
+                        renderEmployeePage(employee, returnShopId, employeeIndex);
+                    } catch (err) {
+                        console.error(err);
+                        showToastMessage("حدث خطأ أثناء محاولة الحذف", true);
+                        renderEmployeePage(employee, returnShopId, employeeIndex);
+                    } finally {
+                        clearBtn.disabled = false;
+                        clearBtn.innerHTML = '<i class="fas fa-trash-can"></i> حذف السجلات';
                     }
                 }
             });
