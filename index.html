@@ -1687,6 +1687,46 @@
             } catch(e) { console.warn(e); }
         }
     }
+
+    function normalizeComparableText(value) {
+        return String(value || '').trim();
+    }
+
+    function matchesEmployeeBranch(record, employeeName = null, branchName = null) {
+        const sameEmployee = employeeName === null || normalizeComparableText(record.employeeName) === normalizeComparableText(employeeName);
+        const sameBranch = branchName === null || normalizeComparableText(record.branchName) === normalizeComparableText(branchName);
+        return sameEmployee && sameBranch;
+    }
+
+    async function deleteAttendanceRecordsFor(employeeName = null, branchName = null) {
+        const beforeCount = attendanceRecords.length;
+        attendanceRecords = attendanceRecords.filter(record => !matchesEmployeeBranch(record, employeeName, branchName));
+        const deletedCount = beforeCount - attendanceRecords.length;
+        if (deletedCount > 0) {
+            await saveAttendanceToFirebase();
+        }
+        return deletedCount;
+    }
+
+    async function deleteEmployeeNotesFor(employeeName = null, branchName = null) {
+        const beforeCount = employeeNotes.length;
+        employeeNotes = employeeNotes.filter(note => !matchesEmployeeBranch(note, employeeName, branchName));
+        const deletedCount = beforeCount - employeeNotes.length;
+        if (deletedCount > 0) {
+            await saveEmployeeNotesToFirebase();
+        }
+        return deletedCount;
+    }
+
+    async function deleteFinancialReportsFor(employeeName = null, branchName = null) {
+        const beforeCount = financialReports.length;
+        financialReports = financialReports.filter(report => !matchesEmployeeBranch(report, employeeName, branchName));
+        const deletedCount = beforeCount - financialReports.length;
+        if (deletedCount > 0) {
+            await saveFinancialReportsToFirebase();
+        }
+        return deletedCount;
+    }
     
     async function deleteFinancialReport(reportId) {
         if (window.firebaseDB && reportId) {
@@ -1834,23 +1874,32 @@
         ]; 
     }
     
-    function deleteShopById(shopId) { 
+    async function deleteShopById(shopId) { 
         const shopIndex = shopsData.findIndex(s => s && String(s.id) === String(shopId)); 
         if (shopIndex !== -1) { 
+            const shopName = shopsData[shopIndex].name;
             shopsData.splice(shopIndex, 1); 
-            saveDataToFirebase(); 
+            await deleteAttendanceRecordsFor(null, shopName);
+            await deleteEmployeeNotesFor(null, shopName);
+            await deleteFinancialReportsFor(null, shopName);
+            await saveDataToFirebase(); 
             renderHomePage(); 
-            showToastMessage("تم حذف المحل بنجاح"); 
+            showToastMessage("تم حذف الفرع وكل السجلات المرتبطة به"); 
         } 
     }
     
-    function deleteEmployeeFromShop(shopId, employeeIndex) { 
+    async function deleteEmployeeFromShop(shopId, employeeIndex) { 
         const shop = shopsData.find(s => s && String(s.id) === String(shopId)); 
         if (shop && shop.employees && shop.employees[employeeIndex]) { 
+            const employeeName = shop.employees[employeeIndex].name;
+            const branchName = shop.name;
             shop.employees.splice(employeeIndex, 1); 
-            saveDataToFirebase(); 
+            await deleteAttendanceRecordsFor(employeeName, branchName);
+            await deleteEmployeeNotesFor(employeeName, branchName);
+            await deleteFinancialReportsFor(employeeName, branchName);
+            await saveDataToFirebase(); 
             renderShopPage(shopId); 
-            showToastMessage("تم حذف الموظف بنجاح"); 
+            showToastMessage("تم حذف الموظف وكل سجلاته"); 
         } 
     }
     
@@ -2908,10 +2957,12 @@
             }); 
         });
         document.querySelectorAll('.delete-shop-btn').forEach(btn => { 
-            btn.addEventListener('click', (e) => { 
+            btn.addEventListener('click', async (e) => { 
                 e.stopPropagation(); 
                 const shopId = parseInt(btn.getAttribute('data-shop-id')); 
-                if (confirm('حذف المحل؟')) deleteShopById(shopId); 
+                if (confirm('هل تريد حذف الفرع وكل سجلات الحضور والتنبيهات والتقارير المرتبطة به؟')) {
+                    await deleteShopById(shopId);
+                } 
             }); 
         });
         
@@ -2985,10 +3036,12 @@
             }); 
         });
         document.querySelectorAll('.delete-employee-btn').forEach(btn => { 
-            btn.addEventListener('click', (e) => { 
+            btn.addEventListener('click', async (e) => { 
                 e.stopPropagation(); 
                 const empIdx = parseInt(btn.getAttribute('data-emp-index')); 
-                if (confirm('حذف الموظف؟')) deleteEmployeeFromShop(shopId, empIdx); 
+                if (confirm('هل تريد حذف الموظف وكل سجلات الحضور والتنبيهات والتقارير الخاصة به؟')) {
+                    await deleteEmployeeFromShop(shopId, empIdx);
+                } 
             }); 
         });
     }
@@ -3224,8 +3277,9 @@
         if (clearBtn) {
             clearBtn.addEventListener('click', async () => {
                 if (confirm(`هل أنت متأكد من حذف جميع سجلات الحضور الخاصة بالموظف (${employee.name}) في فرع (${shop?.name || ''}) نهائياً؟`)) {
-                    attendanceRecords = attendanceRecords.filter(r => !(r.employeeName === employee.name && r.branchName === (shop?.name || '')));
-                    await saveAttendanceToFirebase();
+                    clearBtn.disabled = true;
+                    clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
+                    await deleteAttendanceRecordsFor(employee.name, shop?.name || '');
                     await updateAllEmployeesWorkHours();
                     renderEmployeePage(employee, returnShopId, employeeIndex);
                     showToastMessage("تم حذف جميع السجلات بنجاح");
@@ -3366,13 +3420,23 @@
             const newCode = modal.querySelector('#editEmployeeAccessCode').value.trim();
             if (newName && newCode) {
                 const oldName = employee.name;
+                const shop = shopsData.find(s => s && String(s.id) === String(shopId));
+                const branchName = shop?.name || '';
                 employee.name = newName;
                 employee.accessCode = newCode;
                 attendanceRecords.forEach(r => {
-                    if (r.employeeName === oldName) r.employeeName = newName;
+                    if (matchesEmployeeBranch(r, oldName, branchName)) r.employeeName = newName;
+                });
+                employeeNotes.forEach(note => {
+                    if (matchesEmployeeBranch(note, oldName, branchName)) note.employeeName = newName;
+                });
+                financialReports.forEach(report => {
+                    if (matchesEmployeeBranch(report, oldName, branchName)) report.employeeName = newName;
                 });
                 await saveDataToFirebase();
                 await saveAttendanceToFirebase();
+                await saveEmployeeNotesToFirebase();
+                await saveFinancialReportsToFirebase();
                 callback();
                 modal.remove();
                 showToastMessage("تم تحديث بيانات الموظف");
