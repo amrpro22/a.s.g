@@ -56,18 +56,21 @@
 
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4cc9f0;
-            --danger: #f72585;
-            --success: #4cc9b0;
-            --warning: #ff9800;
-            --bg: #f8faff;
+            --primary: #2563eb;
+            --secondary: #1d4ed8;
+            --accent: #0891b2;
+            --danger: #e11d48;
+            --success: #059669;
+            --warning: #d97706;
+            --bg: #f4f7fb;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
             --text-muted: #64748b;
-            --radius: 20px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --shadow: 0 12px 30px -22px rgba(15, 23, 42, 0.45);
         }
 
         * {
@@ -78,7 +81,7 @@
         }
 
         body {
-            background-color: var(--bg);
+            background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 240px);
             font-family: 'Cairo', 'Inter', sans-serif;
             color: var(--text-main);
             min-height: 100vh;
@@ -96,15 +99,15 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12), rgba(76, 201, 240, 0.15));
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 12px 16px;
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(67, 97, 238, 0.15);
-            box-shadow: 0 4px 30px rgba(67, 97, 238, 0.05);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.6);
         }
 
         .header-brand {
@@ -114,16 +117,17 @@
         }
 
         .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--primary);
             font-size: 1.2rem;
-            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+            box-shadow: none;
             flex-shrink: 0;
         }
 
@@ -166,9 +170,9 @@
         }
 
         .app-container {
-            max-width: 800px;
+            max-width: 960px;
             margin: 0 auto;
-            padding: 16px;
+            padding: 18px 16px 88px;
         }
 
         .actions-bar {
@@ -208,10 +212,10 @@
         }
 
         .home-hero {
-            background: #ffffff;
-            border: 1px solid rgba(67, 97, 238, 0.10);
-            border-radius: 18px;
-            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
             margin-bottom: 16px;
             box-shadow: var(--shadow);
         }
@@ -232,9 +236,9 @@
         }
 
         .home-hero-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             background: #eef2ff;
             color: var(--primary);
             display: flex;
@@ -288,15 +292,25 @@
         .home-stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
 
         .home-stat-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 12px;
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px;
             min-width: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-stat-card i {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            color: rgba(37, 99, 235, 0.14);
+            font-size: 1.35rem;
         }
 
         .home-stat-card strong {
@@ -325,31 +339,119 @@
         }
 
         .home-action-panel .action-card-btn {
-            min-height: 86px;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 16px;
-            border-radius: 16px;
+            min-height: 76px;
+            align-items: center;
+            justify-content: flex-start;
+            flex-direction: row;
+            text-align: right;
+            padding: 14px;
+            border-radius: 12px;
             box-shadow: none;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .home-action-panel .action-card-btn.primary-action {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .home-action-panel .action-card-btn.secondary-action {
+            color: var(--primary);
+        }
+
+        .home-action-panel .action-card-btn .action-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
         }
 
         .home-action-panel .action-card-btn i {
-            background: #eef2ff;
+            background: #eff6ff;
             width: 36px;
             height: 36px;
-            border-radius: 12px;
+            border-radius: 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-size: 1rem;
-            margin-bottom: 2px;
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+
+        .home-action-panel .primary-action i {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
         }
 
         .home-action-panel .action-card-btn small {
             color: var(--text-muted);
             font-weight: 700;
             font-size: 0.68rem;
+        }
+
+        .home-action-panel .primary-action small {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .home-toolbar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-bottom: 14px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 180px;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-field {
+            position: relative;
+            min-width: 0;
+        }
+
+        .search-field i {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-field input {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 38px 0 12px;
+            font-family: inherit;
+            font-weight: 700;
+            outline: none;
+            background: var(--surface-soft);
+            color: var(--text-main);
+            font-size: 16px;
+        }
+
+        .search-field input:focus,
+        .home-filter-select:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .home-filter-select {
+            height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 12px;
+            font-family: inherit;
+            font-weight: 800;
+            background: var(--surface-soft);
+            color: var(--text-main);
+            outline: none;
         }
 
         .add-employee-form {
@@ -432,14 +534,14 @@
         .shop-card, .employee-card, .report-card {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 15px;
+            padding: 14px;
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
             transition: box-shadow 0.2s, border-color 0.2s;
             box-shadow: var(--shadow);
-            border: 1px solid transparent;
+            border: 1px solid var(--border);
             position: relative;
         }
         
@@ -510,15 +612,15 @@
         }
 
         .shop-card:hover, .employee-card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 12px 25px -10px rgba(67, 97, 238, 0.15);
+            border-color: #bfdbfe;
+            box-shadow: 0 16px 34px -24px rgba(37, 99, 235, 0.55);
         }
 
         .shop-icon, .employee-avatar {
             width: 48px;
             height: 48px;
-            background: #f1f5f9;
-            border-radius: 14px;
+            background: #eff6ff;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -548,6 +650,62 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .shop-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .shop-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 24px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.66rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .shop-chip.active {
+            color: #047857;
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+        }
+
+        .shop-chip.warning {
+            color: #b45309;
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .empty-state {
+            background: var(--surface);
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--radius);
+            padding: 34px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 800;
+        }
+
+        .empty-state i {
+            display: block;
+            width: 46px;
+            height: 46px;
+            margin: 0 auto 10px;
+            border-radius: 14px;
+            background: #eff6ff;
+            color: var(--primary);
+            line-height: 46px;
+            font-size: 1.15rem;
         }
 
         .badge-pin {
@@ -585,6 +743,47 @@
             align-items: center;
             justify-content: center;
             font-size: 0.85rem;
+        }
+
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            right: 12px;
+            left: 12px;
+            bottom: max(12px, env(safe-area-inset-bottom));
+            z-index: 1500;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px -20px rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .bottom-nav button {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 12px;
+            min-height: 48px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.66rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+        }
+
+        .bottom-nav button.active,
+        .bottom-nav button:hover {
+            background: #eff6ff;
+            color: var(--primary);
         }
 
         .btn-icon:hover {
@@ -1128,23 +1327,33 @@
         }
         
         @media (max-width: 600px) {
-            .app-container { padding: 12px; }
+            .app-container { padding: 12px 12px 92px; }
             .brand-text h1 { font-size: 0.95rem; }
             .brand-text p { font-size: 0.6rem; }
             .actions-bar { grid-template-columns: 1fr; gap: 10px; }
             .shop-card, .employee-card { padding: 12px; }
             .shop-icon, .employee-avatar { width: 44px; height: 44px; font-size: 1.15rem; }
-            .toast-message { white-space: normal; text-align: center; max-width: 85%; font-size: 0.8rem; bottom: 20px; }
+            .toast-message { white-space: normal; text-align: center; max-width: 85%; font-size: 0.8rem; bottom: 86px; }
             .filter-bar { flex-direction: column; }
             .filter-select { width: 100%; }
-            .home-hero-top { align-items: flex-start; }
+            .home-hero-top { align-items: flex-start; flex-direction: column; }
+            .home-tools { width: 100%; justify-content: flex-end; }
             .home-stats-grid { grid-template-columns: 1fr 1fr; }
-            .home-action-panel { grid-template-columns: 1fr; }
+            .home-action-panel { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .home-action-panel .action-card-btn { padding: 12px 10px; }
+            .home-action-panel .action-card-btn small { display: none; }
+            .home-action-panel .action-card-btn span { font-size: 0.78rem; }
+            .home-toolbar { grid-template-columns: 1fr; }
             .home-hero-title h2 { font-size: 1rem; }
+            .shop-meta-row { gap: 5px; }
+            .shop-chip { font-size: 0.62rem; padding-inline: 7px; }
+            .bottom-nav { display: grid; }
             .report-actions { margin-top: 10px; width: 100%; justify-content: center; }
             .report-card { flex-direction: column; text-align: center; }
             .report-info { text-align: center; }
             .report-view-content { padding: 10px; }
+            .modal-overlay { align-items: flex-end; padding: 12px; }
+            .modal-content { max-width: 100%; border-radius: 18px 18px 12px 12px; }
         }
     </style>
 </head>
@@ -2443,7 +2652,6 @@
 
     function renderHomePage() {
         currentView = 'home'; 
-        if (!shopsData.length) return; 
         const root = document.getElementById('appRoot');
         let shopOptions = ''; 
         shopsData.forEach(shop => {
@@ -2472,12 +2680,24 @@
             if (shop) {
                 const totalEmployees = shop.employees?.length || 0; 
                 const currentIcon = shop.icon || "fas fa-store";
+                const branchReports = financialReports.filter(report => report.branchName === shop.name);
+                const latestReport = branchReports
+                    .slice()
+                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))[0];
+                const openInBranch = Object.keys(openAttendanceMap).filter(key => key.endsWith(`__${shop.name}`)).length;
+                const statusValue = openInBranch > 0 ? 'open' : (branchReports.length > 0 ? 'reports' : 'quiet');
+                const latestReportText = latestReport?.timestamp ? new Date(latestReport.timestamp).toLocaleDateString('ar-EG') : 'لا يوجد';
                 shopsHtml += `
-                <div class="shop-card" data-shop-id="${shop.id}">
+                <div class="shop-card" data-shop-id="${shop.id}" data-search="${shop.name} ${shop.desc || ''}" data-status="${statusValue}" data-has-reports="${branchReports.length > 0 ? '1' : '0'}" data-open-attendance="${openInBranch > 0 ? '1' : '0'}">
                     <div class="shop-icon"><i class="${currentIcon}"></i></div>
                     <div class="shop-info">
                         <div class="shop-name">${shop.name}</div>
                         <div class="shop-desc"><i class="fas fa-users"></i> ${totalEmployees} موظف | ${shop.desc}</div>
+                        <div class="shop-meta-row">
+                            <span class="shop-chip"><i class="fas fa-file-lines"></i> ${branchReports.length} تقرير</span>
+                            <span class="shop-chip ${openInBranch > 0 ? 'active' : ''}"><i class="fas fa-clock"></i> ${openInBranch} دوام مفتوح</span>
+                            <span class="shop-chip warning"><i class="fas fa-calendar-day"></i> آخر تقرير: ${latestReportText}</span>
+                        </div>
                     </div>
                     <div class="card-actions">
                         <button class="btn-icon edit-shop-btn" data-shop-id="${shop.id}"><i class="fas fa-pen"></i></button>
@@ -2486,6 +2706,9 @@
                 </div>`;
             }
         });
+        if (!shopsHtml) {
+            shopsHtml = '<div class="empty-state"><i class="fas fa-store"></i> لا توجد فروع بعد</div>';
+        }
 
         root.innerHTML = `
             <div class="main-header">
@@ -2516,23 +2739,27 @@
                     </div>
 
                     <div class="home-stats-grid">
-                        <div class="home-stat-card"><strong>${totalBranches}</strong><span>الفروع</span></div>
-                        <div class="home-stat-card"><strong>${totalEmployees}</strong><span>الموظفون</span></div>
-                        <div class="home-stat-card"><strong>${totalReports}</strong><span>تقارير الجرد</span></div>
-                        <div class="home-stat-card"><strong>${openAttendanceCount}</strong><span>دوام مفتوح</span></div>
+                        <div class="home-stat-card"><i class="fas fa-store"></i><strong>${totalBranches}</strong><span>الفروع</span></div>
+                        <div class="home-stat-card"><i class="fas fa-users"></i><strong>${totalEmployees}</strong><span>الموظفون</span></div>
+                        <div class="home-stat-card"><i class="fas fa-file-lines"></i><strong>${totalReports}</strong><span>تقارير الجرد</span></div>
+                        <div class="home-stat-card"><i class="fas fa-business-time"></i><strong>${openAttendanceCount}</strong><span>دوام مفتوح</span></div>
                     </div>
                 </div>
 
                 <div class="home-action-panel">
-                    <div class="action-card-btn" id="addBranchBtn">
+                    <div class="action-card-btn primary-action" id="addBranchBtn">
                         <i class="fas fa-plus-circle"></i>
-                        <span>إضافة فرع</span>
-                        <small>إنشاء فرع جديد وربطه بالموظفين</small>
+                        <div class="action-copy">
+                            <span>إضافة فرع</span>
+                            <small>إنشاء فرع جديد وربطه بالموظفين</small>
+                        </div>
                     </div>
-                    <div class="action-card-btn" id="showAddEmployeeBtn">
+                    <div class="action-card-btn secondary-action" id="showAddEmployeeBtn">
                         <i class="fas fa-user-plus"></i>
-                        <span>إضافة موظف</span>
-                        <small>إضافة موظف وكود الدخول الخاص به</small>
+                        <div class="action-copy">
+                            <span>إضافة موظف</span>
+                            <small>إضافة موظف وكود الدخول الخاص به</small>
+                        </div>
                     </div>
                 </div>
 
@@ -2546,13 +2773,80 @@
                 </div>
 
                 <div class="section-title"><i class="fas fa-layer-group"></i> الفروع المسجلة</div>
-                <div class="shops-grid">${shopsHtml}</div>
+                <div class="home-toolbar">
+                    <label class="search-field" for="branchSearchInput">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input id="branchSearchInput" type="search" placeholder="ابحث باسم الفرع أو الوصف">
+                    </label>
+                    <select id="branchStatusFilter" class="home-filter-select">
+                        <option value="all">كل الفروع</option>
+                        <option value="open">دوام مفتوح</option>
+                        <option value="reports">لديها تقارير</option>
+                        <option value="quiet">بدون نشاط</option>
+                    </select>
+                </div>
+                <div class="shops-grid" id="shopsGrid">${shopsHtml}</div>
+                <nav class="bottom-nav" aria-label="التنقل السريع">
+                    <button type="button" class="active" id="navHomeBtn"><i class="fas fa-house"></i><span>الرئيسية</span></button>
+                    <button type="button" id="navReportsBtn"><i class="fas fa-file-lines"></i><span>التقارير</span></button>
+                    <button type="button" id="navAddBranchBtn"><i class="fas fa-store-medical"></i><span>فرع</span></button>
+                    <button type="button" id="navAddEmployeeBtn"><i class="fas fa-user-plus"></i><span>موظف</span></button>
+                </nav>
             </div>
         `;
 
         document.getElementById('addBranchBtn').addEventListener('click', () => { showAddBranchModal(() => renderHomePage()); });
         const logoutBtn = document.getElementById('adminLogoutBtn');
         if (logoutBtn) logoutBtn.addEventListener('click', logoutAdmin);
+
+        const branchSearchInput = document.getElementById('branchSearchInput');
+        const branchStatusFilter = document.getElementById('branchStatusFilter');
+        const filterHomeBranches = () => {
+            const term = (branchSearchInput?.value || '').trim().toLowerCase();
+            const status = branchStatusFilter?.value || 'all';
+            let visibleCount = 0;
+            document.querySelectorAll('.shop-card').forEach(card => {
+                const searchText = (card.getAttribute('data-search') || '').toLowerCase();
+                const cardStatus = card.getAttribute('data-status') || 'quiet';
+                const hasReports = card.getAttribute('data-has-reports') === '1';
+                const hasOpenAttendance = card.getAttribute('data-open-attendance') === '1';
+                const matchesSearch = !term || searchText.includes(term);
+                const matchesStatus =
+                    status === 'all' ||
+                    (status === 'open' && hasOpenAttendance) ||
+                    (status === 'reports' && hasReports) ||
+                    (status === 'quiet' && cardStatus === 'quiet');
+                const shouldShow = matchesSearch && matchesStatus;
+                card.style.display = shouldShow ? 'flex' : 'none';
+                if (shouldShow) visibleCount++;
+            });
+            const grid = document.getElementById('shopsGrid');
+            let emptySearch = document.getElementById('emptySearchState');
+            if (grid && !visibleCount && document.querySelectorAll('.shop-card').length) {
+                if (!emptySearch) {
+                    emptySearch = document.createElement('div');
+                    emptySearch.id = 'emptySearchState';
+                    emptySearch.className = 'empty-state';
+                    emptySearch.innerHTML = '<i class="fas fa-filter-circle-xmark"></i> لا توجد فروع تطابق البحث';
+                    grid.appendChild(emptySearch);
+                }
+                emptySearch.style.display = 'block';
+            } else if (emptySearch) {
+                emptySearch.style.display = 'none';
+            }
+        };
+        if (branchSearchInput) branchSearchInput.addEventListener('input', filterHomeBranches);
+        if (branchStatusFilter) branchStatusFilter.addEventListener('change', filterHomeBranches);
+
+        const navReportsBtn = document.getElementById('navReportsBtn');
+        const navAddBranchBtn = document.getElementById('navAddBranchBtn');
+        const navAddEmployeeBtn = document.getElementById('navAddEmployeeBtn');
+        if (navReportsBtn) navReportsBtn.addEventListener('click', () => renderReportsPage(null, null));
+        if (navAddBranchBtn) navAddBranchBtn.addEventListener('click', () => showAddBranchModal(() => renderHomePage()));
+        if (navAddEmployeeBtn) navAddEmployeeBtn.addEventListener('click', () => {
+            document.getElementById('showAddEmployeeBtn')?.click();
+            document.getElementById('addEmployeeForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
         
         // إصلاح تفاعل إظهار واستقرار فورم الموظف دون اختفاء فوري
         document.getElementById('showAddEmployeeBtn').addEventListener('click', (e) => { 
