@@ -1689,23 +1689,86 @@
     }
 
     function normalizeComparableText(value) {
-        return String(value || '').trim();
+        return String(value || '')
+            .trim()
+            .replace(/\s+/g, ' ')
+            .toLowerCase();
     }
 
-    function matchesEmployeeBranch(record, employeeName = null, branchName = null) {
-        const sameEmployee = employeeName === null || normalizeComparableText(record.employeeName) === normalizeComparableText(employeeName);
-        const sameBranch = branchName === null || normalizeComparableText(record.branchName) === normalizeComparableText(branchName);
+    function getRecordEmployeeName(record) {
+        return record?.employeeName || record?.name || record?.employee || record?.empName || '';
+    }
+
+    function getRecordBranchName(record) {
+        return record?.branchName || record?.shopName || record?.branch || record?.shop || record?.storeName || '';
+    }
+
+    function matchesEmployeeBranch(record, employeeName = null, branchName = null, options = {}) {
+        const recordEmployee = normalizeComparableText(getRecordEmployeeName(record));
+        const recordBranch = normalizeComparableText(getRecordBranchName(record));
+        const targetEmployee = normalizeComparableText(employeeName);
+        const targetBranch = normalizeComparableText(branchName);
+        const sameEmployee = employeeName === null || recordEmployee === targetEmployee;
+        const sameBranch = branchName === null || recordBranch === targetBranch || (options.allowMissingBranch && !recordBranch);
         return sameEmployee && sameBranch;
     }
 
     async function deleteAttendanceRecordsFor(employeeName = null, branchName = null) {
+        const allowMissingBranch = employeeName !== null;
+        let firebaseDeletedCount = 0;
+
+        if (window.firebaseDB) {
+            try {
+                const recordsRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
+                const snap = await window.firebaseGet(recordsRef);
+                if (snap.exists()) {
+                    const data = snap.val();
+                    const remainingRecords = [];
+
+                    Object.entries(data || {}).forEach(([key, value]) => {
+                        const record = { id: key, ...(value || {}) };
+                        if (matchesEmployeeBranch(record, employeeName, branchName, { allowMissingBranch })) {
+                            firebaseDeletedCount++;
+                        } else {
+                            remainingRecords.push(record);
+                        }
+                    });
+
+                    if (firebaseDeletedCount > 0) {
+                        if (!remainingRecords.length) {
+                            await window.firebaseRemove(recordsRef);
+                        } else {
+                            const remainingObj = {};
+                            remainingRecords.forEach((record, index) => {
+                                const key = record.id || `record_${Date.now()}_${index}`;
+                                const { id, ...recordData } = record;
+                                remainingObj[key] = recordData;
+                            });
+                            await window.firebaseSet(recordsRef, remainingObj);
+                        }
+                    }
+                    attendanceRecords = remainingRecords;
+                }
+            } catch (error) {
+                console.warn("تعذر حذف سجلات الحضور مباشرة:", error);
+            }
+        }
+
         const beforeCount = attendanceRecords.length;
-        attendanceRecords = attendanceRecords.filter(record => !matchesEmployeeBranch(record, employeeName, branchName));
-        const deletedCount = beforeCount - attendanceRecords.length;
-        if (deletedCount > 0) {
+        attendanceRecords = attendanceRecords.filter(record => !matchesEmployeeBranch(record, employeeName, branchName, { allowMissingBranch }));
+        const localDeletedCount = beforeCount - attendanceRecords.length;
+
+        if (!firebaseDeletedCount && localDeletedCount > 0) {
             await saveAttendanceToFirebase();
         }
-        return deletedCount;
+
+        return firebaseDeletedCount || localDeletedCount;
+    }
+
+    async function deleteAttendanceRecordsForEmployee(employeeName, branchName = null) {
+        const exactDeletedCount = branchName ? await deleteAttendanceRecordsFor(employeeName, branchName) : 0;
+        const remainingDeletedCount = await deleteAttendanceRecordsFor(employeeName, null);
+        return exactDeletedCount + remainingDeletedCount;
     }
 
     async function deleteEmployeeNotesFor(employeeName = null, branchName = null) {
@@ -1894,7 +1957,7 @@
             const employeeName = shop.employees[employeeIndex].name;
             const branchName = shop.name;
             shop.employees.splice(employeeIndex, 1); 
-            await deleteAttendanceRecordsFor(employeeName, branchName);
+            await deleteAttendanceRecordsForEmployee(employeeName, branchName);
             await deleteEmployeeNotesFor(employeeName, branchName);
             await deleteFinancialReportsFor(employeeName, branchName);
             await saveDataToFirebase(); 
@@ -3279,10 +3342,11 @@
                 if (confirm(`هل أنت متأكد من حذف جميع سجلات الحضور الخاصة بالموظف (${employee.name}) في فرع (${shop?.name || ''}) نهائياً؟`)) {
                     clearBtn.disabled = true;
                     clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
-                    await deleteAttendanceRecordsFor(employee.name, shop?.name || '');
+                    const deletedCount = await deleteAttendanceRecordsForEmployee(employee.name, shop?.name || '');
                     await updateAllEmployeesWorkHours();
+                    employee.totalMinutes = 0;
                     renderEmployeePage(employee, returnShopId, employeeIndex);
-                    showToastMessage("تم حذف جميع السجلات بنجاح");
+                    showToastMessage(deletedCount > 0 ? `تم حذف ${deletedCount} سجل حضور` : "لم يتم العثور على سجلات حضور لهذا الموظف", deletedCount === 0);
                 }
             });
         }
