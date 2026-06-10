@@ -1713,56 +1713,113 @@
         return sameEmployee && sameBranch;
     }
 
-    async function deleteAttendanceRecordsFor(employeeName = null, branchName = null) {
-        const allowMissingBranch = employeeName !== null;
-        let firebaseDeletedCount = 0;
+    const ATTENDANCE_PATHS = [
+        'attendanceRecords',
+        'attendance',
+        'attendances',
+        'attendanceData',
+        'attendanceLogs',
+        'attendance_logs',
+        'employeeAttendance',
+        'employeeAttendanceRecords'
+    ];
 
-        if (window.firebaseDB) {
-            try {
-                const recordsRef = window.firebaseRef(window.firebaseDB, 'attendanceRecords');
-                const snap = await window.firebaseGet(recordsRef);
-                if (snap.exists()) {
-                    const data = snap.val();
-                    const remainingRecords = [];
+    async function deleteMatchingAttendanceFromPath(path, employeeName = null, branchName = null) {
+        if (!window.firebaseDB) throw new Error('Firebase غير جاهز');
 
-                    Object.entries(data || {}).forEach(([key, value]) => {
-                        const record = { id: key, ...(value || {}) };
-                        if (matchesEmployeeBranch(record, employeeName, branchName, { allowMissingBranch })) {
-                            firebaseDeletedCount++;
-                        } else {
-                            remainingRecords.push(record);
-                        }
-                    });
+        const pathRef = window.firebaseRef(window.firebaseDB, path);
+        const snap = await window.firebaseGet(pathRef);
+        if (!snap.exists()) return 0;
 
-                    if (firebaseDeletedCount > 0) {
-                        if (!remainingRecords.length) {
-                            await window.firebaseRemove(recordsRef);
-                        } else {
-                            const remainingObj = {};
-                            remainingRecords.forEach((record, index) => {
-                                const key = record.id || `record_${Date.now()}_${index}`;
-                                const { id, ...recordData } = record;
-                                remainingObj[key] = recordData;
-                            });
-                            await window.firebaseSet(recordsRef, remainingObj);
-                        }
-                    }
-                    attendanceRecords = remainingRecords;
+        const data = snap.val();
+        const pruneAttendanceTree = (node, key = '') => {
+            if (!node || typeof node !== 'object') {
+                return { value: node, deleted: 0 };
+            }
+
+            const record = { id: key, ...node };
+            if (matchesEmployeeBranch(record, employeeName, branchName, { allowMissingBranch: employeeName !== null })) {
+                return { value: null, deleted: 1 };
+            }
+
+            let deleted = 0;
+            const nextNode = Array.isArray(node) ? [] : {};
+            Object.entries(node).forEach(([childKey, childValue]) => {
+                const result = pruneAttendanceTree(childValue, childKey);
+                deleted += result.deleted;
+                if (result.value !== null && result.value !== undefined) {
+                    nextNode[childKey] = result.value;
                 }
-            } catch (error) {
-                console.warn("تعذر حذف سجلات الحضور مباشرة:", error);
+            });
+
+            if (deleted > 0 && Object.keys(nextNode).length === 0) {
+                return { value: null, deleted };
+            }
+
+            return { value: nextNode, deleted };
+        };
+
+        const result = pruneAttendanceTree(data);
+        if (result.deleted > 0) {
+            if (result.value === null || result.value === undefined) {
+                await window.firebaseRemove(pathRef);
+            } else {
+                await window.firebaseSet(pathRef, result.value);
             }
         }
 
-        const beforeCount = attendanceRecords.length;
-        attendanceRecords = attendanceRecords.filter(record => !matchesEmployeeBranch(record, employeeName, branchName, { allowMissingBranch }));
-        const localDeletedCount = beforeCount - attendanceRecords.length;
+        return result.deleted;
+    }
 
-        if (!firebaseDeletedCount && localDeletedCount > 0) {
-            await saveAttendanceToFirebase();
+    async function countMatchingAttendanceFromPath(path, employeeName = null, branchName = null) {
+        if (!window.firebaseDB) return 0;
+
+        const pathRef = window.firebaseRef(window.firebaseDB, path);
+        const snap = await window.firebaseGet(pathRef);
+        if (!snap.exists()) return 0;
+
+        const countMatches = (node, key = '') => {
+            if (!node || typeof node !== 'object') return 0;
+            const record = { id: key, ...node };
+            if (matchesEmployeeBranch(record, employeeName, branchName, { allowMissingBranch: employeeName !== null })) {
+                return 1;
+            }
+            return Object.entries(node).reduce((sum, [childKey, childValue]) => {
+                return sum + countMatches(childValue, childKey);
+            }, 0);
+        };
+
+        return countMatches(snap.val());
+    }
+
+    async function countMatchingAttendanceInFirebase(employeeName = null, branchName = null) {
+        if (!window.firebaseDB) return 0;
+        let total = 0;
+        for (const path of ATTENDANCE_PATHS) {
+            total += await countMatchingAttendanceFromPath(path, employeeName, branchName);
+        }
+        return total;
+    }
+
+    async function deleteAttendanceRecordsFor(employeeName = null, branchName = null) {
+        if (!window.firebaseDB) {
+            showToastMessage("Firebase غير جاهز، لم يتم الحذف من القاعدة", true);
+            return 0;
         }
 
-        return firebaseDeletedCount || localDeletedCount;
+        try {
+            let firebaseDeletedCount = 0;
+            for (const path of ATTENDANCE_PATHS) {
+                firebaseDeletedCount += await deleteMatchingAttendanceFromPath(path, employeeName, branchName);
+            }
+
+            attendanceRecords = await loadAttendanceFromFirebase();
+            return firebaseDeletedCount;
+        } catch (error) {
+            console.error("فشل حذف سجلات الحضور من Firebase:", error);
+            showToastMessage("فشل حذف السجلات من قاعدة البيانات", true);
+            return 0;
+        }
     }
 
     async function deleteAttendanceRecordsForEmployee(employeeName, branchName = null) {
@@ -1958,11 +2015,12 @@
             const branchName = shop.name;
             shop.employees.splice(employeeIndex, 1); 
             await deleteAttendanceRecordsForEmployee(employeeName, branchName);
+            const remainingAttendance = await countMatchingAttendanceInFirebase(employeeName, null);
             await deleteEmployeeNotesFor(employeeName, branchName);
             await deleteFinancialReportsFor(employeeName, branchName);
             await saveDataToFirebase(); 
             renderShopPage(shopId); 
-            showToastMessage("تم حذف الموظف وكل سجلاته"); 
+            showToastMessage(remainingAttendance > 0 ? `تم حذف الموظف لكن بقي ${remainingAttendance} سجل حضور في Firebase` : "تم حذف الموظف وسجلاته من Firebase", remainingAttendance > 0); 
         } 
     }
     
@@ -3343,10 +3401,15 @@
                     clearBtn.disabled = true;
                     clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
                     const deletedCount = await deleteAttendanceRecordsForEmployee(employee.name, shop?.name || '');
+                    const remainingInFirebase = await countMatchingAttendanceInFirebase(employee.name, null);
                     await updateAllEmployeesWorkHours();
                     employee.totalMinutes = 0;
                     renderEmployeePage(employee, returnShopId, employeeIndex);
-                    showToastMessage(deletedCount > 0 ? `تم حذف ${deletedCount} سجل حضور` : "لم يتم العثور على سجلات حضور لهذا الموظف", deletedCount === 0);
+                    if (remainingInFirebase > 0) {
+                        showToastMessage(`لم يكتمل الحذف من Firebase، بقي ${remainingInFirebase} سجل`, true);
+                    } else {
+                        showToastMessage(deletedCount > 0 ? `تم حذف ${deletedCount} سجل من Firebase` : "لا توجد سجلات في Firebase لهذا الموظف");
+                    }
                 }
             });
         }
